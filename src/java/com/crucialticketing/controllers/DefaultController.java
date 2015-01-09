@@ -13,6 +13,14 @@ public class DefaultController {
     //@Autowired
     //UserService personService;
 
+    @RequestMapping(value = "/", method = RequestMethod.GET)
+    public String h(@PathVariable(value = "pagename") String pageName, ModelMap map) {
+        //personService.getPersonById("1");
+
+        map.addAttribute("page", "menu/" + pageName + ".jsp");
+        return "mainview";
+    }
+    
     @RequestMapping(value = "/{pagename}/", method = RequestMethod.GET)
     public String index(@PathVariable(value = "pagename") String pageName, ModelMap map) {
         //personService.getPersonById("1");

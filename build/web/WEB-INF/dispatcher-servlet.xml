@@ -27,8 +27,7 @@
     
     <bean id="ticketService" class="com.crucialticketing.services.TicketServiceImpl" />  
     <bean id="ticketDao" class="com.crucialticketing.services.TicketDaoImpl" />  
-    
-    
+ 
     <!-- declare datasource bean -->  
     <bean id="dataSource"  
           class="org.springframework.jdbc.datasource.DriverManagerDataSource">  
