@@ -22,8 +22,8 @@
     </bean>
     
     <!-- declare beans -->  
-    <bean id="personService" class="com.crucialticketing.services.PersonServiceImpl" />  
-    <bean id="personDao" class="com.crucialticketing.services.PersonDaoImpl" />  
+    <bean id="userService" class="com.crucialticketing.services.UserServiceImpl" />  
+    <bean id="userDao" class="com.crucialticketing.services.UserDaoImpl" />  
     
     <bean id="ticketService" class="com.crucialticketing.services.TicketServiceImpl" />  
     <bean id="ticketDao" class="com.crucialticketing.services.TicketDaoImpl" />  

@@ -21,20 +21,21 @@ import org.springframework.web.bind.annotation.RequestParam;
  */
 @Controller
 public class TicketController {
+
     @Autowired
     TicketService ticketService;
-    
+
     @RequestMapping(value = "/update/ticketquery/", method = RequestMethod.GET)
-    public String queryTicket(ModelMap map) { 
+    public String queryTicket(ModelMap map) {
         map.addAttribute("page", "main/queryticket.jsp");
         return "mainview";
     }
-    
+
     @RequestMapping(value = "/update/viewticket/", method = RequestMethod.GET)
     public String viewTicket(@RequestParam(value = "ticketid", required = true) String ticketId, ModelMap map) {
         Ticket ticket = ticketService.getTicketById(ticketId);
-       
-        map.put("ticketObject", ticket);     
+
+        map.put("ticketObject", ticket);
         map.addAttribute("page", "main/ticket.jsp");
         return "mainview";
     }

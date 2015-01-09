@@ -1,8 +1,5 @@
 package com.crucialticketing.controllers;
 
-import com.crucialticketing.entities.Person;
-import com.crucialticketing.services.PersonService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class DefaultController {
 
-    @Autowired
-    PersonService personService;
+    //@Autowired
+    //UserService personService;
 
     @RequestMapping(value = "/{pagename}/", method = RequestMethod.GET)
     public String index(@PathVariable(value = "pagename") String pageName, ModelMap map) {
@@ -41,10 +38,10 @@ public class DefaultController {
 
         //Normally the parameter would be used to retrieve the object
         //In this case we keep it simple and return the name
-        Person person = new Person();
-        person.setName(name);
-        person.setAge(52);
-        map.put("personObject", person);
+        //Person person = new Person();
+        //person.setName(name);
+        //person.setAge(52);
+       // map.put("personObject", person);
 
         map.addAttribute("helloAgain", "The name passed in is the name returned.");
         return "demo";
@@ -55,10 +52,10 @@ public class DefaultController {
 
         //Normally the parameter would be used to retrieve the object
         //In this case we keep it simple and return the name
-        Person person = new Person();
-        person.setName(name);
-        person.setAge(age);
-        map.put("personObject", person);
+        //Person person = new Person();
+        //person.setName(name);
+        //person.setAge(age);
+        //map.put("personObject", person);
 
         map.addAttribute("helloAgain", "The name passed in along with the age.");
         return "demo";
