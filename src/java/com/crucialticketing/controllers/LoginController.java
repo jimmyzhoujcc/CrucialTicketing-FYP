@@ -8,6 +8,7 @@ package com.crucialticketing.controllers;
 import com.crucialticketing.entities.Login;
 import com.crucialticketing.entities.User;
 import com.crucialticketing.services.UserService;
+import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -34,11 +35,12 @@ public class LoginController {
 
     @RequestMapping(value = "/attemptlogin/",
             method = RequestMethod.POST)
-    public String attemptLogin(@ModelAttribute("login") Login login, ModelMap map) {
+    public String attemptLogin(HttpServletRequest request, @ModelAttribute("login") Login login, ModelMap map) {
 
         User user = userService.getUserByUsername(login.getUsername());
 
         if (user.getLogin().getPassword().equals(login.getPassword())) {
+            request.getSession().setAttribute("user", user);
             map.addAttribute("page", "menu/main.jsp");
             return "mainview";
         }

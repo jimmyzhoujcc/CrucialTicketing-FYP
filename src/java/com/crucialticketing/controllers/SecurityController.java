@@ -69,7 +69,7 @@ public class SecurityController implements Filter {
 
                 if (session == null) {
                     HttpServletResponse httpResponse = (HttpServletResponse) response;
-                    httpRequest.getSession().setAttribute("alert", "No valid session in progress, please re-login");
+                    httpRequest.getSession().setAttribute("alert", "Session has timed out, please re-login");
                     httpResponse.sendRedirect("/CrucialTicketing/home/login/login/");
                     return;
                 }
