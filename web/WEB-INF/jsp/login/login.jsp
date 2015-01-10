@@ -36,3 +36,4 @@
 
     </body>
 </html>
+<% request.getSession().setAttribute("alert", ""); %>

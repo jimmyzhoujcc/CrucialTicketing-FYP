@@ -5,11 +5,11 @@
         <param-value>/WEB-INF/dispatcher-servlet.xml</param-value>
     </context-param>
     <filter>
-        <filter-name>Mapping</filter-name>
-        <filter-class>com.crucialticketing.controllers.Mapping</filter-class>
+        <filter-name>SecurityController</filter-name>
+        <filter-class>com.crucialticketing.controllers.SecurityController</filter-class>
     </filter>
     <filter-mapping>
-        <filter-name>Mapping</filter-name>
+        <filter-name>SecurityController</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
     <listener>
