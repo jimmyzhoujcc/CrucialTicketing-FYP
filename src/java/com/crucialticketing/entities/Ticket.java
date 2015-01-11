@@ -11,8 +11,22 @@ package com.crucialticketing.entities;
  */
 public class Ticket {
     private String ticketId;
+    private String ticketType;
     private String shortDescription;
-
+    private Status status;
+    private System system;
+    
+    private User messageProcessor;
+    private User createdBy;
+    private User reportedBy;
+    
+    private int timeDateCreated;
+    private int timeDateChanged;
+    private int timeDateClosed;
+    private int timeDateReopened;
+    
+    private Workflow workflow;
+    
     public Ticket() {}
     
     public Ticket(String ticketId, String shortDescription) {

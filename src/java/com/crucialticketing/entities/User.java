@@ -10,6 +10,9 @@ package com.crucialticketing.entities;
  * @author Daniel Foley
  */
 public class User {
+    private int userId;
+    private String firstName;
+    private String lastName;
     private Login login;
 
     public User() {
