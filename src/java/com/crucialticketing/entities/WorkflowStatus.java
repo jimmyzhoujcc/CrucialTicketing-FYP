@@ -9,13 +9,13 @@ package com.crucialticketing.entities;
  *
  * @author DanFoley
  */
-public class Status {
+public class WorkflowStatus {
     private int statusId;
     private String statusName;
     
-    public Status() {}
+    public WorkflowStatus() {}
 
-    public Status(int statusId, String statusName) {
+    public WorkflowStatus(int statusId, String statusName) {
         this.statusId = statusId;
         this.statusName = statusName;
     }

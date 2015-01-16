@@ -90,7 +90,7 @@
                <% if (pageName == "menu/update.jsp") {
                        out.println("class=\"current\"");
                    }%>
-               >Edit/Update</a>
+               >View</a>
 
             <a href="<%=request.getContextPath()%>/home/report/" 
                <% if (pageName == "menu/report.jsp") {

@@ -13,16 +13,22 @@ import java.util.List;
  */
 public class Workflow {
     private int workflowId;
+    private String workflowName;
     private List<WorkflowChange> workflow;
     
     public Workflow() {}
 
+    public Workflow(int workflowId, String workflowName) {
+        this.workflowId = workflowId;
+        this.workflowName = workflowName;
+    }
+    
     public Workflow(int workflowId, List<WorkflowChange> workflow) {
         this.workflowId = workflowId;
         this.workflow = workflow;
     }
     
-    public void addStatus(Status status, Role role, Queue queue) {
+    public void addStatus(WorkflowStatus status, Role role, Queue queue) {
         workflow.add(new WorkflowChange(status, role, queue));
     }
     
@@ -38,6 +44,14 @@ public class Workflow {
         this.workflowId = workflowId;
     }
 
+    public String getWorkflowName() {
+        return workflowName;
+    }
+
+    public void setWorkflowName(String workflowName) {
+        this.workflowName = workflowName;
+    }
+
     public List<WorkflowChange> getWorkflow() {
         return workflow;
     }
@@ -45,6 +59,8 @@ public class Workflow {
     public void setWorkflow(List<WorkflowChange> workflow) {
         this.workflow = workflow;
     }
+
+    
 
     
 }

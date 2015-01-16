@@ -10,23 +10,23 @@ package com.crucialticketing.entities;
  * @author Daniel Foley
  */
 public class WorkflowChange {
-    private Status status;
+    private WorkflowStatus status;
     private Role role;
     private Queue queue;
     
     public WorkflowChange() {}
 
-    public WorkflowChange(Status status, Role role, Queue queue) {
+    public WorkflowChange(WorkflowStatus status, Role role, Queue queue) {
         this.status = status;
         this.role = role;
         this.queue = queue;
     }
 
-    public Status getStatus() {
+    public WorkflowStatus getStatus() {
         return status;
     }
 
-    public void setStatus(Status status) {
+    public void setStatus(WorkflowStatus status) {
         this.status = status;
     }
 

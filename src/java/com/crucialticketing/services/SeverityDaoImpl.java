@@ -52,7 +52,7 @@ public class SeverityDaoImpl implements SeverityDao {
         
         List<Map<String, Object>> severityData = jdbcTemplate.queryForList(sql);
         
-        severity.setSeverityId((int)severityData.get(0).get("severity_id"));
+//        severity.setSeverityId((int)severityData.get(0).get("severity_id"));
         severity.setSeverityLevel((int)severityData.get(0).get("severity_level"));
         severity.setSeverityName((String)severityData.get(0).get("severity_name"));
         

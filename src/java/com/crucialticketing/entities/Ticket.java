@@ -16,7 +16,7 @@ public class Ticket {
     
     private String shortDescription;
     
-    private Status status;
+    private WorkflowStatus status;
     
     private User messageProcessor;
     private User createdBy;
@@ -53,11 +53,11 @@ public class Ticket {
         this.shortDescription = shortDescription;
     }
 
-    public Status getStatus() {
+    public WorkflowStatus getStatus() {
         return status;
     }
 
-    public void setStatus(Status status) {
+    public void setStatus(WorkflowStatus status) {
         this.status = status;
     }
 
