@@ -5,6 +5,7 @@
  */
 package com.crucialticketing.services;
 
+import com.crucialticketing.entities.ApplicationControl;
 import com.crucialticketing.entities.Ticket;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +22,17 @@ public class TicketDaoImpl implements TicketDao {
 
     @Autowired
     DataSource dataSource;
-
+    
+    @Autowired
+    UserService userService;
+    
+    @Autowired
+    ApplicationControlService applicationControlService;
+    
+    @Autowired
+    ApplicationService applicationService;
+    
+    
     @Override
     public void insertTicket(Ticket ticket) {
         /*
@@ -84,10 +95,19 @@ public class TicketDaoImpl implements TicketDao {
         String sql = "SELECT * FROM ticket WHERE ticket_id= " + id;
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
         
-        List<Map<String, Object>> ticketList = jdbcTemplate.queryForList(sql);
+        List<Map<String, Object>> ticketInfo = jdbcTemplate.queryForList(sql);
 
-        ticket.setTicketId(String.valueOf(ticketList.get(0).get("ticket_id")));
-        ticket.setShortDescription((String) ticketList.get(0).get("short_description"));
+        for (Map<String, Object> tableItem : ticketInfo) {
+            ticket.setMessageProcessor(userService.getUserById(String.valueOf(tableItem.get("message_processor_id"))));
+            ticket.setCreatedBy(userService.getUserById(String.valueOf(tableItem.get("created_by_id"))));
+            ticket.setReportedBy(userService.getUserById(String.valueOf(tableItem.get("reported_by_id"))));
+            
+            ticket.setApplicationControl(applicationControlService.getApplicationControlById(
+                    String.valueOf(tableItem.get("application_control_id"))));
+            
+        }
+       // ticket.setTicketId(String.valueOf(ticketList.get(0).get("ticket_id")));
+       // ticket.setShortDescription((String) ticketList.get(0).get("short_description"));
  
         return ticket;
     }

@@ -11,10 +11,12 @@ package com.crucialticketing.entities;
  */
 public class Ticket {
     private String ticketId;
-    private String ticketType;
+    
+    private ApplicationControl applicationControl;
+    
     private String shortDescription;
+    
     private Status status;
-    private System system;
     
     private User messageProcessor;
     private User createdBy;
@@ -23,16 +25,9 @@ public class Ticket {
     private int timeDateCreated;
     private int timeDateChanged;
     private int timeDateClosed;
-    private int timeDateReopened;
-    
-    private Workflow workflow;
+    private int timeDateReopened;  
     
     public Ticket() {}
-    
-    public Ticket(String ticketId, String shortDescription) {
-        this.ticketId = ticketId;
-        this.shortDescription = shortDescription;
-    }
 
     public String getTicketId() {
         return ticketId;
@@ -42,6 +37,14 @@ public class Ticket {
         this.ticketId = ticketId;
     }
 
+    public ApplicationControl getApplicationControl() {
+        return applicationControl;
+    }
+
+    public void setApplicationControl(ApplicationControl applicationControl) {
+        this.applicationControl = applicationControl;
+    }
+
     public String getShortDescription() {
         return shortDescription;
     }
@@ -49,4 +52,74 @@ public class Ticket {
     public void setShortDescription(String shortDescription) {
         this.shortDescription = shortDescription;
     }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    public User getMessageProcessor() {
+        return messageProcessor;
+    }
+
+    public void setMessageProcessor(User messageProcessor) {
+        this.messageProcessor = messageProcessor;
+    }
+
+    public User getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(User createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public User getReportedBy() {
+        return reportedBy;
+    }
+
+    public void setReportedBy(User reportedBy) {
+        this.reportedBy = reportedBy;
+    }
+
+    public int getTimeDateCreated() {
+        return timeDateCreated;
+    }
+
+    public void setTimeDateCreated(int timeDateCreated) {
+        this.timeDateCreated = timeDateCreated;
+    }
+
+    public int getTimeDateChanged() {
+        return timeDateChanged;
+    }
+
+    public void setTimeDateChanged(int timeDateChanged) {
+        this.timeDateChanged = timeDateChanged;
+    }
+
+    public int getTimeDateClosed() {
+        return timeDateClosed;
+    }
+
+    public void setTimeDateClosed(int timeDateClosed) {
+        this.timeDateClosed = timeDateClosed;
+    }
+
+    public int getTimeDateReopened() {
+        return timeDateReopened;
+    }
+
+    public void setTimeDateReopened(int timeDateReopened) {
+        this.timeDateReopened = timeDateReopened;
+    }
+
+    
+    
+    
+
+    
 }

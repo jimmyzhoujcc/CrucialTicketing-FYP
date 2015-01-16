@@ -2,6 +2,31 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group/>
+        <group>
+            <file>file:/C:/Users/Daniel%20Foley/Documents/NetBeansProjects/CrucialTicketing/src/java/com/crucialticketing/services/SeverityService.java</file>
+            <file>file:/C:/Users/Daniel%20Foley/Documents/NetBeansProjects/CrucialTicketing/src/java/com/crucialticketing/services/UserDaoImpl.java</file>
+            <file>file:/C:/Users/Daniel%20Foley/Documents/NetBeansProjects/CrucialTicketing/src/java/com/crucialticketing/services/ApplicationControlServiceImpl.java</file>
+            <file>file:/C:/Users/Daniel%20Foley/Documents/NetBeansProjects/CrucialTicketing/src/java/com/crucialticketing/services/UserServiceImpl.java</file>
+            <file>file:/C:/Users/Daniel%20Foley/Documents/NetBeansProjects/CrucialTicketing/src/java/com/crucialticketing/controllers/SecurityController.java</file>
+            <file>file:/C:/Users/Daniel%20Foley/Documents/NetBeansProjects/CrucialTicketing/src/java/com/crucialticketing/services/SeverityDao.java</file>
+            <file>file:/C:/Users/Daniel%20Foley/Documents/NetBeansProjects/CrucialTicketing/src/java/com/crucialticketing/services/TicketTypeServiceImpl.java</file>
+            <file>file:/C:/Users/Daniel%20Foley/Documents/NetBeansProjects/CrucialTicketing/src/java/com/crucialticketing/services/ApplicationServiceImpl.java</file>
+            <file>file:/C:/Users/Daniel%20Foley/Documents/NetBeansProjects/CrucialTicketing/src/java/com/crucialticketing/services/SeverityDaoImpl.java</file>
+            <file>file:/C:/Users/Daniel%20Foley/Documents/NetBeansProjects/CrucialTicketing/src/java/com/crucialticketing/services/TicketTypeService.java</file>
+            <file>file:/C:/Users/Daniel%20Foley/Documents/NetBeansProjects/CrucialTicketing/src/java/com/crucialticketing/entities/Ticket.java</file>
+            <file>file:/C:/Users/Daniel%20Foley/Documents/NetBeansProjects/CrucialTicketing/src/java/com/crucialticketing/services/TicketDaoImpl.java</file>
+            <file>file:/C:/Users/Daniel%20Foley/Documents/NetBeansProjects/CrucialTicketing/src/java/com/crucialticketing/services/TicketTypeDao.java</file>
+            <file>file:/C:/Users/Daniel%20Foley/Documents/NetBeansProjects/CrucialTicketing/src/java/com/crucialticketing/services/ApplicationControlDaoImpl.java</file>
+            <file>file:/C:/Users/Daniel%20Foley/Documents/NetBeansProjects/CrucialTicketing/src/java/com/crucialticketing/entities/ApplicationControl.java</file>
+            <file>file:/C:/Users/Daniel%20Foley/Documents/NetBeansProjects/CrucialTicketing/src/java/com/crucialticketing/services/SeverityServiceImpl.java</file>
+            <file>file:/C:/Users/Daniel%20Foley/Documents/NetBeansProjects/CrucialTicketing/src/java/com/crucialticketing/services/ApplicationControlDao.java</file>
+            <file>file:/C:/Users/Daniel%20Foley/Documents/NetBeansProjects/CrucialTicketing/src/java/com/crucialticketing/services/TicketTypeDaoImpl.java</file>
+            <file>file:/C:/Users/Daniel%20Foley/Documents/NetBeansProjects/CrucialTicketing/web/WEB-INF/dispatcher-servlet.xml</file>
+            <file>file:/C:/Users/Daniel%20Foley/Documents/NetBeansProjects/CrucialTicketing/src/java/com/crucialticketing/services/UserService.java</file>
+            <file>file:/C:/Users/Daniel%20Foley/Documents/NetBeansProjects/CrucialTicketing/src/java/com/crucialticketing/services/ApplicationDaoImpl.java</file>
+            <file>file:/C:/Users/Daniel%20Foley/Documents/NetBeansProjects/CrucialTicketing/src/java/com/crucialticketing/services/TicketDao.java</file>
+            <file>file:/C:/Users/Daniel%20Foley/Documents/NetBeansProjects/CrucialTicketing/web/WEB-INF/jsp/main/queryticket.jsp</file>
+            <file>file:/C:/Users/Daniel%20Foley/Documents/NetBeansProjects/CrucialTicketing/src/java/com/crucialticketing/controllers/TicketController.java</file>
+        </group>
     </open-files>
 </project-private>

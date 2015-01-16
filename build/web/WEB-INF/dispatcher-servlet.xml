@@ -22,11 +22,30 @@
     </bean>
     
     <!-- declare beans -->  
+    
+    <!-- User Bean -->
     <bean id="userService" class="com.crucialticketing.services.UserServiceImpl" />  
     <bean id="userDao" class="com.crucialticketing.services.UserDaoImpl" />  
     
+    <!-- Ticket Bean -->
     <bean id="ticketService" class="com.crucialticketing.services.TicketServiceImpl" />  
     <bean id="ticketDao" class="com.crucialticketing.services.TicketDaoImpl" />  
+ 
+    <!-- Ticket Type Bean -->
+    <bean id="ticketTypeService" class="com.crucialticketing.services.TicketTypeServiceImpl" />  
+    <bean id="ticketTypeDao" class="com.crucialticketing.services.TicketTypeDaoImpl" />  
+ 
+    <!-- Severity Bean -->
+    <bean id="severityService" class="com.crucialticketing.services.SeverityServiceImpl" />  
+    <bean id="severityDao" class="com.crucialticketing.services.SeverityDaoImpl" />    
+    
+    <!-- Application Control Bean -->
+    <bean id="applicationControlService" class="com.crucialticketing.services.ApplicationControlServiceImpl" />  
+    <bean id="applicationControlDao" class="com.crucialticketing.services.ApplicationControlDaoImpl" />  
+ 
+    <!-- Application Bean -->
+    <bean id="applicationService" class="com.crucialticketing.services.ApplicationServiceImpl" />  
+    <bean id="applicationDao" class="com.crucialticketing.services.ApplicationDaoImpl" />  
  
     <!-- declare datasource bean -->  
     <bean id="dataSource"  

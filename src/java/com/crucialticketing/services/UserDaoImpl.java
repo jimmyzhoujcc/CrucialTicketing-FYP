@@ -78,10 +78,10 @@ public class UserDaoImpl implements UserDao {
     @Override
     public User getUserById(String id) {
 
-        String sql = "SELECT * FROM person WHERE person_id= " + id;
+        String sql = "SELECT * FROM user WHERE user_id= " + id;
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-        List<Map<String, Object>> personList = jdbcTemplate.queryForList(sql);
-        return new User();
+        List<Map<String, Object>> userReturn = jdbcTemplate.queryForList(sql);
+        return new User((String)userReturn.get(0).get("first_name"), (String)userReturn.get(0).get("last_name"));
     }
 
     @Override

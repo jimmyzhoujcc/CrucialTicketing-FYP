@@ -7,7 +7,8 @@
     Select by
     <br />
     Ticket ID: <input type="text" name="ticketid" />
-
+    <input type="submit" />
+</form>
     <br />
     Created from: <input type="text" name="ticketid" /> to <input type="text" name="ticketid" />
 
@@ -45,5 +46,3 @@
     Status
 
     <br />
-    <input type="submit" />
-</form>

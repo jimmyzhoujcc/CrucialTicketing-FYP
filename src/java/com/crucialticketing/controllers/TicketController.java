@@ -31,7 +31,7 @@ public class TicketController {
         return "mainview";
     }
 
-    @RequestMapping(value = "/update/viewticket/", method = RequestMethod.GET)
+    @RequestMapping(value = "/update/viewticket/", method = RequestMethod.POST)
     public String viewTicket(@RequestParam(value = "ticketid", required = true) String ticketId, ModelMap map) {
         Ticket ticket = ticketService.getTicketById(ticketId);
 
