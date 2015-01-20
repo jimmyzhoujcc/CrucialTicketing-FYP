@@ -15,7 +15,7 @@ public interface DatabaseService {
 
     public void insert(Object o);
 
-    public Object select(String field, String value);
+    public List<Object> select(String field, String value);
 
     public void update(Object o);
 

@@ -6,20 +6,42 @@
 package com.crucialticketing.services;
 
 import com.crucialticketing.entities.Severity;
+import java.util.ArrayList;
 import java.util.List;
+import javax.sql.DataSource;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *
  * @author Daniel Foley
  */
-public interface SeverityService {
-    public void insertSeverity(Severity severity);
+public class SeverityService implements DatabaseService {
 
-    public List<Severity> getSeverityList();
+    @Autowired
+    DataSource dataSource;
 
-    public void updateSeverity(Severity severity);
+    @Override
+    public void insert(Object o) {
 
-    public void deleteSeverity(String id);
+    }
 
-    public Severity getSeverityById(String id);
+    @Override
+    public List<Object> select(String field, String value) {
+        return new ArrayList<Object>();
+    }
+
+    @Override
+    public void update(Object o) {
+
+    }
+
+    @Override
+    public void delete(Object o) {
+
+    }
+
+    @Override
+    public List<Object> getTable() {
+        return new ArrayList<Object>();
+    }
 }

@@ -7,10 +7,10 @@ package com.crucialticketing.controllers;
 
 import com.crucialticketing.entities.Ticket;
 import com.crucialticketing.services.TicketService;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -33,9 +33,10 @@ public class TicketController {
 
     @RequestMapping(value = "/update/viewticket/", method = RequestMethod.POST)
     public String viewTicket(@RequestParam(value = "ticketid", required = true) String ticketId, ModelMap map) {
-        Ticket ticket = ticketService.getTicketById(ticketId);
+        List<Object> objectList = ticketService.select("ticket_id", ticketId);
 
-        map.put("ticketObject", ticket);
+        
+        map.put("ticketObject", (Ticket)objectList.get(0));
         map.addAttribute("page", "main/ticket.jsp");
         return "mainview";
     }

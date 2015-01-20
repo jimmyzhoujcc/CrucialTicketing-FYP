@@ -37,23 +37,32 @@ public class UserService implements DatabaseService {
     }
 
     @Override
-    public Object select(String field, String value) {
-        String sql = "SELECT * FROM user WHERE " + field + "= " + value;
+    public List<Object> select(String field, String value) {
+        List<Object> o = new ArrayList<Object>();
+
+        String sql = "SELECT * FROM user WHERE " + field + "='" + value + "'";
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
         List<Map<String, Object>> userReturn = jdbcTemplate.queryForList(sql);
 
         User user;
+        
+        if (!userReturn.isEmpty()) {
+            for (Map<String, Object> userItem : userReturn) {
 
-        if (userReturn.size() != 0) {
-            user = new User(
-                    (int) userReturn.get(0).get("user_id"),
-                    (String) userReturn.get(0).get("first_name"),
-                    (String) userReturn.get(0).get("last_name"));
+                user = new User(
+                        (int) userItem.get("user_id"),
+                        (String) userItem.get("first_name"),
+                        (String) userItem.get("last_name"));
+
+                user.setLogin(new Login(
+                        (String) userItem.get("username"),
+                        (String) userItem.get("password")));
+
+                o.add((Object) user);
+            }
         } else {
             user = new User();
         }
-
-        Object o = (Object) user;
 
         return o;
     }

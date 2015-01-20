@@ -38,9 +38,9 @@ public class LoginController {
             method = RequestMethod.POST)
     public String attemptLogin(HttpServletRequest request, @ModelAttribute("login") Login login, ModelMap map) {
 
-        List<User> userList = (List<User>)userService.select("username", login.getUsername());
+        List<Object> objectList = (List<Object>)userService.select("username", login.getUsername());
         
-        User user = userList.get(0);
+        User user = (User)objectList.get(0);
         
         if (user.getLogin().getPassword().equals(login.getPassword())) {
             request.getSession().setAttribute("user", user);

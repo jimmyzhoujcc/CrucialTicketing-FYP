@@ -5,21 +5,43 @@
  */
 package com.crucialticketing.services;
 
-import com.crucialticketing.entities.Application;
+import java.util.ArrayList;
 import java.util.List;
+import javax.sql.DataSource;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.crucialticketing.entities.Application;
 
 /**
  *
  * @author Daniel Foley
  */
-public interface ApplicationService {
-    public void insertApplication(Application application);
+public class ApplicationService implements DatabaseService {
 
-    public List<Application> getApplicationList();
+    @Autowired
+    DataSource dataSource;
 
-    public void updateApplication(Application application);
+    @Override
+    public void insert(Object o) {
 
-    public void deleteApplication(String id);
+    }
 
-    public Application getApplicationById(String id);
+    @Override
+    public List<Object> select(String field, String value) {
+        return new ArrayList<Object>();
+    }
+
+    @Override
+    public void update(Object o) {
+
+    }
+
+    @Override
+    public void delete(Object o) {
+
+    }
+
+    @Override
+    public List<Object> getTable() {
+        return new ArrayList<Object>();
+    }
 }

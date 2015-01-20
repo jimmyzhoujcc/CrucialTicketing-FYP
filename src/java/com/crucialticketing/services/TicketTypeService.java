@@ -6,20 +6,42 @@
 package com.crucialticketing.services;
 
 import com.crucialticketing.entities.TicketType;
+import java.util.ArrayList;
 import java.util.List;
+import javax.sql.DataSource;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *
  * @author Daniel Foley
  */
-public interface TicketTypeService {
-    public void insertTicketType(TicketType ticketType);
+public class TicketTypeService implements DatabaseService {
+   
+    @Autowired
+    DataSource dataSource;
 
-    public List<TicketType> getTicketTypeList();
+    @Override
+    public void insert(Object o) {
 
-    public void updateTicketType(TicketType ticketType);
+    }
 
-    public void deleteTicketType(String id);
+    @Override
+    public List<Object> select(String field, String value) {
+        return new ArrayList<Object>();
+    }
 
-    public TicketType getTicketTypeById(String id);
+    @Override
+    public void update(Object o) {
+
+    }
+
+    @Override
+    public void delete(Object o) {
+
+    }
+
+    @Override
+    public List<Object> getTable() {
+        return new ArrayList<Object>();
+    }
 }
