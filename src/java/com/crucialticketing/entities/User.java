@@ -18,12 +18,14 @@ public class User {
     public User() {
     }
 
-    public User(String firstName, String lastName) {
+    public User(int userId, String firstName, String lastName) {
+        this.userId = userId;
         this.firstName = firstName;
         this.lastName = lastName;
     }
     
-    public User(Login login, String firstName, String lastName) {
+    public User(Login login, int userId, String firstName, String lastName) {
+        this.userId = userId;
         this.firstName = firstName;
         this.lastName = lastName;
     }

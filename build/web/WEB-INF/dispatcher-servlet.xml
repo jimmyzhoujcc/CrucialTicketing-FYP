@@ -23,9 +23,10 @@
     
     <!-- declare beans -->  
     
-    <!-- User Bean -->
-    <bean id="userService" class="com.crucialticketing.services.UserServiceImpl" />  
-    <bean id="userDao" class="com.crucialticketing.services.UserDaoImpl" />  
+    <bean id="databaseService" class="com.crucialticketing.services.DatabaseService" />
+    
+    <!-- User Bean -->  
+    <bean id="userService" class="com.crucialticketing.services.UserService" />  
     
     <!-- Ticket Bean -->
     <bean id="ticketService" class="com.crucialticketing.services.TicketServiceImpl" />  

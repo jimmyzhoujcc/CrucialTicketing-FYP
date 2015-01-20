@@ -98,10 +98,10 @@ public class TicketDaoImpl implements TicketDao {
         List<Map<String, Object>> ticketInfo = jdbcTemplate.queryForList(sql);
 
         for (Map<String, Object> tableItem : ticketInfo) {
-            ticket.setMessageProcessor(userService.getUserById(String.valueOf(tableItem.get("message_processor_id"))));
+           /* ticket.setMessageProcessor(userService.getUserById(String.valueOf(tableItem.get("message_processor_id"))));
             ticket.setCreatedBy(userService.getUserById(String.valueOf(tableItem.get("created_by_id"))));
             ticket.setReportedBy(userService.getUserById(String.valueOf(tableItem.get("reported_by_id"))));
-            
+            */
             ticket.setApplicationControl(applicationControlService.getApplicationControlById(
                     String.valueOf(tableItem.get("application_control_id"))));
             
