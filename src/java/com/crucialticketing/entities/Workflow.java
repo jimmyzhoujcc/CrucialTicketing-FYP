@@ -5,6 +5,7 @@
  */
 package com.crucialticketing.entities;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -16,11 +17,14 @@ public class Workflow {
     private String workflowName;
     private List<WorkflowChange> workflow;
     
-    public Workflow() {}
+    public Workflow() {
+        workflow = new ArrayList<WorkflowChange>();
+    }
 
     public Workflow(int workflowId, String workflowName) {
         this.workflowId = workflowId;
         this.workflowName = workflowName;
+        workflow = new ArrayList<WorkflowChange>();
     }
     
     public Workflow(int workflowId, List<WorkflowChange> workflow) {

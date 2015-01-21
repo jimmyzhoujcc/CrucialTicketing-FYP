@@ -23,57 +23,37 @@ body {
     text-align:right;
     font-weight: bold;
     font-family: Arial;
+    float:right;
 }
 
-.logging {
-    font-weight: normal;
-    font-size: small;
+.titletabbox {
+    float:right;
 }
 
 .footer {
-    font-size: small;
     text-align:center;
 }
 
-div.menu3
+
+.main
 {
-    /*margin:0 auto;*/
-    /*width:500px;Uncomment this line to make the menu center-aligned.*/
-    /*text-align:center;*/
-    margin-left:2%;
-    font-size:0;
-    height: 25px;    
-    *position:relative;*top:1px;/*Hacks for IE6 & IE7 */    
+    padding: 30px;
 }
 
-div.menu3 a
-{
-    display: inline-block;
-    padding: 0 20px;
-    margin-right:1px; /* It specifies the distance between each tab */
-    background:#F7F7F7;
-    color:Black;
-    text-decoration:none;
-    font: normal 14px Arial;
-    line-height: 24px;
-    border:1px solid #CAD0DB;
-    border-bottom:0;
-    color:#666;
-    vertical-align:top;/*ChangeSet#2*/
-    text-decoration:none;
+.progressbar-override {
+    max-width: 50em;
 }
 
-div.menu3 a:hover, div.menu3 a.current
-{
-    background:#E9ECF0;
-    line-height: 25px;
-    color:#000;
+.clearfix {
+    clear:both;
 }
 
-div.menu3sub
-{
-    /*height:6px;*/
-    padding: 5px;
-    border:1px solid #CAD0DB;
-    background:#E9ECF0;
+.media-picture {
+    max-width: 64px;
+}
+
+@media screen and (max-width: 800px)  {
+    .ticketnav {
+        display:none;
+    }
 }

@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+@RequestMapping(value = "/main/")
 @Controller
 public class DefaultController {
 
@@ -23,7 +24,6 @@ public class DefaultController {
     
     @RequestMapping(value = "/{pagename}/", method = RequestMethod.GET)
     public String index(@PathVariable(value = "pagename") String pageName, ModelMap map) {
-        //personService.getPersonById("1");
 
         map.addAttribute("page", "menu/" + pageName + ".jsp");
         return "mainview";

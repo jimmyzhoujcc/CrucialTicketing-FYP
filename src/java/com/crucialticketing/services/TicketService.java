@@ -6,7 +6,12 @@
 package com.crucialticketing.services;
 
 import com.crucialticketing.entities.ApplicationControl;
+import com.crucialticketing.entities.Queue;
+import com.crucialticketing.entities.Role;
 import com.crucialticketing.entities.Ticket;
+import com.crucialticketing.entities.Workflow;
+import com.crucialticketing.entities.WorkflowChange;
+import com.crucialticketing.entities.WorkflowStatus;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -54,12 +59,22 @@ public class TicketService implements DatabaseService {
             ticket.setReportedBy(userService.getUserById(String.valueOf(tableItem.get("reported_by_id"))));
             */
             
+            ticket.setTicketId("10027587");
+            ticket.setShortDescription("Test description");
+            
             List<Object> applicationControlReturn = applicationControlService.select(
                     "application_control_id", 
                     String.valueOf(tableItem.get("application_control_id")));
             
             ticket.setApplicationControl((ApplicationControl)applicationControlReturn.get(0));
-            
+            Workflow workflow = new Workflow(1, "test");
+            workflow.addStatus(new WorkflowStatus(1, "test status"), new Role(1, "test role"), new Queue(1, "test queue"));
+            workflow.addStatus(new WorkflowStatus(2, "test status 2"), new Role(1, "test role"), new Queue(1, "test queue"));
+            workflow.addStatus(new WorkflowStatus(2, "test status 2"), new Role(1, "test role"), new Queue(1, "test queue"));
+            workflow.addStatus(new WorkflowStatus(2, "test status 2"), new Role(1, "test role"), new Queue(1, "test queue"));
+            workflow.addStatus(new WorkflowStatus(2, "test status 2"), new Role(1, "test role"), new Queue(1, "test queue"));
+     
+            ticket.setWorkflow(workflow);
             o.add((Object)ticket);
             
         }

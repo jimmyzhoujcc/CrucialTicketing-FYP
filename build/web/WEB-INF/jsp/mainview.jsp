@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
          pageEncoding="UTF-8"%>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>   
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
     "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -8,7 +9,15 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>Crucial Ticketing</title>
 
+        <!-- Bootstrap -->
+        <link rel="stylesheet" href="<%=request.getContextPath()%>/css/bootstrap.css">
+        <link rel="stylesheet" href="<%=request.getContextPath()%>/css/bootstrap.min.css">
+        <link rel="stylesheet" href="<%=request.getContextPath()%>/css/bootstrap-theme.css">
+        <link rel="stylesheet" href="<%=request.getContextPath()%>/css/bootstrap-theme.min.css">
+        <script src="<%=request.getContextPath()%>/js/bootstrap.min.js"></script>
+
         <link href="<%=request.getContextPath()%>/css/main.css" rel="stylesheet" type="text/css"/>
+
 
         <script language="javascript">
             function move(tbFrom, tbTo)
@@ -63,53 +72,53 @@
     </head>
     <body>
         <div class="heading">
-            <div class="title">Crucial Ticketing</div>
-            <div class="title logging">Help | <a href="<%= request.getContextPath()%>/home/login/logout/">Logout</a></div>
+
+
+            <div class="title"><h3>Crucial Ticketing</h3></div>
+            <div class="titletabbox">
+                <ul class="nav nav-pills" role="tablist">
+                    <li role="presentation"><a href="#">Alerts <span class="badge">42</span></a></li>
+                    <li role="presentation"><a href="#">Help</a></li>
+                    <li role="presentation"><a href="#">Logout</a></li>
+                </ul>
+            </div>
+
         </div>
 
+        <br class="clearfix" />
         <% String pageName = (String) request.getAttribute("page");
             if (pageName == null) {
                 pageName = "menu/home.jsp";
             }
         %>
 
-        <div class="menu3">
-            <a href="<%=request.getContextPath()%>/home/main/" 
-               <% if (pageName == "menu/main.jsp") {
-                       out.println("class=\"current\"");
-                   }%>
-               >Home</a>
+        <ul class="nav nav-tabs">
+            <li role="presentation" <% if (pageName.equals("menu/main.jsp")) {
+                    out.print("class=\"active\"");
+                }%>>
+                <a href="<%=request.getContextPath()%>/home/main/main/">Home</a>
+            </li>
+            <li role="presentation" <% if (pageName.equals("menu/create.jsp")) {
+                    out.print("class=\"active\"");
+                }%>>
+                <a href="<%=request.getContextPath()%>/home/main/create/">Create</a>
+            </li>
+            <li role="presentation" <% if (pageName.equals("menu/update.jsp")) {
+                    out.print("class=\"active\"");
+                }%>>
+                <a href="<%=request.getContextPath()%>/home/main/update/">View</a>
+            </li>
+            <li role="presentation"><a href="menu/reporting.jsp">Reporting</a></li>
+            <li role="presentation"><a href="menu/settings.jsp">Settings</a></li>
 
-            <a href="<%=request.getContextPath()%>/home/create/" 
-               <% if (pageName == "menu/create.jsp") {
-                       out.println("class=\"current\"");
-                   }%>
-               >Create</a>
-
-            <a href="<%=request.getContextPath()%>/home/update/" 
-               <% if (pageName == "menu/update.jsp") {
-                       out.println("class=\"current\"");
-                   }%>
-               >View</a>
-
-            <a href="<%=request.getContextPath()%>/home/report/" 
-               <% if (pageName == "menu/report.jsp") {
-                       out.println("class=\"current\"");
-                   }%>
-               >Reporting</a>
-
-            <a href="<%=request.getContextPath()%>/home/settings/" 
-               <% if (pageName == "menu/settings.jsp") {
-                       out.println("class=\"current\"");
-                   }%>
-               >Settings</a>
+        </ul>
+        <div class="main">
+            <jsp:include page="<%=pageName%>"/>
         </div>
-        <div class="menu3sub">
-            <jsp:include page="<%=pageName%>" flush="true" /> 
-        </div>
-
-        <div class="heading footer">
-            Created by Daniel Foley | Final Year Project for Computer Science at the University of the West of England
+        <div class="footer">
+            <ol class="breadcrumb">
+                <li>Project by Daniel Foley | Computer Science | University of the West of England</li>
+            </ol>
         </div>
     </body>
 </html>

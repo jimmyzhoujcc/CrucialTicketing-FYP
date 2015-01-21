@@ -3,11 +3,8 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/CrucialTicketing/src/java/com/crucialticketing/services/SeverityService.java</file>
-            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/CrucialTicketing/src/java/com/crucialticketing/services/TicketTypeService.java</file>
-            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/CrucialTicketing/src/java/com/crucialticketing/controllers/TicketController.java</file>
-            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/CrucialTicketing/src/java/com/crucialticketing/services/TicketService.java</file>
-            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/CrucialTicketing/web/WEB-INF/dispatcher-servlet.xml</file>
+            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/CrucialTicketing/web/WEB-INF/jsp/main/ticket.jsp</file>
+            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/CrucialTicketing/web/css/main.css</file>
         </group>
     </open-files>
 </project-private>
