@@ -24,13 +24,15 @@ public class Workflow {
     public Workflow(int workflowId, String workflowName) {
         this.workflowId = workflowId;
         this.workflowName = workflowName;
-        workflow = new ArrayList<WorkflowChange>();
     }
-    
-    public Workflow(int workflowId, List<WorkflowChange> workflow) {
+
+    public Workflow(int workflowId, String workflowName, List<WorkflowChange> workflow) {
         this.workflowId = workflowId;
+        this.workflowName = workflowName;
         this.workflow = workflow;
     }
+
+    
     
     public void addStatus(WorkflowStatus status, Role role, Queue queue) {
         workflow.add(new WorkflowChange(status, role, queue));

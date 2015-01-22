@@ -9,14 +9,33 @@
 <div class="row">
     <div class="col-xs-12 col-sm-6 col-md-10">
         <h3><span class="label label-default">${ticketObject.ticketId}</span> ${ticketObject.shortDescription}</h3>
+
         <br />
 
         <ol class="breadcrumb">
-            <li>New</li>
-                <c:forEach var="workflowItem" items="${ticketObject.workflow.workflow}">
-                <li>${workflowItem.status.statusName}</li>
-                </c:forEach>
-            <li>Closed</li>
+            <li>
+                <c:if test="${ticketObject.status.statusId == 1}">
+                <u>
+                </c:if>
+                New
+                <c:if test="${ticketObject.status.statusId == 1}">
+                </u>
+            </c:if>
+            </li>
+            <c:forEach var="workflowItem" items="${ticketObject.applicationControl.workflow.workflow}">
+                <li>
+                    <c:if test="${workflowItem.status.statusId == ticketObject.status.statusId}">
+                    <u>
+                    </c:if>
+
+                    ${workflowItem.status.statusName}
+
+                    <c:if test="${workflowItem.status.statusId == ticketObject.status.statusId}">
+                    </u>
+                </c:if>
+
+                </li>
+            </c:forEach>
         </ol>
 
         <div class="panel panel-primary">
@@ -37,7 +56,7 @@
                 <br />
                 Workflow: ${ticketObject.applicationControl.workflow.workflowName}
                 <br /><br />
-                Current status: <br />
+                Current status: ${ticketObject.status.statusName}<br />
                 Current Queue: <br />
             </div>
         </div>
@@ -131,7 +150,7 @@
             </div>
         </div>
     </div>
-                            
+
     <div class="ticketnav col-xs-6 col-md-2" style="position:fixed; right:0">
         <div class="panel panel-primary">
             <div class="panel-heading">
@@ -156,6 +175,18 @@
                 <button type="button" class="btn btn-warning">Edit</button>
                 <button type="button" class="btn btn-success">Save Ticket</button>
 
+                <br /><br />
+                <!-- Single button -->
+                <div class="btn-group">
+                    <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                        Change ticket status<span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu">
+                        <li><a href="#">Action</a></li>
+                        <li><a href="#">Another action</a></li>
+                        <li><a href="#">Something else here</a></li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>

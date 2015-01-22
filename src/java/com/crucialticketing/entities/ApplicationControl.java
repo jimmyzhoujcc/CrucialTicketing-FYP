@@ -18,10 +18,12 @@ public class ApplicationControl {
     
     public ApplicationControl() {}
 
-    public ApplicationControl(TicketType ticketType, Application application, Workflow workflow) {
+    public ApplicationControl(int applicationControlId, TicketType ticketType, Application application, Workflow workflow, Severity severity) {
+        this.applicationControlId = applicationControlId;
         this.ticketType = ticketType;
         this.application = application;
         this.workflow = workflow;
+        this.severity = severity;
     }
 
     public int getApplicationControlId() {

@@ -27,8 +27,6 @@ public class Ticket {
     private int timeDateClosed;
     private int timeDateReopened;  
     
-    private Workflow workflow;
-    
     public Ticket() {}
 
     public String getTicketId() {
@@ -117,21 +115,5 @@ public class Ticket {
 
     public void setTimeDateReopened(int timeDateReopened) {
         this.timeDateReopened = timeDateReopened;
-    }
-
-    public Workflow getWorkflow() {
-        return workflow;
-    }
-
-    public void setWorkflow(Workflow workflow) {
-        this.workflow = workflow;
-    }
-
-   
-
-    
-    
-    
-
-    
+    }   
 }

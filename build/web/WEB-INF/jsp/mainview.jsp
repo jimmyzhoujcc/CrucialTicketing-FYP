@@ -9,6 +9,8 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>Crucial Ticketing</title>
 
+        <script src="<%=request.getContextPath()%>/js/jquery-1.11.2.min.js"></script>
+        
         <!-- Bootstrap -->
         <link rel="stylesheet" href="<%=request.getContextPath()%>/css/bootstrap.css">
         <link rel="stylesheet" href="<%=request.getContextPath()%>/css/bootstrap.min.css">
@@ -16,6 +18,9 @@
         <link rel="stylesheet" href="<%=request.getContextPath()%>/css/bootstrap-theme.min.css">
         <script src="<%=request.getContextPath()%>/js/bootstrap.min.js"></script>
 
+        
+
+        
         <link href="<%=request.getContextPath()%>/css/main.css" rel="stylesheet" type="text/css"/>
 
 
