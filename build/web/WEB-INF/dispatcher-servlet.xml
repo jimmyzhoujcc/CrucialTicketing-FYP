@@ -41,8 +41,11 @@
     <!-- Application Bean -->
     <bean id="applicationService" class="com.crucialticketing.services.ApplicationService" />   
  
-    <!-- Application Bean -->
-    <bean id="workflowService" class="com.crucialticketing.services.WorkflowService" />   
+    <!-- Workflow Bean -->
+    <bean id="workflowService" class="com.crucialticketing.services.WorkflowService" /> 
+    
+    <!-- TicketLog Bean -->
+    <bean id="ticketLogService" class="com.crucialticketing.services.TicketLogService" />   
  
     <!-- declare datasource bean -->  
     <bean id="dataSource"  

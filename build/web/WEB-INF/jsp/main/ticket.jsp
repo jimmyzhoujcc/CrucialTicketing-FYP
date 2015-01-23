@@ -4,7 +4,8 @@
     Author     : Owner
 --%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
-
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <div class="row">
     <div class="col-xs-12 col-sm-6 col-md-10">
@@ -14,25 +15,10 @@
 
         <ol class="breadcrumb">
             <li>
-                <c:if test="${ticketObject.status.statusId == 1}">
-                <u>
-                </c:if>
-                New
-                <c:if test="${ticketObject.status.statusId == 1}">
-                </u>
-            </c:if>
+
             </li>
             <c:forEach var="workflowItem" items="${ticketObject.applicationControl.workflow.workflow}">
                 <li>
-                    <c:if test="${workflowItem.status.statusId == ticketObject.status.statusId}">
-                    <u>
-                    </c:if>
-
-                    ${workflowItem.status.statusName}
-
-                    <c:if test="${workflowItem.status.statusId == ticketObject.status.statusId}">
-                    </u>
-                </c:if>
 
                 </li>
             </c:forEach>
@@ -56,8 +42,17 @@
                 <br />
                 Workflow: ${ticketObject.applicationControl.workflow.workflowName}
                 <br /><br />
-                Current status: ${ticketObject.status.statusName}<br />
-                Current Queue: <br />
+                Current status: ${ticketObject.currentWorkflowStage.status.statusName}<br />
+                Current Queue: 
+
+
+                <c:if test="${ticketObject.currentWorkflowStage.queue.queueId == -1}">
+                    Reporting user
+                </c:if>
+                <c:if test="${ticketObject.currentWorkflowStage.queue.queueId > 0}">
+                    ${ticketObject.currentWorkflowStage.queue.queueName}
+                </c:if>
+                <br />
             </div>
         </div>
 
@@ -120,31 +115,28 @@
                 <h3 class="panel-title">Ticket Log</h3>
             </div>
             <div class="panel-body">
-                <div style="padding:10px;max-height:300px;width:100%;overflow:auto;">
+                <div style="padding:10px;max-height:500px;width:100%;overflow:auto;">
 
-                    <div class="media">
-                        <div class="media-left">
-                            <a href="#">
-                                <img class="media-picture media-object" src="<%=request.getContextPath()%>/profile/1.PNG" alt="...">
-                            </a>
-                        </div>
-                        <div class="media-body">
-                            <h4 class="media-heading">Test Test <small>15th October 2014 15:30</small></h4>
-                            Message added to log for test
-                        </div>
-                    </div>
+                    <c:forEach var="ticketLogEntry" items="${ticketObject.ticketLog.entryList}">
+                        <div class="media">
+                            <div class="media-left">
+                                <a href="#">
+                                    <img class="media-picture media-object" src="<%=request.getContextPath()%>/profile/${ticketLogEntry.user.userId}.png" alt="...">
+                                </a>
+                            </div>
+                            <div class="media-body">
+                                <h4 class="media-heading">${ticketLogEntry.user.firstName} ${ticketLogEntry.user.lastName} 
+                                    <small>
+                                        <jsp:useBean id="dateValue" class="java.util.Date"/>
+                                        <jsp:setProperty name="dateValue" property="time" value="${ticketLogEntry.stamp*1000}"/>
+                                        <fmt:formatDate type="both" dateStyle="long" timeStyle="long" value="${dateValue}" />
 
-                    <div class="media">
-                        <div class="media-left">
-                            <a href="#">
-                                <img class="media-picture media-object" src="<%=request.getContextPath()%>/profile/system.png" alt="...">
-                            </a>
+                                    </small></h4>
+                                    ${ticketLogEntry.logEntry}
+                            </div>
                         </div>
-                        <div class="media-body">
-                            <h4 class="media-heading">System message <small>15th October 2014 15:30</small></h4>
-                            Status has been updated to 'New'
-                        </div>
-                    </div>
+                    </c:forEach>
+
 
                 </div>
             </div>
@@ -181,10 +173,19 @@
                     <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                         Change ticket status<span class="caret"></span>
                     </button>
+
+                    <c:set var="totalNextNodes" value="${fn:length(ticketObject.currentWorkflowStage.nextWorkflowStage)}"/>
+
+
                     <ul class="dropdown-menu" role="menu">
-                        <li><a href="#">Action</a></li>
-                        <li><a href="#">Another action</a></li>
-                        <li><a href="#">Something else here</a></li>
+                        <c:forEach var="nextNode" items="${ticketObject.currentWorkflowStage.nextWorkflowStage}">
+                            <li>
+                                <a href="#">${nextNode.status.statusName}</a>
+                            </li>
+                        </c:forEach>
+                        <c:if test="${totalNextNodes == 0}">
+                            <li><a href="#">No further actions</a></li>
+                            </c:if>
                     </ul>
                 </div>
             </div>

@@ -5,21 +5,29 @@
  */
 package com.crucialticketing.entities;
 
+import java.util.List;
+
 /**
  *
  * @author Daniel Foley
  */
-public class WorkflowChange {
+public class WorkflowStage {
     private WorkflowStatus status;
     private Role role;
     private Queue queue;
+    private List<WorkflowStage> nextWorkflowStage;
     
-    public WorkflowChange() {}
+    public WorkflowStage() {}
 
-    public WorkflowChange(WorkflowStatus status, Role role, Queue queue) {
+    public WorkflowStage(WorkflowStatus status, Role role, Queue queue, List<WorkflowStage> nextWorkflowStatus) {
         this.status = status;
         this.role = role;
         this.queue = queue;
+        this.nextWorkflowStage = nextWorkflowStatus;
+    }
+
+    public void addNextNode(WorkflowStage nextNode) {
+        nextWorkflowStage.add(nextNode);
     }
 
     public WorkflowStatus getStatus() {
@@ -45,7 +53,15 @@ public class WorkflowChange {
     public void setQueue(Queue queue) {
         this.queue = queue;
     }
-    
+
+    public List<WorkflowStage> getNextWorkflowStage() {
+        return nextWorkflowStage;
+    }
+
+    public void setNextWorkflowStage(List<WorkflowStage> nextWorkflowStage) {
+        this.nextWorkflowStage = nextWorkflowStage;
+    }
+   
     
     
 }

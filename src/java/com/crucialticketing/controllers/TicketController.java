@@ -33,11 +33,25 @@ public class TicketController {
 
     @RequestMapping(value = "/update/viewticket/", method = RequestMethod.POST)
     public String viewTicket(@RequestParam(value = "ticketid", required = true) String ticketId, ModelMap map) {
+        if (ticketId.length() == 0) {
+            map.addAttribute("alert", "No search criteria was provided");
+            map.addAttribute("page", "main/queryticket.jsp");
+            return "mainview";
+        }
+
         List<Object> objectList = ticketService.select("ticket_id", ticketId);
 
-        
-        map.put("ticketObject", (Ticket)objectList.get(0));
+        Ticket ticket = (Ticket) objectList.get(0);
+
+        if (ticket.getTicketId() == null) {
+            map.addAttribute("alert", "No ticket was found with that ID, please check and try again");
+            map.addAttribute("page", "main/queryticket.jsp");
+            return "mainview";
+        }
+
+        map.put("ticketObject", (Ticket) objectList.get(0));
         map.addAttribute("page", "main/ticket.jsp");
+
         return "mainview";
     }
 }

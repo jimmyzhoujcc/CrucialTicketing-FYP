@@ -11,10 +11,11 @@ import com.crucialticketing.entities.Queue;
 import com.crucialticketing.entities.Role;
 import com.crucialticketing.entities.Severity;
 import com.crucialticketing.entities.Ticket;
+import com.crucialticketing.entities.TicketLog;
 import com.crucialticketing.entities.TicketType;
 import com.crucialticketing.entities.User;
 import com.crucialticketing.entities.Workflow;
-import com.crucialticketing.entities.WorkflowChange;
+import com.crucialticketing.entities.WorkflowStage;
 import com.crucialticketing.entities.WorkflowStatus;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +36,9 @@ public class TicketService implements DatabaseService {
     @Autowired
     WorkflowService workflowService;
 
+    @Autowired
+    TicketLogService ticketLogService;
+    
     @Override
     public void insert(Object o) {
 
@@ -73,7 +77,7 @@ public class TicketService implements DatabaseService {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
 
         List<Map<String, Object>> ticketInfo = jdbcTemplate.queryForList(sql);
-
+        
         for (Map<String, Object> tableItem : ticketInfo) {
 
             ticket.setTicketId(String.valueOf(tableItem.get("ticket_id")));
@@ -96,6 +100,8 @@ public class TicketService implements DatabaseService {
 
             List<Object> tempWorkflow = workflowService.select("workflow_template_id", String.valueOf(tableItem.get("workflow_template_id")));
             Workflow workflow = (Workflow)tempWorkflow.get(0);
+            workflow.setWorkflowId((int)tableItem.get("workflow_template_id"));
+            workflow.setWorkflowName((String)tableItem.get("workflow_template_name"));
             
             ticket.setApplicationControl(new ApplicationControl(
                     (int) tableItem.get("application_control_id"),
@@ -104,8 +110,18 @@ public class TicketService implements DatabaseService {
                     new Workflow(workflow.getWorkflowId(), workflow.getWorkflowName(), workflow.getWorkflow()),
                     new Severity((int) tableItem.get("severity_id"), (int) tableItem.get("severity_level"), (String) tableItem.get("severity_name"))));
 
-            ticket.setStatus(new WorkflowStatus((int) tableItem.get("workflow_status_id"), (String) tableItem.get("workflow_status_name")));
+            WorkflowStage currentWorkflowStage = ticket.getApplicationControl().getWorkflow().getWorkflowStageByStatus((int) tableItem.get("workflow_status_id"));
+            ticket.setCurrentWorkflowStage(currentWorkflowStage);
+            
+            TicketLog ticketLog = (TicketLog)(ticketLogService.select("ticket_id", String.valueOf(tableItem.get("ticket_id")))).get(0);
+           
+            ticket.setTicketLog(ticketLog);
+            
             o.add((Object) ticket);
+        }
+        
+        if(o.isEmpty()) {
+            o.add(new Ticket());
         }
 
         return o;
