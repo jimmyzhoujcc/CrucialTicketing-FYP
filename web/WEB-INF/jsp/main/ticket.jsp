@@ -9,6 +9,9 @@
 
 <div class="row">
     <div class="col-xs-12 col-sm-6 col-md-10">
+        <c:if test="${fn:length(alert)>0}">
+            <div class="alert alert-danger" role="alert">${alert}</div>
+        </c:if>
         <h3><span class="label label-default">${ticketObject.ticketId}</span> ${ticketObject.shortDescription}</h3>
 
         <br />
@@ -31,7 +34,14 @@
             <div class="panel-body">
                 Ticket ID: ${ticketObject.ticketId}
                 <br />
-                Ticket Description: ${ticketObject.shortDescription}
+                Ticket Description: 
+                <c:if test="${editMode==true}">
+                    <input type="input" id="holder_new_shortdescription" value="${ticketObject.shortDescription}" />
+                </c:if>
+                <c:if test="${editMode==false}">
+                    ${ticketObject.shortDescription}
+                </c:if>
+
                 <br /><br />
 
                 Ticket Type ${ticketObject.applicationControl.ticketType.ticketTypeName}
@@ -110,11 +120,22 @@
         </div>
 
 
+
         <div class="panel panel-primary">
             <div class="panel-heading">
                 <h3 class="panel-title">Ticket Log</h3>
             </div>
             <div class="panel-body">
+                <c:if test="${editMode==true}">
+                    <textarea class="logentrytextarea" id="holder_logentry"></textarea>
+
+                    <br />
+                    (Remember: saving the ticket submits the message)
+                    <br />
+                    <hr class="style-one" />
+
+                </c:if>
+
                 <div style="padding:10px;max-height:500px;width:100%;overflow:auto;">
 
                     <c:forEach var="ticketLogEntry" items="${ticketObject.ticketLog.entryList}">
@@ -135,6 +156,9 @@
                                     ${ticketLogEntry.logEntry}
                             </div>
                         </div>
+                            
+                            <hr class="style-three" />
+
                     </c:forEach>
 
 
@@ -164,30 +188,59 @@
                 <h3 class="panel-title">Ticket Control</h3>
             </div>
             <div class="panel-body">
-                <button type="button" class="btn btn-warning">Edit</button>
-                <button type="button" class="btn btn-success">Save Ticket</button>
+                <c:if test="${editMode==false}">
+                    <form method="POST" action="<%=request.getContextPath()%>/home/update/editticket/">
+                        <input type="submit" value="Edit" class="btn btn-warning" />
+                        <input type="hidden" name="ticketid" value="${ticketObject.ticketId}" />
+                    </form>
+                </c:if>
 
-                <br /><br />
-                <!-- Single button -->
-                <div class="btn-group">
-                    <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                        Change ticket status<span class="caret"></span>
-                    </button>
+                <c:if test="${editMode==true}">
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                            Change ticket status<span class="caret"></span>
+                        </button>
 
-                    <c:set var="totalNextNodes" value="${fn:length(ticketObject.currentWorkflowStage.nextWorkflowStage)}"/>
+                        <c:set var="totalNextNodes" value="${fn:length(ticketObject.currentWorkflowStage.nextWorkflowStage)}"/>
 
+                        <script type="text/javascript">
+                            function changeStatus(inputStatus) {
+                                var elem = document.getElementById("newstatus");
+                                elem.value = inputStatus
+                            }
+                        </script>
 
-                    <ul class="dropdown-menu" role="menu">
-                        <c:forEach var="nextNode" items="${ticketObject.currentWorkflowStage.nextWorkflowStage}">
-                            <li>
-                                <a href="#">${nextNode.status.statusName}</a>
-                            </li>
-                        </c:forEach>
-                        <c:if test="${totalNextNodes == 0}">
-                            <li><a href="#">No further actions</a></li>
-                            </c:if>
-                    </ul>
-                </div>
+                        <ul class="dropdown-menu" role="menu">
+                            <c:forEach var="nextNode" items="${ticketObject.currentWorkflowStage.nextWorkflowStage}">
+                                <li>
+                                    <a href="javascript:changeStatus('${nextNode.status.statusId}');">${nextNode.status.statusName}</a>
+                                </li>
+                            </c:forEach>
+                            <c:if test="${totalNextNodes == 0}">
+                                <li><a href="#">No further actions</a></li>
+                                </c:if>
+                        </ul>
+                    </div>
+
+                    <br /><br />
+                </c:if>
+
+                <c:if test="${editMode==true}">
+                    <script>
+                        function modify_value() {
+                            document.getElementById('logentry').value = document.getElementById('holder_logentry').value;
+                            document.getElementById('new_shortdescription').value = document.getElementById('holder_new_shortdescription').value;
+                        }
+                        </script>
+                    <form method="POST" action="<%=request.getContextPath()%>/home/update/saveticket/">
+                        <input type="submit" value="Save Ticket" class="btn btn-success" onclick="javascript:modify_value();" />
+                        <input type="hidden" value="${ticketObject.ticketId}" name="ticketid" />
+                        <input type="hidden" value="${ticketObject.shortDescription}" name="old_shortdescription" />
+                        <input type="hidden" value="" id="new_shortdescription" name="new_shortdescription" />
+                        <input type="hidden" value="" id="newstatus" name="newstatus" />
+                        <input type="hidden" value="" id="logentry" name="logentry" />
+                    </form>
+                </c:if>
             </div>
         </div>
     </div>

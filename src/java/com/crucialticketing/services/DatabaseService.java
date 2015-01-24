@@ -17,7 +17,7 @@ public interface DatabaseService {
 
     public List<Object> select(String field, String value);
 
-    public void update(Object o);
+    public void update(String filterField, String filterValue, String updateField, String updateValue);
 
     public void delete(Object o);
 

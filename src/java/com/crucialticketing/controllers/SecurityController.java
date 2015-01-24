@@ -61,7 +61,7 @@ public class SecurityController implements Filter {
 
         Throwable problem = null;
         try {
-          /*      HttpServletRequest httpRequest = (HttpServletRequest) request;
+                HttpServletRequest httpRequest = (HttpServletRequest) request;
 
             String contextPath = httpRequest.getRequestURI();
             if (contextPath.contains("/home/") && (!contextPath.contains("/home/login/"))) {
@@ -81,7 +81,7 @@ public class SecurityController implements Filter {
                     return;
                 }
             }
-            */
+     
             chain.doFilter(request, response);
         } catch (Throwable t) {
             problem = t;

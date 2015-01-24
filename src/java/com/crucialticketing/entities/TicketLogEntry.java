@@ -10,6 +10,7 @@ package com.crucialticketing.entities;
  * @author DanFoley
  */
 public class TicketLogEntry {
+    private int ticketId;
     private int ticketLogId;
     private User user;
     private String logEntry;
@@ -17,13 +18,23 @@ public class TicketLogEntry {
     
     public TicketLogEntry() {}
 
-    public TicketLogEntry(int ticketLogId, User user, String logEntry, int entryStamp) {
+    public TicketLogEntry(int ticketId, int ticketLogId, User user, String logEntry, int entryStamp) {
+        this.ticketId = ticketId;
         this.ticketLogId = ticketLogId;
         this.user = user;
         this.logEntry = logEntry;
         this.stamp = entryStamp;
     }
 
+    public int getTicketId() {
+        return ticketId;
+    }
+
+    public void setTicketId(int ticketId) {
+        this.ticketId = ticketId;
+    }
+
+    
     public int getTicketLogId() {
         return ticketLogId;
     }

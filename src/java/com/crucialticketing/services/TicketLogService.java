@@ -9,6 +9,7 @@ import com.crucialticketing.entities.TicketLog;
 import com.crucialticketing.entities.TicketLogEntry;
 import com.crucialticketing.entities.User;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import javax.sql.DataSource;
@@ -26,7 +27,20 @@ public class TicketLogService implements DatabaseService {
 
     @Override
     public void insert(Object o) {
+        int unixTime = (int) (((new Date()).getTime()) / 1000);
 
+        TicketLogEntry ticketLogEntry = (TicketLogEntry) o;
+
+        String sql = "INSERT ticket_log (ticket_id, user_id, ticket_log_entry, stamp) "
+                + "VALUES("
+                + ticketLogEntry.getTicketId() + ", "
+                + ticketLogEntry.getUser().getUserId() + ", '"
+                + ticketLogEntry.getLogEntry() + "', "
+                + unixTime + ")";
+
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+
+        int executedQuery = jdbcTemplate.update(sql);
     }
 
     @Override
@@ -34,18 +48,18 @@ public class TicketLogService implements DatabaseService {
         List<Object> o = new ArrayList<>();
 
         String sql = "SELECT * FROM ticket_log JOIN user ON ticket_log.user_id=user.user_id "
-                + "WHERE " + field + "=" + value;
+                + "WHERE " + field + "=" + value + " ORDER BY ticket_log_id DESC";
 
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
 
         List<Map<String, Object>> ticketLogInfo = jdbcTemplate.queryForList(sql);
 
         TicketLog ticketLog = new TicketLog();
-        
+
         for (Map<String, Object> tableItem : ticketLogInfo) {
-            
-            
+
             ticketLog.addEntry(
+                    (int) tableItem.get("ticket_id"),
                     (int) tableItem.get("ticket_log_id"),
                     new User(
                             (int) tableItem.get("user_id"),
@@ -53,18 +67,17 @@ public class TicketLogService implements DatabaseService {
                             (String) tableItem.get("last_name")),
                     (String) tableItem.get("ticket_log_entry"),
                     (int) tableItem.get("stamp"));
-            
-           
+
         }
-        
-        o.add((Object)ticketLog);
+
+        o.add((Object) ticketLog);
 
         return o;
 
     }
 
     @Override
-    public void update(Object o) {
+    public void update(String filterField, String filterValue, String updateField, String updateValue) {
 
     }
 

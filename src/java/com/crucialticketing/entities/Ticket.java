@@ -29,6 +29,8 @@ public class Ticket {
     
     private TicketLog ticketLog;
     
+    private boolean lock;
+    
     public Ticket() {}
 
     public String getTicketId() {
@@ -126,6 +128,15 @@ public class Ticket {
     public void setTicketLog(TicketLog ticketLog) {
         this.ticketLog = ticketLog;
     }
+
+    public boolean isLock() {
+        return lock;
+    }
+
+    public void setLock(boolean lock) {
+        this.lock = lock;
+    }
+    
     
     
 }

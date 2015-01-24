@@ -38,7 +38,7 @@ public class TicketService implements DatabaseService {
 
     @Autowired
     TicketLogService ticketLogService;
-    
+
     @Override
     public void insert(Object o) {
 
@@ -49,7 +49,7 @@ public class TicketService implements DatabaseService {
         List<Object> o = new ArrayList<>();
         Ticket ticket = new Ticket();
 
-        String sql = "SELECT ticket.ticket_id, ticket.short_description, "
+        String sql = "SELECT ticket.ticket_id, ticket.short_description, ticket.lock, "
                 + "user1.user_id AS MP_user_id, user1.username AS MP_username, user1.password AS MP_password, "
                 + "user1.first_name AS MP_first_name, user1.last_name AS MP_last_name, "
                 + "user2.user_id AS C_user_id, user2.username AS C_username, user2.password AS C_password, "
@@ -77,7 +77,7 @@ public class TicketService implements DatabaseService {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
 
         List<Map<String, Object>> ticketInfo = jdbcTemplate.queryForList(sql);
-        
+
         for (Map<String, Object> tableItem : ticketInfo) {
 
             ticket.setTicketId(String.valueOf(tableItem.get("ticket_id")));
@@ -99,10 +99,10 @@ public class TicketService implements DatabaseService {
                             (String) tableItem.get("R_last_name")));
 
             List<Object> tempWorkflow = workflowService.select("workflow_template_id", String.valueOf(tableItem.get("workflow_template_id")));
-            Workflow workflow = (Workflow)tempWorkflow.get(0);
-            workflow.setWorkflowId((int)tableItem.get("workflow_template_id"));
-            workflow.setWorkflowName((String)tableItem.get("workflow_template_name"));
-            
+            Workflow workflow = (Workflow) tempWorkflow.get(0);
+            workflow.setWorkflowId((int) tableItem.get("workflow_template_id"));
+            workflow.setWorkflowName((String) tableItem.get("workflow_template_name"));
+
             ticket.setApplicationControl(new ApplicationControl(
                     (int) tableItem.get("application_control_id"),
                     new TicketType((int) tableItem.get("ticket_type_id"), (String) tableItem.get("ticket_type_name")),
@@ -112,15 +112,17 @@ public class TicketService implements DatabaseService {
 
             WorkflowStage currentWorkflowStage = ticket.getApplicationControl().getWorkflow().getWorkflowStageByStatus((int) tableItem.get("workflow_status_id"));
             ticket.setCurrentWorkflowStage(currentWorkflowStage);
-            
-            TicketLog ticketLog = (TicketLog)(ticketLogService.select("ticket_id", String.valueOf(tableItem.get("ticket_id")))).get(0);
-           
+
+            TicketLog ticketLog = (TicketLog) (ticketLogService.select("ticket_id", String.valueOf(tableItem.get("ticket_id")))).get(0);
+
             ticket.setTicketLog(ticketLog);
-            
+
+            ticket.setLock((boolean) tableItem.get("lock"));
+
             o.add((Object) ticket);
         }
-        
-        if(o.isEmpty()) {
+
+        if (o.isEmpty()) {
             o.add(new Ticket());
         }
 
@@ -128,8 +130,11 @@ public class TicketService implements DatabaseService {
     }
 
     @Override
-    public void update(Object o) {
+    public void update(String filterField, String filterValue, String updateField, String updateValue) {
+        String sql = "UPDATE ticket SET `"+ updateField +"`='"+ updateValue +"' WHERE `" + filterField + "`='" + filterValue + "'";
 
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+        int returnVal = jdbcTemplate.update(sql);
     }
 
     @Override

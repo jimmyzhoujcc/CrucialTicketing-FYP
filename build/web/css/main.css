@@ -49,11 +49,36 @@ body {
 }
 
 .media-picture {
-    max-width: 64px;
+    max-width: 48px;
 }
 
 @media screen and (max-width: 800px)  {
     .ticketnav {
         display:none;
     }
+}
+
+.logentrytextarea {
+    -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+    -moz-box-sizing: border-box;    /* Firefox, other Gecko */
+    box-sizing: border-box;  
+    width:90%;
+    height:150px;
+    resize: none;
+}
+
+hr.style-one {
+    border: 0;
+    height: 1px;
+    background: #333;
+    background-image: -webkit-linear-gradient(left, #ccc, #333, #ccc); 
+    background-image:    -moz-linear-gradient(left, #ccc, #333, #ccc); 
+    background-image:     -ms-linear-gradient(left, #ccc, #333, #ccc); 
+    background-image:      -o-linear-gradient(left, #ccc, #333, #ccc); 
+}
+
+hr.style-three {
+    border: 0;
+    border-bottom: 1px dashed #CCCCB2;
+    background: #999;
 }

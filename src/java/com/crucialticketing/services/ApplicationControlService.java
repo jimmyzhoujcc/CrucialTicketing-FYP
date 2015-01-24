@@ -101,7 +101,7 @@ public class ApplicationControlService implements DatabaseService {
     }
 
     @Override
-    public void update(Object o) {
+    public void update(String filterField, String filterValue, String updateField, String updateValue) {
 
     }
 

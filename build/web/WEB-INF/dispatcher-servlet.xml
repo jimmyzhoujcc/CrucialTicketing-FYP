@@ -47,6 +47,9 @@
     <!-- TicketLog Bean -->
     <bean id="ticketLogService" class="com.crucialticketing.services.TicketLogService" />   
  
+    <!-- Workflow status Bean -->
+    <bean id="workflowStatusService" class="com.crucialticketing.services.WorkflowStatusService" />   
+ 
     <!-- declare datasource bean -->  
     <bean id="dataSource"  
           class="org.springframework.jdbc.datasource.DriverManagerDataSource">  

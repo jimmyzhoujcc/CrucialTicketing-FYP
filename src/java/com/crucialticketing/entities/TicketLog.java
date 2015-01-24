@@ -19,18 +19,19 @@ public class TicketLog {
         entryList = new ArrayList<>();
     }
 
-    public TicketLog(List<TicketLogEntry> entryList) {
+    public TicketLog(int ticketId, List<TicketLogEntry> entryList) {
         entryList = new ArrayList<>();
         this.entryList = entryList;
     }
     
-    public void addEntry(int ticketLogId, User user, String logEntry, int stamp) {
-        entryList.add(new TicketLogEntry(ticketLogId, user, logEntry, stamp));
+    public void addEntry(int ticketId, int ticketLogId, User user, String logEntry, int stamp) {
+        entryList.add(new TicketLogEntry(ticketId, ticketLogId, user, logEntry, stamp));
     }
     
     public List<TicketLogEntry> getEntryList() {
         return this.entryList;
     }
+    
     
     
 }
