@@ -7,6 +7,7 @@ package com.crucialticketing.services;
 
 import com.crucialticketing.entities.Application;
 import com.crucialticketing.entities.ApplicationControl;
+import com.crucialticketing.entities.Lock;
 import com.crucialticketing.entities.Queue;
 import com.crucialticketing.entities.Role;
 import com.crucialticketing.entities.Severity;
@@ -38,6 +39,9 @@ public class TicketService implements DatabaseService {
 
     @Autowired
     TicketLogService ticketLogService;
+    
+    @Autowired
+    LockService lockService;
 
     @Override
     public void insert(Object o) {
@@ -117,7 +121,9 @@ public class TicketService implements DatabaseService {
 
             ticket.setTicketLog(ticketLog);
 
-            ticket.setLock((boolean) tableItem.get("lock"));
+            //List<Object> lockList = lockService.select("ticket_id", String.valueOf(tableItem.get("ticket_id")));
+            
+            //ticket.setLock((Lock)lockList.get(0));
 
             o.add((Object) ticket);
         }

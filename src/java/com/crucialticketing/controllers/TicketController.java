@@ -57,6 +57,8 @@ public class TicketController {
             return "mainview";
         }
 
+        map.addAttribute("message", "this is a test message");
+        
         map.put("ticketObject", (Ticket) objectList.get(0));
         map.addAttribute("page", "main/ticket.jsp");
 
@@ -66,20 +68,21 @@ public class TicketController {
 
     @RequestMapping(value = "/update/editticket/", method = RequestMethod.POST)
     public String editTicket(@RequestParam(value = "ticketid", required = true) String ticketId, ModelMap map) {
+
         List<Object> objectList = ticketService.select("ticket_id", ticketId);
 
         Ticket ticket = (Ticket) objectList.get(0);
 
-        if (ticket.isLock()) {
+        //if (ticket.isLock()) {
             map.addAttribute("alert", "Ticket is currently locked, please try again later");
             map.addAttribute("page", "main/ticket.jsp");
             map.addAttribute("editMode", false);
-        } else {
+       // } else {
             ticketService.update("ticket_id", ticketId, "lock", "1");
             map.addAttribute("alert", "You are now in edit mode, please save ticket to exit and confirm changes");
             map.addAttribute("page", "main/ticket.jsp");
             map.addAttribute("editMode", true);
-        }
+       // }
 
         map.put("ticketObject", (Ticket) objectList.get(0));
 

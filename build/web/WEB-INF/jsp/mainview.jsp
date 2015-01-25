@@ -76,6 +76,31 @@
         </script>
     </head>
     <body>
+        <div id="message" style="position:fixed; float:left;left:20%"><h2>${message}</h2></div>
+        
+        <script>
+            var intervalTime = 3000;
+            var timing = intervalTime;
+            var timingSub = 1000;
+            
+            function clearAlert() {
+                var valueFromId = document.getElementById('message');
+                
+                if(valueFromId.innerText.length > 0) {
+                    if(timing === 0) {
+                        document.getElementById('message').innerText = "";
+                    } else {
+                        timing -= timingSub;
+                    }
+                } else {
+                    clearInterval();
+                }
+            }
+            
+            setInterval(function () { clearAlert(); }, 1000);
+            
+            </script>
+        
         <div class="heading">
 
 

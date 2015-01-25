@@ -5,6 +5,8 @@
  */
 package com.crucialticketing.entities;
 
+import java.util.List;
+
 /**
  *
  * @author Owner
@@ -29,7 +31,7 @@ public class Ticket {
     
     private TicketLog ticketLog;
     
-    private boolean lock;
+    private Lock lock;
     
     public Ticket() {}
 
@@ -61,8 +63,8 @@ public class Ticket {
         return currentWorkflowStage;
     }
 
-    public void setCurrentWorkflowStage(WorkflowStage workflowStage) {
-        this.currentWorkflowStage = workflowStage;
+    public void setCurrentWorkflowStage(WorkflowStage currentWorkflowStage) {
+        this.currentWorkflowStage = currentWorkflowStage;
     }
 
     public User getMessageProcessor() {
@@ -119,7 +121,7 @@ public class Ticket {
 
     public void setTimeDateReopened(int timeDateReopened) {
         this.timeDateReopened = timeDateReopened;
-    } 
+    }
 
     public TicketLog getTicketLog() {
         return ticketLog;
@@ -129,14 +131,13 @@ public class Ticket {
         this.ticketLog = ticketLog;
     }
 
-    public boolean isLock() {
+    public Lock getLock() {
         return lock;
     }
 
-    public void setLock(boolean lock) {
+    public void setLock(Lock lock) {
         this.lock = lock;
     }
-    
-    
+
     
 }

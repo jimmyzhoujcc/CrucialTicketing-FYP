@@ -50,6 +50,10 @@
     <!-- Workflow status Bean -->
     <bean id="workflowStatusService" class="com.crucialticketing.services.WorkflowStatusService" />   
  
+    <!-- Workflow status Bean -->
+    <bean id="lockService" class="com.crucialticketing.services.LockService" />   
+ 
+    
     <!-- declare datasource bean -->  
     <bean id="dataSource"  
           class="org.springframework.jdbc.datasource.DriverManagerDataSource">  
