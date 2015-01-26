@@ -22,36 +22,23 @@
     </bean>
     
     <!-- declare beans -->  
-    
-    <!-- User Bean -->  
-    <bean id="userService" class="com.crucialticketing.services.UserService" />  
-    
-    <!-- Ticket Bean -->
-    <bean id="ticketService" class="com.crucialticketing.services.TicketService" />  
 
-    <!-- Ticket Type Bean -->
-    <bean id="ticketTypeService" class="com.crucialticketing.services.TicketTypeService" />  
-
-    <!-- Severity Bean -->
-    <bean id="severityService" class="com.crucialticketing.services.SeverityService" />  
- 
-    <!-- Application Control Bean -->
     <bean id="applicationControlService" class="com.crucialticketing.services.ApplicationControlService" />  
- 
-    <!-- Application Bean -->
-    <bean id="applicationService" class="com.crucialticketing.services.ApplicationService" />   
- 
-    <!-- Workflow Bean -->
-    <bean id="workflowService" class="com.crucialticketing.services.WorkflowService" /> 
-    
-    <!-- TicketLog Bean -->
-    <bean id="ticketLogService" class="com.crucialticketing.services.TicketLogService" />   
- 
-    <!-- Workflow status Bean -->
-    <bean id="workflowStatusService" class="com.crucialticketing.services.WorkflowStatusService" />   
- 
-    <!-- Workflow status Bean -->
-    <bean id="lockService" class="com.crucialticketing.services.LockService" />   
+    <bean id="applicationService" class="com.crucialticketing.services.ApplicationService" />  
+   
+    <bean id="queueService" class="com.crucialticketing.services.QueueService" />  
+    <bean id="roleService" class="com.crucialticketing.services.RoleService" />  
+   
+    <bean id="ticketService" class="com.crucialticketing.services.TicketService" />  
+    <bean id="ticketTypeService" class="com.crucialticketing.services.TicketTypeService" />  
+    <bean id="severityService" class="com.crucialticketing.services.SeverityService" />  
+    <bean id="ticketLogService" class="com.crucialticketing.services.TicketLogService" />  
+   
+    <bean id="userService" class="com.crucialticketing.services.UserService" />  
+   
+    <bean id="workflowService" class="com.crucialticketing.services.WorkflowService" />  
+    <bean id="workflowMapService" class="com.crucialticketing.services.WorkflowMapService" />  
+    <bean id="workflowStatusService" class="com.crucialticketing.services.WorkflowStatusService" />
  
     
     <!-- declare datasource bean -->  

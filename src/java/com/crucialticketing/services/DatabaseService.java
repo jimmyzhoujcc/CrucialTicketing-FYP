@@ -5,21 +5,12 @@
  */
 package com.crucialticketing.services;
 
-import java.util.List;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
  *
  * @author DanFoley
  */
 public interface DatabaseService {
-
-    public void insert(Object o);
-
-    public List<Object> select(String field, String value);
-
-    public void update(String filterField, String filterValue, String updateField, String updateValue);
-
-    public void delete(Object o);
-
-    public List<Object> getTable();
+    public void setCon(JdbcTemplate con);
 }

@@ -8,12 +8,13 @@ package com.crucialticketing.controllers;
 import com.crucialticketing.entities.Ticket;
 import com.crucialticketing.entities.TicketLogEntry;
 import com.crucialticketing.entities.User;
-import com.crucialticketing.services.TicketLogService;
 import com.crucialticketing.services.TicketService;
 import com.crucialticketing.services.WorkflowStatusService;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
+import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,10 +29,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class TicketController {
 
     @Autowired
-    TicketService ticketService;
+    DataSource dataSource;
     
-    @Autowired
-    TicketLogService ticketLogService;
 
     @RequestMapping(value = "/update/ticketquery/", method = RequestMethod.GET)
     public String queryTicket(ModelMap map) {
@@ -46,11 +45,13 @@ public class TicketController {
             map.addAttribute("page", "main/queryticket.jsp");
             return "mainview";
         }
-
-        List<Object> objectList = ticketService.select("ticket_id", ticketId);
-
-        Ticket ticket = (Ticket) objectList.get(0);
-
+        
+        JdbcTemplate con = new JdbcTemplate(dataSource);
+        TicketService ticketService = new TicketService();
+        ticketService.setCon(con);
+        
+        Ticket ticket = ticketService.getTicketById(Integer.valueOf(ticketId), true);
+     
         if (ticket.getTicketId() == null) {
             map.addAttribute("alert", "No ticket was found with that ID, please check and try again");
             map.addAttribute("page", "main/queryticket.jsp");
@@ -59,7 +60,7 @@ public class TicketController {
 
         map.addAttribute("message", "this is a test message");
         
-        map.put("ticketObject", (Ticket) objectList.get(0));
+        map.put("ticketObject", ticket);
         map.addAttribute("page", "main/ticket.jsp");
 
         map.addAttribute("editMode", false);
@@ -68,7 +69,7 @@ public class TicketController {
 
     @RequestMapping(value = "/update/editticket/", method = RequestMethod.POST)
     public String editTicket(@RequestParam(value = "ticketid", required = true) String ticketId, ModelMap map) {
-
+/*
         List<Object> objectList = ticketService.select("ticket_id", ticketId);
 
         Ticket ticket = (Ticket) objectList.get(0);
@@ -85,7 +86,7 @@ public class TicketController {
        // }
 
         map.put("ticketObject", (Ticket) objectList.get(0));
-
+*/
         return "mainview";
     }
 
@@ -97,7 +98,7 @@ public class TicketController {
             @RequestParam(value = "newstatus", required = true) String newStatus,
             @RequestParam(value = "logentry", required = true) String logEntry,
             ModelMap map) {
-
+/*
         List<Object> objectList = ticketService.select("ticket_id", ticketId);
         Ticket ticket = (Ticket) objectList.get(0);
 
@@ -123,7 +124,7 @@ public class TicketController {
         map.put("ticketObject", ticket);
         map.addAttribute("page", "main/ticket.jsp");
         map.addAttribute("editMode", false);
-
+*/
         return "mainview";
     }
 

@@ -18,7 +18,7 @@ public class Ticket {
     
     private String shortDescription;
     
-    private WorkflowStage currentWorkflowStage;
+    private WorkflowStep currentWorkflowStep;
     
     private User messageProcessor;
     private User createdBy;
@@ -30,8 +30,6 @@ public class Ticket {
     private int timeDateReopened;  
     
     private TicketLog ticketLog;
-    
-    private Lock lock;
     
     public Ticket() {}
 
@@ -59,12 +57,12 @@ public class Ticket {
         this.shortDescription = shortDescription;
     }
 
-    public WorkflowStage getCurrentWorkflowStage() {
-        return currentWorkflowStage;
+    public WorkflowStep getCurrentWorkflowStep() {
+        return currentWorkflowStep;
     }
 
-    public void setCurrentWorkflowStage(WorkflowStage currentWorkflowStage) {
-        this.currentWorkflowStage = currentWorkflowStage;
+    public void setCurrentWorkflowStep(WorkflowStep currentWorkflowStep) {
+        this.currentWorkflowStep = currentWorkflowStep;
     }
 
     public User getMessageProcessor() {
@@ -129,15 +127,5 @@ public class Ticket {
 
     public void setTicketLog(TicketLog ticketLog) {
         this.ticketLog = ticketLog;
-    }
-
-    public Lock getLock() {
-        return lock;
-    }
-
-    public void setLock(Lock lock) {
-        this.lock = lock;
-    }
-
-    
+    }    
 }

@@ -10,7 +10,9 @@ import com.crucialticketing.entities.User;
 import com.crucialticketing.services.UserService;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
+import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -26,7 +28,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public class LoginController {
 
     @Autowired
-    UserService userService;
+    DataSource dataSource;
 
     @RequestMapping(value = "/login/", method = RequestMethod.GET)
     public String defaultLoginVisit(ModelMap map) {
@@ -38,16 +40,18 @@ public class LoginController {
             method = RequestMethod.POST)
     public String attemptLogin(HttpServletRequest request, @ModelAttribute("login") Login login, ModelMap map) {
 
-        List<Object> objectList = (List<Object>)userService.select("username", login.getUsername());
-        
-        User user = (User)objectList.get(0);
-        
+        JdbcTemplate con = new JdbcTemplate(dataSource);
+        UserService userService = new UserService();
+        userService.setCon(con);
+
+        User user = userService.getUserByUsername(login.getUsername(), true);
+
         if (user.getLogin().getPassword().equals(login.getPassword())) {
             request.getSession().setAttribute("user", user);
             map.addAttribute("page", "menu/main.jsp");
             return "mainview";
         }
-
+        
         map.addAttribute("alert", "Invalid username or password");
         return "/login/login";
     }

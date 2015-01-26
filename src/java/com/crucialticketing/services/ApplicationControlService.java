@@ -5,114 +5,93 @@
  */
 package com.crucialticketing.services;
 
-import com.crucialticketing.entities.Application;
 import com.crucialticketing.entities.ApplicationControl;
-import com.crucialticketing.entities.Severity;
 import com.crucialticketing.entities.TicketType;
 import com.crucialticketing.entities.Workflow;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.sql.DataSource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
  *
- * @author Daniel Foley
+ * @author DanFoley
  */
-public class ApplicationControlService implements DatabaseService {
+public class ApplicationControlService implements ApplicationControlDao {
 
-    @Autowired
+    String selectByApplicationControlId = "SELECT * FROM application_control WHERE application_control_id=?";
+    JdbcTemplate jdbcTemplate;
     DataSource dataSource;
 
-    @Autowired
-    TicketTypeService ticketTypeService;
-
     @Override
-    public void insert(Object o) {
-
-    }
-
-    @Override
-    public List<Object> select(String field, String value) {
-
-        ApplicationControl applicationControl;
-        List<Object> o = new ArrayList<>();
-
-        String sql = "SELECT "
-                + "application_control.application_control_id, "
-                + "ticket_type.ticket_type_id, "
-                + "ticket_type.ticket_type_name, "
-                + "application.application_id, "
-                + "application.application_name, "
-                + "workflow_template.workflow_template_id, "
-                + "workflow_template.workflow_template_name, "
-                + "severity.severity_id, "
-                + "severity.severity_level, "
-                + "severity.severity_name "
-                + "FROM "
-                + "application_control, "
-                + "ticket_type, "
-                + "application, "
-                + "workflow_template, "
-                + "severity "
-                + "WHERE "
-                + "application_control.ticket_type_id=ticket_type.ticket_type_id AND "
-                + "application_control.application_id=application.application_id AND "
-                + "application_control.workflow_template_id=workflow_template.workflow_template_id AND "
-                + "application_control.severity_id=severity.severity_id AND "
-                + "application_control." + field + "='" + value + "'";
-
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-
-        List<Map<String, Object>> applicationControlData = jdbcTemplate.queryForList(sql);
-
-        if (!applicationControlData.isEmpty()) {
-
-            for (Map<String, Object> applicationControlItem : applicationControlData) {
-
-                applicationControl = new ApplicationControl();
-
-                applicationControl.setApplicationControlId((int) applicationControlItem.get("application_control_id"));
-
-                applicationControl.setTicketType(new TicketType(
-                        (int) applicationControlItem.get("ticket_type_id"),
-                        (String) applicationControlItem.get("ticket_type_name")));
-
-                applicationControl.setApplication(new Application(
-                        (int) applicationControlItem.get("application_id"),
-                        (String) applicationControlItem.get("application_name")));
-
-                applicationControl.setWorkflow(new Workflow(
-                        (int) applicationControlItem.get("workflow_template_id"),
-                        (String) applicationControlItem.get("workflow_template_name")));
-
-                applicationControl.setSeverity(new Severity(
-                        (int) applicationControlItem.get("severity_id"),
-                        (int) applicationControlItem.get("severity_level"),
-                        (String) applicationControlItem.get("severity_name")));
-
-                o.add((Object) applicationControl);
-            }
+    public ApplicationControl getApplicationControlById(int applicationControlId, boolean populateWorkflowMap) {
+        String sql = selectByApplicationControlId;
+        List<Map<String, Object>> rs = jdbcTemplate.queryForList(sql, new Object[]{applicationControlId});
+        if (rs.size() != 1) {
+            return new ApplicationControl();
         }
-
-        return o;
+        return (this.rowMapper(rs, populateWorkflowMap)).get(0);
     }
 
     @Override
-    public void update(String filterField, String filterValue, String updateField, String updateValue) {
-
+    public List<ApplicationControl> getApplicationControlList(boolean populateWorkflowMap) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public void delete(Object o) {
+    public List<ApplicationControl> rowMapper(List<Map<String, Object>> resultSet, boolean populateWorkflowMap) {
+        List<ApplicationControl> applicationControlList = new ArrayList<>();
+        
+        TicketTypeService ticketTypeService = new TicketTypeService();
+        ticketTypeService.setCon(jdbcTemplate);
+        
+        SeverityService severityService = new SeverityService();
+        severityService.setCon(jdbcTemplate);
+        
+        ApplicationService applicationService = new ApplicationService();
+        applicationService.setCon(jdbcTemplate);
+        
+        WorkflowService workflowService = new WorkflowService();
+        workflowService.setCon(jdbcTemplate);
+        
+        WorkflowMapService workflowMapService = new WorkflowMapService();
+        workflowMapService.setCon(jdbcTemplate);
 
+        for (Map row : resultSet) {
+            ApplicationControl applicationControl = new ApplicationControl();
+
+            applicationControl.setApplicationControlId((int) row.get("application_control_id"));
+
+            // Gets ticket type
+            applicationControl.setTicketType(ticketTypeService.getTicketTypeById((int) row.get("ticket_type_id")));
+
+            // Gets severity 
+            applicationControl.setSeverity(severityService.getSeverityById((int) row.get("severity_id")));
+
+            // Gets application
+            applicationControl.setApplication(applicationService.getApplicationById((int) row.get("application_id")));
+
+            // Gets workflow
+            Workflow workflow = workflowService.getWorkflowById((int) row.get("workflow_template_id"));
+
+            // If flag is true then the mapping of the workflow is also obtained
+            if (populateWorkflowMap) {
+                workflow.setWorkflowMap(workflowMapService.getWorkflowMapById((int) row.get("workflow_template_id")));
+            }
+            
+            applicationControl.setWorkflow(workflow);
+            
+            // 
+            applicationControlList.add(applicationControl);
+        }
+        
+        return applicationControlList;
     }
 
     @Override
-    public List<Object> getTable() {
-
-        return new ArrayList<Object>();
+    public void setCon(JdbcTemplate con) {
+        jdbcTemplate = con;
     }
+
 }

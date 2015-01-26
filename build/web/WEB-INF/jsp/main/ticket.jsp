@@ -18,13 +18,10 @@
 
         <ol class="breadcrumb">
             <li>
-
+                Snapshot of the ticket as of 
+                <c:set var="now" value="<%=new java.util.Date()%>" />
+                <fmt:formatDate type="both" dateStyle="long" timeStyle="long" value="${now}" />
             </li>
-            <c:forEach var="workflowItem" items="${ticketObject.applicationControl.workflow.workflow}">
-                <li>
-
-                </li>
-            </c:forEach>
         </ol>
 
         <div class="panel panel-primary">
@@ -52,15 +49,14 @@
                 <br />
                 Workflow: ${ticketObject.applicationControl.workflow.workflowName}
                 <br /><br />
-                Current status: ${ticketObject.currentWorkflowStage.status.statusName}<br />
+                Current status: ${ticketObject.currentWorkflowStep.status.statusName}<br />
+                
                 Current Queue: 
-
-
-                <c:if test="${ticketObject.currentWorkflowStage.queue.queueId == -1}">
+                <c:if test="${ticketObject.currentWorkflowStep.queue.queueId == -1}">
                     Reporting user
                 </c:if>
-                <c:if test="${ticketObject.currentWorkflowStage.queue.queueId > 0}">
-                    ${ticketObject.currentWorkflowStage.queue.queueName}
+                <c:if test="${ticketObject.currentWorkflowStep.queue.queueId > 0}">
+                    ${ticketObject.currentWorkflowStep.queue.queueName}
                 </c:if>
                 <br />
             </div>

@@ -5,43 +5,59 @@
  */
 package com.crucialticketing.services;
 
+import com.crucialticketing.entities.ApplicationControl;
 import com.crucialticketing.entities.TicketType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
  *
  * @author Daniel Foley
  */
-public class TicketTypeService implements DatabaseService {
+public class TicketTypeService implements TicketTypeDao {
    
-    @Autowired
+    String selectByTicketTypeId = "SELECT * FROM ticket_type WHERE ticket_type_id=?";
+    JdbcTemplate jdbcTemplate;
     DataSource dataSource;
 
     @Override
-    public void insert(Object o) {
-
+    public TicketType getTicketTypeById(int ticketTypeId) {
+        String sql = selectByTicketTypeId;
+        List<Map<String,Object>> rs = jdbcTemplate.queryForList(sql, new Object[] { ticketTypeId });
+        if(rs.size() != 1) {
+            return new TicketType();
+        }
+        return (this.rowMapper(rs)).get(0);
     }
 
     @Override
-    public List<Object> select(String field, String value) {
-        return new ArrayList<Object>();
+    public List<TicketType> getTicketTypeList() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public void update(String filterField, String filterValue, String updateField, String updateValue) {
+    public List<TicketType> rowMapper(List<Map<String, Object>> resultSet) {
+         List<TicketType> ticketTypeList = new ArrayList<>();
 
+        for (Map row : resultSet) {
+            TicketType ticketType = new TicketType();
+
+            ticketType.setTicketTypeId((int) row.get("ticket_type_id"));
+            ticketType.setTicketTypeName((String) row.get("ticket_type_name"));
+
+            ticketTypeList.add(ticketType);
+        }
+        return ticketTypeList;
     }
 
     @Override
-    public void delete(Object o) {
-
+    public void setCon(JdbcTemplate con) {
+        jdbcTemplate = con;
     }
 
-    @Override
-    public List<Object> getTable() {
-        return new ArrayList<Object>();
-    }
+    
 }

@@ -18,6 +18,10 @@ public class User {
     public User() {
     }
 
+    public User(int userId) {
+        this.userId = userId;
+    }
+    
     public User(int userId, String firstName, String lastName) {
         this.userId = userId;
         this.firstName = firstName;

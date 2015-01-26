@@ -17,49 +17,45 @@ import org.springframework.jdbc.core.JdbcTemplate;
  *
  * @author DanFoley
  */
-public class WorkflowStatusService implements DatabaseService {
+public class WorkflowStatusService implements WorkflowStatusDao {
 
-    @Autowired
+   
+    String selectByWorkflowStatusId = "SELECT * FROM workflow_status WHERE workflow_status_id=?";
+    JdbcTemplate jdbcTemplate;
     DataSource dataSource;
 
     @Override
-    public void insert(Object o) {
-
-    }
-
-    @Override
-    public List<Object> select(String field, String value) {
-        List<Object> o = new ArrayList<>();
-
-        String sql = "SELECT * FROM workflow_status WHERE " + field + "=" + value;
-
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-
-        List<Map<String, Object>> workflowStatusInfo = jdbcTemplate.queryForList(sql);
-
-        for (Map<String, Object> workflowStatusItem : workflowStatusInfo) {
-            WorkflowStatus workflowStatus = new WorkflowStatus(
-                    (int) workflowStatusItem.get("workflow_status_id"),
-                    (String) workflowStatusItem.get("workflow_status_name"));
-
-            o.add((Object) workflowStatus);
+    public WorkflowStatus getWorkflowStatusById(int workflowStatusId) {
+        String sql = selectByWorkflowStatusId;
+        List<Map<String, Object>> rs = jdbcTemplate.queryForList(sql, new Object[]{workflowStatusId});
+        if (rs.size() != 1) {
+            return new WorkflowStatus();
         }
-
-        return o;
+        return (this.rowMapper(rs)).get(0);
     }
 
     @Override
-    public void update(String filterField, String filterValue, String updateField, String updateValue) {
-
+    public List<WorkflowStatus> getWorkflowStatusList() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public void delete(Object o) {
+    public List<WorkflowStatus> rowMapper(List<Map<String, Object>> resultSet) {
+        List<WorkflowStatus> workflowStatusList = new ArrayList<>();
 
+        for (Map row : resultSet) {
+            WorkflowStatus workflowStatus = new WorkflowStatus();
+
+            workflowStatus.setStatusId((int) row.get("workflow_status_id"));
+            workflowStatus.setStatusName((String) row.get("workflow_status_name"));
+     
+            workflowStatusList.add(workflowStatus);
+        }
+        return workflowStatusList;
     }
 
     @Override
-    public List<Object> getTable() {
-        return new ArrayList<Object>();
+    public void setCon(JdbcTemplate con) {
+        jdbcTemplate = con;
     }
 }

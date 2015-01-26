@@ -5,59 +5,29 @@
  */
 package com.crucialticketing.entities;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  *
  * @author DanFoley
  */
 public class Workflow {
-
     private int workflowId;
     private String workflowName;
-    private List<WorkflowStage> workflow;
+    private WorkflowMap workflowMap;
 
     public Workflow() {
-        workflow = new ArrayList<WorkflowStage>();
+        workflowMap = new WorkflowMap();
     }
 
     public Workflow(int workflowId, String workflowName) {
         this.workflowId = workflowId;
         this.workflowName = workflowName;
+        workflowMap = new WorkflowMap();
     }
 
-    public Workflow(int workflowId, String workflowName, List<WorkflowStage> workflow) {
+    public Workflow(int workflowId, String workflowName, WorkflowMap workflowMap) {
         this.workflowId = workflowId;
         this.workflowName = workflowName;
-        this.workflow = workflow;
-    }
-
-    public void addStatus(WorkflowStatus status, Role role, Queue queue) {
-        List<WorkflowStage> newList = new ArrayList<>();
-        workflow.add(new WorkflowStage(status, role, queue, newList));
-    }
-
-    public void removeStatus(WorkflowStage workflowStage) {
-        workflow.remove(workflowStage);
-    }
-
-    public boolean doesStatusExist(int workflowStatusId) {
-        for (WorkflowStage workflowStage : workflow) {
-            if (workflowStage.getStatus().getStatusId() == workflowStatusId) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public WorkflowStage getWorkflowStageByStatus(int workflowStatusId) {
-        for (WorkflowStage workflowStage : workflow) {
-            if (workflowStage.getStatus().getStatusId() == workflowStatusId) {
-                return workflowStage;
-            }
-        }
-        return new WorkflowStage();
+        this.workflowMap = workflowMap;
     }
 
     public int getWorkflowId() {
@@ -76,12 +46,13 @@ public class Workflow {
         this.workflowName = workflowName;
     }
 
-    public List<WorkflowStage> getWorkflow() {
-        return workflow;
+    public WorkflowMap getWorkflowMap() {
+        return workflowMap;
     }
 
-    public void setWorkflow(List<WorkflowStage> workflow) {
-        this.workflow = workflow;
+    public void setWorkflowMap(WorkflowMap workflowMap) {
+        this.workflowMap = workflowMap;
     }
-
+    
+    
 }

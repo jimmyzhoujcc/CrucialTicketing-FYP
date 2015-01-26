@@ -11,22 +11,22 @@ import java.util.List;
  *
  * @author Daniel Foley
  */
-public class WorkflowStage {
+public class WorkflowStep {
     private WorkflowStatus status;
     private Role role;
     private Queue queue;
-    private List<WorkflowStage> nextWorkflowStage;
+    private List<WorkflowStep> nextWorkflowStage;
     
-    public WorkflowStage() {}
+    public WorkflowStep() {}
 
-    public WorkflowStage(WorkflowStatus status, Role role, Queue queue, List<WorkflowStage> nextWorkflowStatus) {
+    public WorkflowStep(WorkflowStatus status, Role role, Queue queue, List<WorkflowStep> nextWorkflowStatus) {
         this.status = status;
         this.role = role;
         this.queue = queue;
         this.nextWorkflowStage = nextWorkflowStatus;
     }
 
-    public void addNextNode(WorkflowStage nextNode) {
+    public void addNextNode(WorkflowStep nextNode) {
         nextWorkflowStage.add(nextNode);
     }
 
@@ -54,11 +54,11 @@ public class WorkflowStage {
         this.queue = queue;
     }
 
-    public List<WorkflowStage> getNextWorkflowStage() {
+    public List<WorkflowStep> getNextWorkflowStage() {
         return nextWorkflowStage;
     }
 
-    public void setNextWorkflowStage(List<WorkflowStage> nextWorkflowStage) {
+    public void setNextWorkflowStage(List<WorkflowStep> nextWorkflowStage) {
         this.nextWorkflowStage = nextWorkflowStage;
     }
    

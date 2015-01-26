@@ -30,8 +30,5 @@ public class TicketLog {
     
     public List<TicketLogEntry> getEntryList() {
         return this.entryList;
-    }
-    
-    
-    
+    }   
 }

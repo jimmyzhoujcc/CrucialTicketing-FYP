@@ -5,97 +5,73 @@
  */
 package com.crucialticketing.services;
 
-/**
- *
- * @author Daniel Foley
- */
 import com.crucialticketing.entities.Login;
+import com.crucialticketing.entities.User;
 import java.util.ArrayList;
 import java.util.List;
-import javax.sql.DataSource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
-import com.crucialticketing.entities.User;
 import java.util.Map;
+import javax.sql.DataSource;
+import org.springframework.jdbc.core.JdbcTemplate;
 
-public class UserService implements DatabaseService {
+/**
+ *
+ * @author DanFoley
+ */
+public class UserService implements UserDao {
 
-    @Autowired
-    DataSource dataSource;
-
-    @Override
-    public void insert(Object o) {
-
-        String sql = "INSERT INTO user "
-                + "(name,age) VALUES (?, ?)";
-
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-        /*
-         jdbcTemplate.update(
-         sql,
-         new Object[]{User.getUsername(), User.getAge()});*/
-    }
+    private JdbcTemplate jdbcTemplate;
+    private DataSource dataSource;
 
     @Override
-    public List<Object> select(String field, String value) {
-        List<Object> o = new ArrayList<Object>();
-
-        String sql = "SELECT * FROM user WHERE " + field + "='" + value + "'";
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-        List<Map<String, Object>> userReturn = jdbcTemplate.queryForList(sql);
-
-        User user;
-        
-        if (!userReturn.isEmpty()) {
-            for (Map<String, Object> userItem : userReturn) {
-
-                user = new User(
-                        (int) userItem.get("user_id"),
-                        (String) userItem.get("first_name"),
-                        (String) userItem.get("last_name"));
-
-                user.setLogin(new Login(
-                        (String) userItem.get("username"),
-                        (String) userItem.get("password")));
-
-                o.add((Object) user);
-            }
-        } else {
-            user = new User();
+    public User getUserById(int userId, boolean populateLogin) {
+        String sql = "SELECT * FROM user WHERE user_id=?";
+        List<Map<String, Object>> rs = jdbcTemplate.queryForList(sql, new Object[]{userId});
+        if (rs.size() != 1) {
+            return new User();
         }
-
-        return o;
+        return (this.rowMapper(rs, populateLogin)).get(0);
+    }
+    
+    @Override
+    public User getUserByUsername(String username, boolean populateLogin) {
+        String sql = "SELECT * FROM user WHERE username=?";
+        List<Map<String, Object>> rs = jdbcTemplate.queryForList(sql, new Object[]{username});
+        if (rs.size() != 1) {
+            return new User();
+        }
+        return (this.rowMapper(rs, populateLogin)).get(0);
     }
 
     @Override
-    public void update(String filterField, String filterValue, String updateField, String updateValue) {
-
+    public List<User> getUserList(boolean populateLogin) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public void delete(Object o) {
-        User user = (User) o;
-        String sql = "DELETE FROM user WHERE user_id=" + user.getUserId();
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-        jdbcTemplate.update(sql);
-    }
+    public List<User> rowMapper(List<Map<String, Object>> resultSet, boolean populateLogin) {
+        List<User> userList = new ArrayList<>();
 
-    @Override
-    public List<Object> getTable() {
-        List<Object> userList = new ArrayList<Object>();
+        for (Map row : resultSet) {
+            User user = new User();
 
-        String sql = "SELECT * FROM user";
+            user.setUserId((int) row.get("user_id"));
+            user.setFirstName((String) row.get("first_name"));
+            user.setLastName((String) row.get("last_name"));
 
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-        List<Map<String, Object>> row = jdbcTemplate.queryForList(sql);
+            if (populateLogin) {
+                user.setLogin(new Login(
+                        (String) row.get("username"),
+                        (String) row.get("password")));
+            }
 
-        for (Map<String, Object> dbItem : row) {
-            userList.add(new User(
-                    (int) dbItem.get("user_id"),
-                    (String) dbItem.get("first_name"),
-                    (String) dbItem.get("last_name")));
+            userList.add(user);
         }
         return userList;
+    }
+
+    @Override
+    public void setCon(JdbcTemplate con) {
+        jdbcTemplate = con;
     }
 
 }

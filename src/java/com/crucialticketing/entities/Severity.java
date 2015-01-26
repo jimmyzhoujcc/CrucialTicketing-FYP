@@ -16,10 +16,8 @@ public class Severity {
     
     public Severity() {}
 
-    public Severity(int severityId, int severityLevel, String severityName) {
+    public Severity(int severityId) {
         this.severityId = severityId;
-        this.severityLevel = severityLevel;
-        this.severityName = severityName;
     }
 
     

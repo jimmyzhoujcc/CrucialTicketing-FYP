@@ -15,9 +15,8 @@ public class TicketType {
 
     public TicketType() {}
     
-    public TicketType(int ticketTypeId, String ticketTypeName) {
+    public TicketType(int ticketTypeId) {
         this.ticketTypeId = ticketTypeId;
-        this.ticketTypeName = ticketTypeName;
     }
 
     public int getTicketTypeId() {
