@@ -12,16 +12,16 @@ package com.crucialticketing.entities;
 public class TicketLockRequest {
     private int lockId;
     private int ticketId;
-    private User user;
+    private int userId;
     private int requestTime;
     private int requestPassTime;
     
     public TicketLockRequest() {}
 
-    public TicketLockRequest(int lockId, int ticketId, User user, int requestTime, int requestPassTime) {
+    public TicketLockRequest(int lockId, int ticketId, int userId, int requestTime, int requestPassTime) {
         this.lockId = lockId;
         this.ticketId = ticketId;
-        this.user = user;
+        this.userId = userId;
         this.requestTime = requestTime;
         this.requestPassTime = requestPassTime;
     }
@@ -42,12 +42,12 @@ public class TicketLockRequest {
         this.ticketId = ticketId;
     }
 
-    public User getUser() {
-        return user;
+    public int getUserId() {
+        return userId;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 
     public int getRequestTime() {
@@ -65,6 +65,6 @@ public class TicketLockRequest {
     public void setRequestPassTime(int requestPassTime) {
         this.requestPassTime = requestPassTime;
     }
-    
-    
+
+  
 }

@@ -1,154 +1,154 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-         pageEncoding="UTF-8"%>
-<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>   
-<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-    "http://www.w3.org/TR/html4/loose.dtd">
-<html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Crucial Ticketing</title>
+<%@include file="header.jsp" %>
 
-        <script src="<%=request.getContextPath()%>/js/jquery-1.11.2.min.js"></script>
-        
-        <!-- Bootstrap -->
-        <link rel="stylesheet" href="<%=request.getContextPath()%>/css/bootstrap.css">
-        <link rel="stylesheet" href="<%=request.getContextPath()%>/css/bootstrap.min.css">
-        <link rel="stylesheet" href="<%=request.getContextPath()%>/css/bootstrap-theme.css">
-        <link rel="stylesheet" href="<%=request.getContextPath()%>/css/bootstrap-theme.min.css">
-        <script src="<%=request.getContextPath()%>/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+    var marker = 0;
 
-        
+    crunchifyAjax();
 
-        
-        <link href="<%=request.getContextPath()%>/css/main.css" rel="stylesheet" type="text/css"/>
+    function crunchifyAjax() {
+        $.post("<%=request.getContextPath()%>/home/alert/", function (data) {
+            obj = JSON.parse(data);
+            marker = obj.lastUpdated;
 
+            var listCount = getObjectListCount(obj.userAlertLog);
 
-        <script language="javascript">
-            function move(tbFrom, tbTo)
-            {
-                var arrFrom = new Array();
-                var arrTo = new Array();
-                var arrLU = new Array();
-                var i;
-                for (i = 0; i < tbTo.options.length; i++)
-                {
-                    arrLU[tbTo.options[i].text] = tbTo.options[i].value;
-                    arrTo[i] = tbTo.options[i].text;
-                }
-                var fLength = 0;
-                var tLength = arrTo.length;
-                for (i = 0; i < tbFrom.options.length; i++)
-                {
-                    arrLU[tbFrom.options[i].text] = tbFrom.options[i].value;
-                    if (tbFrom.options[i].selected && tbFrom.options[i].value != "")
-                    {
-                        arrTo[tLength] = tbFrom.options[i].text;
-                        tLength++;
-                    }
-                    else
-                    {
-                        arrFrom[fLength] = tbFrom.options[i].text;
-                        fLength++;
-                    }
-                }
+            $('#notificationsBody').empty();
 
-                tbFrom.length = 0;
-                tbTo.length = 0;
-                var ii;
+            for (i = 0; i < listCount; i++) {
+                var options = {
+                    weekday: "long", year: "numeric", month: "short",
+                    day: "numeric", hour: "2-digit", minute: "2-digit"
+                };
 
-                for (ii = 0; ii < arrFrom.length; ii++)
-                {
-                    var no = new Option();
-                    no.value = arrLU[arrFrom[ii]];
-                    no.text = arrFrom[ii];
-                    tbFrom[ii] = no;
-                }
+                var t = new Date(obj.userAlertLog[i].stamp * 1000);
+                var formatted = t.toLocaleTimeString("en-gb", options);
 
-                for (ii = 0; ii < arrTo.length; ii++)
-                {
-                    var no = new Option();
-                    no.value = arrLU[arrTo[ii]];
-                    no.text = arrTo[ii];
-                    tbTo[ii] = no;
-                }
+                $('#notificationsBody')
+                        .append("<div id=\"notification_" + (i + 1) + "\">" + obj.userAlertLog[i].message + " <span class=\"notification_stamp\">(" + formatted + " (UTC))</span></div><br />");
+
+                $('.notification_' + (i + 1)).addClass('notification');
             }
-        </script>
-    </head>
-    <body>
-        <div id="message" style="position:fixed; float:left;left:20%"><h2>${message}</h2></div>
-        
-        <script>
-            var intervalTime = 3000;
-            var timing = intervalTime;
-            var timingSub = 1000;
-            
-            function clearAlert() {
-                var valueFromId = document.getElementById('message');
-                
-                if(valueFromId.innerText.length > 0) {
-                    if(timing === 0) {
-                        document.getElementById('message').innerText = "";
-                    } else {
-                        timing -= timingSub;
-                    }
-                } else {
-                    clearInterval();
-                }
+
+            $('#alertcount').html(obj.unread);
+        });
+
+
+    }
+
+    function getObjectListCount(obj) {
+        var size = 0, key;
+        for (key in obj) {
+            if (obj.hasOwnProperty(key))
+                size++;
+        }
+        return size;
+    }
+</script>
+
+<script type="text/javascript">
+    var getNotificationInterval = setInterval(crunchifyAjax, 3000);
+</script>
+
+<div id="message" style="position:fixed; float:left;left:20%"><h2>${message}</h2></div>
+
+<script>
+    var intervalTime = 3000;
+    var timing = intervalTime;
+    var timingSub = 1000;
+
+    function clearAlert() {
+        var valueFromId = document.getElementById('message');
+
+        if (valueFromId.innerText.length > 0) {
+            if (timing === 0) {
+                document.getElementById('message').innerText = "";
+            } else {
+                timing -= timingSub;
             }
-            
-            setInterval(function () { clearAlert(); }, 1000);
-            
-            </script>
-        
-        <div class="heading">
+        } else {
+            clearInterval();
+        }
+    }
+
+    setInterval(function () {
+        clearAlert();
+    }, 1000);
+
+</script>
+
+<div class="heading">
 
 
-            <div class="title"><h3>Crucial Ticketing</h3></div>
-            <div class="titletabbox">
-                <ul class="nav nav-pills" role="tablist">
-                    <li role="presentation"><a href="#">Alerts <span class="badge">42</span></a></li>
-                    <li role="presentation"><a href="#">Help</a></li>
-                    <li role="presentation"><a href="#">Logout</a></li>
-                </ul>
-            </div>
+    <div class="title"><h3>Crucial Ticketing</h3></div>
+    <div class="titletabbox">
+        <ul class="nav nav-pills" role="tablist">
+            <li role="presentation">  
 
-        </div>
 
-        <br class="clearfix" />
-        <% String pageName = (String) request.getAttribute("page");
-            if (pageName == null) {
-                pageName = "menu/home.jsp";
-            }
-        %>
+                <a href="#" id="notificationLink">Notifications <span id="alertcount" class="badge">0</span></a>
 
-        <ul class="nav nav-tabs">
-            <li role="presentation" <% if (pageName.equals("menu/main.jsp")) {
-                    out.print("class=\"active\"");
-                }%>>
-                <a href="<%=request.getContextPath()%>/home/main/main/">Home</a>
+                <div id="notificationContainer">
+                    <div id="notificationTitle">Notifications</div>
+                    <div id="notificationsBody" class="notifications">
+                        <div class="notification">
+                            notification 1 <span class="notification_stamp">10:11am 12th September 2014</span>
+
+                        </div>
+                        <div class="notification">
+                            notification 1   
+                        </div>
+                        <div class="notification">
+                            notification 1   
+                        </div>
+                        <div class="notification">
+                            notification 1   
+                        </div>
+                        <div class="notification">
+                            notification 1   
+                        </div>
+                    </div>
+
+                    <div id="notificationFooter"><a href="#">See All</a></div>
+                </div>
+
+
             </li>
-            <li role="presentation" <% if (pageName.equals("menu/create.jsp")) {
-                    out.print("class=\"active\"");
-                }%>>
-                <a href="<%=request.getContextPath()%>/home/main/create/">Create</a>
-            </li>
-            <li role="presentation" <% if (pageName.equals("menu/update.jsp")) {
-                    out.print("class=\"active\"");
-                }%>>
-                <a href="<%=request.getContextPath()%>/home/main/update/">View</a>
-            </li>
-            <li role="presentation"><a href="menu/reporting.jsp">Reporting</a></li>
-            <li role="presentation"><a href="menu/settings.jsp">Settings</a></li>
-
+            <li role="presentation"><a href="#">Help</a></li>
+            <li role="presentation"><a href="#">Logout</a></li>
         </ul>
-        <div class="main">
-            <jsp:include page="<%=pageName%>"/>
-        </div>
-        <div class="footer">
-            <ol class="breadcrumb">
-                <li>Project by Daniel Foley | Computer Science | University of the West of England</li>
-            </ol>
-        </div>
-    </body>
-</html>
+    </div>
+
+</div>
+
+<br class="clearfix" />
+<% String pageName = (String) request.getAttribute("page");
+    if (pageName == null) {
+        pageName = "menu/home.jsp";
+    }
+%>
+
+<ul class="nav nav-tabs">
+    <li role="presentation" <% if (pageName.equals("menu/main.jsp")) {
+            out.print("class=\"active\"");
+        }%>>
+        <a href="<%=request.getContextPath()%>/home/main/main/">Home</a>
+    </li>
+    <li role="presentation" <% if (pageName.equals("menu/create.jsp")) {
+            out.print("class=\"active\"");
+        }%>>
+        <a href="<%=request.getContextPath()%>/home/main/create/">Create</a>
+    </li>
+    <li role="presentation" <% if (pageName.equals("menu/update.jsp")) {
+            out.print("class=\"active\"");
+        }%>>
+        <a href="<%=request.getContextPath()%>/home/main/update/">View</a>
+    </li>
+    <li role="presentation"><a href="menu/reporting.jsp">Reporting</a></li>
+    <li role="presentation"><a href="menu/settings.jsp">Settings</a></li>
+
+</ul>
+<div class="main">
+    <jsp:include page="<%=pageName%>"/>
+</div>
+
+<%@include file="footer.jsp" %>

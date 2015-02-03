@@ -6,8 +6,10 @@
 package com.crucialticketing.controllers;
 
 import com.crucialticketing.entities.Ticket;
+import com.crucialticketing.entities.TicketLockRequest;
 import com.crucialticketing.entities.TicketLogEntry;
 import com.crucialticketing.entities.User;
+import com.crucialticketing.services.TicketLockRequestService;
 import com.crucialticketing.services.TicketService;
 import com.crucialticketing.services.WorkflowStatusService;
 import java.util.List;
@@ -30,7 +32,6 @@ public class TicketController {
 
     @Autowired
     DataSource dataSource;
-    
 
     @RequestMapping(value = "/update/ticketquery/", method = RequestMethod.GET)
     public String queryTicket(ModelMap map) {
@@ -45,13 +46,13 @@ public class TicketController {
             map.addAttribute("page", "main/queryticket.jsp");
             return "mainview";
         }
-        
+
         JdbcTemplate con = new JdbcTemplate(dataSource);
         TicketService ticketService = new TicketService();
         ticketService.setCon(con);
-        
+
         Ticket ticket = ticketService.getTicketById(Integer.valueOf(ticketId), true);
-     
+
         if (ticket.getTicketId() == null) {
             map.addAttribute("alert", "No ticket was found with that ID, please check and try again");
             map.addAttribute("page", "main/queryticket.jsp");
@@ -59,7 +60,7 @@ public class TicketController {
         }
 
         map.addAttribute("message", "this is a test message");
-        
+
         map.put("ticketObject", ticket);
         map.addAttribute("page", "main/ticket.jsp");
 
@@ -68,25 +69,43 @@ public class TicketController {
     }
 
     @RequestMapping(value = "/update/editticket/", method = RequestMethod.POST)
-    public String editTicket(@RequestParam(value = "ticketid", required = true) String ticketId, ModelMap map) {
-/*
-        List<Object> objectList = ticketService.select("ticket_id", ticketId);
+    public String editTicket(@RequestParam(value = "ticketid", required = true) String ticketId,
+            HttpServletRequest request,
+            ModelMap map) {
 
-        Ticket ticket = (Ticket) objectList.get(0);
+        JdbcTemplate con = new JdbcTemplate(dataSource);
+        TicketLockRequestService ticketLockRequest = new TicketLockRequestService();
+        ticketLockRequest.setCon(con);
 
-        //if (ticket.isLock()) {
-            map.addAttribute("alert", "Ticket is currently locked, please try again later");
-            map.addAttribute("page", "main/ticket.jsp");
+        List<TicketLockRequest> requestList = ticketLockRequest.getTicketLockRequestsByUser(
+                Integer.valueOf(ticketId),
+                ((User) request.getSession().getAttribute("user")).getUserId());
+
+        if (!requestList.isEmpty()) {
+            if(requestList.get(0).getRequestPassTime() == 0) {
+            map.addAttribute("message", "Request already sent");
             map.addAttribute("editMode", false);
-       // } else {
-            ticketService.update("ticket_id", ticketId, "lock", "1");
-            map.addAttribute("alert", "You are now in edit mode, please save ticket to exit and confirm changes");
-            map.addAttribute("page", "main/ticket.jsp");
-            map.addAttribute("editMode", true);
-       // }
+            } else if(requestList.get(0).getRequestPassTime() == 0) {
+                map.addAttribute("message", "Access rejected - ticket requested by someone else");
+                map.addAttribute("editMode", false);
+            } else {
+                map.addAttribute("editMode", true);
+            }
+        } else {
+            ticketLockRequest.addTicketLockRequest(
+                    Integer.valueOf(ticketId),
+                    ((User) request.getSession().getAttribute("user")).getUserId());
+            map.addAttribute("message", "Request sent");
+            map.addAttribute("editMode", false);
+        }
 
-        map.put("ticketObject", (Ticket) objectList.get(0));
-*/
+        TicketService ticketService = new TicketService();
+        ticketService.setCon(con);
+
+        Ticket ticket = ticketService.getTicketById(Integer.valueOf(ticketId), true);
+        map.put("ticketObject", ticket);
+        map.addAttribute("page", "main/ticket.jsp");
+
         return "mainview";
     }
 
@@ -98,33 +117,33 @@ public class TicketController {
             @RequestParam(value = "newstatus", required = true) String newStatus,
             @RequestParam(value = "logentry", required = true) String logEntry,
             ModelMap map) {
-/*
-        List<Object> objectList = ticketService.select("ticket_id", ticketId);
-        Ticket ticket = (Ticket) objectList.get(0);
+        /*
+         List<Object> objectList = ticketService.select("ticket_id", ticketId);
+         Ticket ticket = (Ticket) objectList.get(0);
 
-        // Checking description has changed
-        if (!oldShortDescription.equals(newShortDescription)) {
-            User userInControl = (User)request.getSession().getAttribute("user");
-            ticketService.update("ticket_id", ticketId, "short_description", newShortDescription);
-            TicketLogEntry ticketLogEntry = new TicketLogEntry(Integer.valueOf(ticketId), -1, new User(4, "System", "Message"), "Short description was changed by ("+userInControl.getUserId() + ") "+userInControl.getFirstName() + " "+userInControl.getLastName(), -1);
-            ticketLogService.insert(ticketLogEntry);
-        }
+         // Checking description has changed
+         if (!oldShortDescription.equals(newShortDescription)) {
+         User userInControl = (User)request.getSession().getAttribute("user");
+         ticketService.update("ticket_id", ticketId, "short_description", newShortDescription);
+         TicketLogEntry ticketLogEntry = new TicketLogEntry(Integer.valueOf(ticketId), -1, new User(4, "System", "Message"), "Short description was changed by ("+userInControl.getUserId() + ") "+userInControl.getFirstName() + " "+userInControl.getLastName(), -1);
+         ticketLogService.insert(ticketLogEntry);
+         }
 
-        // Checking if a new status has been selected
-        if (newStatus.length() > 0) {
-            ticketService.update("ticket_id", ticketId, "current_status_id", newStatus);
-        }
-        // Checking if a log entry has been added
+         // Checking if a new status has been selected
+         if (newStatus.length() > 0) {
+         ticketService.update("ticket_id", ticketId, "current_status_id", newStatus);
+         }
+         // Checking if a log entry has been added
 
-        ticketService.update("ticket_id", ticketId, "lock", "0");
+         ticketService.update("ticket_id", ticketId, "lock", "0");
         
-        objectList = ticketService.select("ticket_id", ticketId);
-        ticket = (Ticket) objectList.get(0);
+         objectList = ticketService.select("ticket_id", ticketId);
+         ticket = (Ticket) objectList.get(0);
 
-        map.put("ticketObject", ticket);
-        map.addAttribute("page", "main/ticket.jsp");
-        map.addAttribute("editMode", false);
-*/
+         map.put("ticketObject", ticket);
+         map.addAttribute("page", "main/ticket.jsp");
+         map.addAttribute("editMode", false);
+         */
         return "mainview";
     }
 

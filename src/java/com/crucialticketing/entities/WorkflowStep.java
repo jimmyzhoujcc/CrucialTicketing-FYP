@@ -15,7 +15,7 @@ public class WorkflowStep {
     private WorkflowStatus status;
     private Role role;
     private Queue queue;
-    private List<WorkflowStep> nextWorkflowStage;
+    private List<WorkflowStep> nextWorkflowStep;
     
     public WorkflowStep() {}
 
@@ -23,11 +23,11 @@ public class WorkflowStep {
         this.status = status;
         this.role = role;
         this.queue = queue;
-        this.nextWorkflowStage = nextWorkflowStatus;
+        this.nextWorkflowStep = nextWorkflowStatus;
     }
 
     public void addNextNode(WorkflowStep nextNode) {
-        nextWorkflowStage.add(nextNode);
+        nextWorkflowStep.add(nextNode);
     }
 
     public WorkflowStatus getStatus() {
@@ -54,12 +54,12 @@ public class WorkflowStep {
         this.queue = queue;
     }
 
-    public List<WorkflowStep> getNextWorkflowStage() {
-        return nextWorkflowStage;
+    public List<WorkflowStep> getNextWorkflowStep() {
+        return nextWorkflowStep;
     }
 
-    public void setNextWorkflowStage(List<WorkflowStep> nextWorkflowStage) {
-        this.nextWorkflowStage = nextWorkflowStage;
+    public void setNextWorkflowStep(List<WorkflowStep> nextWorkflowStep) {
+        this.nextWorkflowStep = nextWorkflowStep;
     }
    
     

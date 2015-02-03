@@ -197,7 +197,7 @@
                             Change ticket status<span class="caret"></span>
                         </button>
 
-                        <c:set var="totalNextNodes" value="${fn:length(ticketObject.currentWorkflowStage.nextWorkflowStage)}"/>
+                        <c:set var="totalNextNodes" value="${fn:length(ticketObject.currentWorkflowStep.nextWorkflowStep)}"/>
 
                         <script type="text/javascript">
                             function changeStatus(inputStatus) {
@@ -207,7 +207,7 @@
                         </script>
 
                         <ul class="dropdown-menu" role="menu">
-                            <c:forEach var="nextNode" items="${ticketObject.currentWorkflowStage.nextWorkflowStage}">
+                            <c:forEach var="nextNode" items="${ticketObject.currentWorkflowStep.nextWorkflowStep}">
                                 <li>
                                     <a href="javascript:changeStatus('${nextNode.status.statusId}');">${nextNode.status.statusName}</a>
                                 </li>
