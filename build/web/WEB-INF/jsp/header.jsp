@@ -125,7 +125,10 @@
                 background-color: #fff;
                 border: 1px solid rgba(100, 100, 100, .4);
                 -webkit-box-shadow: 0 3px 8px rgba(0, 0, 0, .25);
-                overflow: visible;
+                
+                overflow-x: hidden;
+                overflow-y: scroll;
+                max-height: 300px;
                 position: absolute;
                 width: 200px;
                 z-index: 2;

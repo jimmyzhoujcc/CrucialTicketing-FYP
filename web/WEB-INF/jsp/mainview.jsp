@@ -49,8 +49,6 @@
     var getNotificationInterval = setInterval(crunchifyAjax, 3000);
 </script>
 
-<div id="message" style="position:fixed; float:left;left:20%"><h2>${message}</h2></div>
-
 <script>
     var intervalTime = 3000;
     var timing = intervalTime;

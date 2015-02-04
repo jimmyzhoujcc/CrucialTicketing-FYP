@@ -11,6 +11,7 @@ import com.crucialticketing.entities.TicketLogEntry;
 import com.crucialticketing.entities.User;
 import com.crucialticketing.services.TicketLockRequestService;
 import com.crucialticketing.services.TicketService;
+import com.crucialticketing.services.UserAlertService;
 import com.crucialticketing.services.WorkflowStatusService;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
@@ -82,10 +83,10 @@ public class TicketController {
                 ((User) request.getSession().getAttribute("user")).getUserId());
 
         if (!requestList.isEmpty()) {
-            if(requestList.get(0).getRequestPassTime() == 0) {
-            map.addAttribute("message", "Request already sent");
-            map.addAttribute("editMode", false);
-            } else if(requestList.get(0).getRequestPassTime() == 0) {
+            if (requestList.get(0).getRequestPassTime() == 0) {
+                map.addAttribute("message", "Request already sent");
+                map.addAttribute("editMode", false);
+            } else if (requestList.get(0).getRequestPassTime() == 0) {
                 map.addAttribute("message", "Access rejected - ticket requested by someone else");
                 map.addAttribute("editMode", false);
             } else {
@@ -97,6 +98,11 @@ public class TicketController {
                     ((User) request.getSession().getAttribute("user")).getUserId());
             map.addAttribute("message", "Request sent");
             map.addAttribute("editMode", false);
+
+            UserAlertService userAlertService = new UserAlertService();
+            userAlertService.setCon(con);
+            userAlertService.insertUserAlert((((User) request.getSession().getAttribute("user")).getUserId()), Integer.valueOf(ticketId), "(" + ticketId + ") Access requested");
+
         }
 
         TicketService ticketService = new TicketService();

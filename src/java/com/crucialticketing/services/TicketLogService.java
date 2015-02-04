@@ -17,7 +17,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
  */
 public class TicketLogService implements TicketLogDao {
 
-    String selectByTicketId = "SELECT * FROM ticket_log WHERE ticket_id=?";
+    String selectByTicketId = "SELECT * FROM ticket_log WHERE ticket_id=? ORDER BY stamp DESC";
     JdbcTemplate jdbcTemplate;
 
     @Override

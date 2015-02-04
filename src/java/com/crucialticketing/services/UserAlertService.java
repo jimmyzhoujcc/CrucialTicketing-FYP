@@ -18,7 +18,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 public class UserAlertService implements UserAlertDao {
 
     private JdbcTemplate con;
-    private String select = "SELECT * FROM user_alert WHERE `user_id`=?";
+    private String select = "SELECT * FROM user_alert WHERE `user_id`=? ORDER BY stamp DESC";
     private String insert = "INSERT INTO user_alert (`user_id`, `ticket_id`, `message`, `stamp`, `read`) "
             + "VALUES (?, ?, ?, ?, ?)";
     
