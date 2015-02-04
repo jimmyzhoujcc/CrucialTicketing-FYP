@@ -2,15 +2,6 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group>
-            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/CrucialTicketing/src/java/com/crucialticketing/services/TicketLogService.java</file>
-            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/CrucialTicketing/web/WEB-INF/jsp/main/queryticket.jsp</file>
-            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/CrucialTicketing/src/java/com/crucialticketing/services/UserAlertService.java</file>
-            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/CrucialTicketing/web/WEB-INF/jsp/main/ticket.jsp</file>
-            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/CrucialTicketing/web/WEB-INF/jsp/login/login.jsp</file>
-            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/CrucialTicketing/web/WEB-INF/jsp/header.jsp</file>
-            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/CrucialTicketing/web/css/main.css</file>
-            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/CrucialTicketing/web/WEB-INF/jsp/mainview.jsp</file>
-        </group>
+        <group/>
     </open-files>
 </project-private>
