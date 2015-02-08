@@ -1,0 +1,17 @@
+(.) Complete save functionality
+    - adding log entry
+    - changing status
+        - validating legal move
+    - changing description
+    - validate and execute timeout
+
+(.) Complete and configure role checks
+    - viewing tickets
+    - editing tickets
+    - saving tickets
+
+(.) Adding attachments
+
+(. Creation of tickets
+
+(.) Style notification body

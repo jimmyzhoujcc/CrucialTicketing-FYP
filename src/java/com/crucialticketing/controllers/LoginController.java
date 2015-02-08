@@ -7,8 +7,8 @@ package com.crucialticketing.controllers;
 
 import com.crucialticketing.entities.Login;
 import com.crucialticketing.entities.User;
+import com.crucialticketing.services.UserRoleConnectionService;
 import com.crucialticketing.services.UserService;
-import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,18 +47,30 @@ public class LoginController {
         User user = userService.getUserByUsername(login.getUsername(), true);
 
         if (user.getLogin().getPassword().equals(login.getPassword())) {
+            UserRoleConnectionService userRoleConnectionService = new UserRoleConnectionService();
+            userRoleConnectionService.setCon(con);
+
+            user.setRoleList(userRoleConnectionService.getUserRoleConListByUserId(user.getUserId()));
+
             request.getSession().setAttribute("user", user);
+
+            if (!user.hasRole("END_USER")) {
+                map.addAttribute("alert", "User does not have the correct privledges to login");
+                return "/login/login";
+            }
+
             map.addAttribute("page", "menu/main.jsp");
             return "mainview";
         }
-        
+
         map.addAttribute("alert", "Invalid username or password");
         return "/login/login";
     }
 
     @RequestMapping(value = "/logout/",
             method = RequestMethod.GET)
-    public String logout(ModelMap map) {
+    public String logout(HttpServletRequest request, ModelMap map) {
+        request.getSession().removeAttribute("user");
         map.addAttribute("login", new Login());
         return "/login/login";
     }

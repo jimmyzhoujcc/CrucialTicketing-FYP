@@ -15,9 +15,13 @@ import java.util.Map;
  */
 public interface TicketLockRequestDao extends DatabaseService {
     public void addTicketLockRequest(int ticketId, int userId);
-    public List<TicketLockRequest> getTicketLockRequestsByUser(int ticketId, int userId);
+    
+    public boolean ticketOpenForEditByUser(int ticketId, int userId);
+    
     public void grantAccess(int ticketId, int userId);
     public void denyAccess(int ticketId, int userId);
+    
     public List<TicketLockRequest> getOpenRequestList();
+    
     public List<TicketLockRequest> rowMapper(List<Map<String, Object>> resultSet);
 }

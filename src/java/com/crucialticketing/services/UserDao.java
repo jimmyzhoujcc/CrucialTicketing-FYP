@@ -14,11 +14,11 @@ import java.util.Map;
  * @author DanFoley
  */
 public interface UserDao extends DatabaseService {
-    public User getUserById(int userId, boolean populateLogin);
+    public User getUserById(int userId, boolean populateInternal);
     
-    public User getUserByUsername(String username, boolean populateLogin);
+    public User getUserByUsername(String username, boolean populateInternal);
     
-    public List<User> getUserList(boolean populateLogin);
+    public List<User> getUserList(boolean populateInternal);
     
-    public List<User> rowMapper(List<Map<String, Object>> resultSet, boolean populateLogin);
+    public List<User> rowMapper(List<Map<String, Object>> resultSet, boolean populateInternal);
 }

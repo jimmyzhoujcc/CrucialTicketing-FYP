@@ -33,7 +33,7 @@
                 <br />
                 Ticket Description: 
                 <c:if test="${editMode==true}">
-                    <input type="input" id="holder_new_shortdescription" value="${ticketObject.shortDescription}" />
+                    <input type="input" id="entry_new_shortdescription" value="${ticketObject.shortDescription}" />
                 </c:if>
                 <c:if test="${editMode==false}">
                     ${ticketObject.shortDescription}
@@ -123,7 +123,7 @@
             </div>
             <div class="panel-body">
                 <c:if test="${editMode==true}">
-                    <textarea class="logentrytextarea" id="holder_logentry"></textarea>
+                    <textarea class="logentrytextarea" id="entry_logentry"></textarea>
 
                     <br />
                     (Remember: saving the ticket submits the message)
@@ -224,17 +224,17 @@
                 <c:if test="${editMode==true}">
                     <script>
                         function modify_value() {
-                            document.getElementById('logentry').value = document.getElementById('holder_logentry').value;
-                            document.getElementById('new_shortdescription').value = document.getElementById('holder_new_shortdescription').value;
+                            document.getElementById('form_logentry').value = document.getElementById('entry_logentry').value;
+                            document.getElementById('form_new_shortdescription').value = document.getElementById('entry_new_shortdescription').value;
                         }
                         </script>
                     <form method="POST" action="<%=request.getContextPath()%>/home/update/saveticket/">
                         <input type="submit" value="Save Ticket" class="btn btn-success" onclick="javascript:modify_value();" />
                         <input type="hidden" value="${ticketObject.ticketId}" name="ticketid" />
                         <input type="hidden" value="${ticketObject.shortDescription}" name="old_shortdescription" />
-                        <input type="hidden" value="" id="new_shortdescription" name="new_shortdescription" />
+                        <input type="hidden" value="" id="form_new_shortdescription" name="new_shortdescription" />
                         <input type="hidden" value="" id="newstatus" name="newstatus" />
-                        <input type="hidden" value="" id="logentry" name="logentry" />
+                        <input type="hidden" value="" id="form_logentry" name="logentry" />
                     </form>
                 </c:if>
             </div>

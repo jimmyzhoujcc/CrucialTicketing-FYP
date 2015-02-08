@@ -19,23 +19,22 @@ import org.springframework.jdbc.core.JdbcTemplate;
  */
 public class UserService implements UserDao {
 
-    private JdbcTemplate jdbcTemplate;
-    private DataSource dataSource;
+    private JdbcTemplate con;
 
     @Override
-    public User getUserById(int userId, boolean populateLogin) {
+    public User getUserById(int userId, boolean populateInternal) {
         String sql = "SELECT * FROM user WHERE user_id=?";
-        List<Map<String, Object>> rs = jdbcTemplate.queryForList(sql, new Object[]{userId});
+        List<Map<String, Object>> rs = con.queryForList(sql, new Object[]{userId});
         if (rs.size() != 1) {
             return new User();
         }
-        return (this.rowMapper(rs, populateLogin)).get(0);
+        return (this.rowMapper(rs, populateInternal)).get(0);
     }
     
     @Override
     public User getUserByUsername(String username, boolean populateLogin) {
         String sql = "SELECT * FROM user WHERE username=?";
-        List<Map<String, Object>> rs = jdbcTemplate.queryForList(sql, new Object[]{username});
+        List<Map<String, Object>> rs = con.queryForList(sql, new Object[]{username});
         if (rs.size() != 1) {
             return new User();
         }
@@ -43,12 +42,12 @@ public class UserService implements UserDao {
     }
 
     @Override
-    public List<User> getUserList(boolean populateLogin) {
+    public List<User> getUserList(boolean populateInternal) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public List<User> rowMapper(List<Map<String, Object>> resultSet, boolean populateLogin) {
+    public List<User> rowMapper(List<Map<String, Object>> resultSet, boolean populateInternal) {
         List<User> userList = new ArrayList<>();
 
         for (Map row : resultSet) {
@@ -58,7 +57,7 @@ public class UserService implements UserDao {
             user.setFirstName((String) row.get("first_name"));
             user.setLastName((String) row.get("last_name"));
 
-            if (populateLogin) {
+            if (populateInternal) {
                 user.setLogin(new Login(
                         (String) row.get("username"),
                         (String) row.get("password")));
@@ -71,7 +70,7 @@ public class UserService implements UserDao {
 
     @Override
     public void setCon(JdbcTemplate con) {
-        jdbcTemplate = con;
+        this.con = con;
     }
 
 }

@@ -31,7 +31,7 @@ public class RoleService implements RoleDao {
         }
         return (this.rowMapper(rs)).get(0);
     }
-
+    
     @Override
     public List<Role> getRoleList() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.

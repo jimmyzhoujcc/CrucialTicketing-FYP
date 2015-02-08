@@ -69,14 +69,24 @@ public class SecurityController implements Filter {
 
                 if (session == null) {
                     HttpServletResponse httpResponse = (HttpServletResponse) response;
-                    httpRequest.getSession().setAttribute("alert", "Session has timed out, please re-login");
+                    httpRequest.getSession().setAttribute("alert", "NULL SESSION Session has timed out, please re-login");
                     httpResponse.sendRedirect("/CrucialTicketing/home/login/login/");
                     return;
                 }
 
-                if (((User) session.getAttribute("user")) == null) {
+                User user = (User) session.getAttribute("user");
+                
+                if (user == null) {
                     HttpServletResponse httpResponse = (HttpServletResponse) response;
-                    httpRequest.getSession().setAttribute("alert", "Session has timed out, please re-login");
+                    httpRequest.getSession().setAttribute("alert", "NULL USER Session has timed out, please re-login");
+                    httpResponse.sendRedirect("/CrucialTicketing/home/login/login/");
+                    return;
+                }
+                
+                if(!user.hasRole("END_USER")) {
+                    HttpServletResponse httpResponse = (HttpServletResponse) response;
+                    httpRequest.getSession().setAttribute("alert", "User does not have correct role privledges");
+                    httpRequest.getSession().removeAttribute("user");
                     httpResponse.sendRedirect("/CrucialTicketing/home/login/login/");
                     return;
                 }

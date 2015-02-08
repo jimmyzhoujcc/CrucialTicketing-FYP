@@ -27,7 +27,7 @@
     </bean>
     
     <!-- declare beans -->  
-
+<!--
     <bean id="applicationControlService" class="com.crucialticketing.services.ApplicationControlService" />  
     <bean id="applicationService" class="com.crucialticketing.services.ApplicationService" />  
    
@@ -48,6 +48,7 @@
     <bean id="ticketLockRequestService" class="com.crucialticketing.services.TicketLockRequestService" />
     
     <bean id="userAlertService" class="com.crucialticketing.services.UserAlertService" />
+-->
 
     <!-- declare datasource bean -->  
     <bean id="dataSource"  
@@ -59,10 +60,10 @@
     </bean> 
     
   
-    <bean id="ticketAccessJob" class="com.crucialticketing.schedule.TicketAccessJob" />
+   <!-- <bean id="ticketAccessJob" class="com.crucialticketing.schedule.TicketAccessJob" /> -->
 
 
-  <!-- Run every 10 seconds -->  
+  <!-- Run every 2 seconds -->  
    <task:scheduled-tasks  scheduler="myScheduler">
   <task:scheduled ref="ticketAccessJob" method="executeTicketAccessJob" cron="*/2 * * * * *" />  
    </task:scheduled-tasks>  

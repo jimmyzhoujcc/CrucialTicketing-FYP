@@ -7,12 +7,10 @@ package com.crucialticketing.controllers;
 
 import com.crucialticketing.entities.Ticket;
 import com.crucialticketing.entities.TicketLockRequest;
-import com.crucialticketing.entities.TicketLogEntry;
 import com.crucialticketing.entities.User;
 import com.crucialticketing.services.TicketLockRequestService;
 import com.crucialticketing.services.TicketService;
 import com.crucialticketing.services.UserAlertService;
-import com.crucialticketing.services.WorkflowStatusService;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.sql.DataSource;
@@ -78,31 +76,22 @@ public class TicketController {
         TicketLockRequestService ticketLockRequest = new TicketLockRequestService();
         ticketLockRequest.setCon(con);
 
-        List<TicketLockRequest> requestList = ticketLockRequest.getTicketLockRequestsByUser(
+         User user = (User) request.getSession().getAttribute("user");
+         
+        if (ticketLockRequest.ticketOpenForEditByUser(
                 Integer.valueOf(ticketId),
-                ((User) request.getSession().getAttribute("user")).getUserId());
-
-        if (!requestList.isEmpty()) {
-            if (requestList.get(0).getRequestPassTime() == 0) {
-                map.addAttribute("message", "Request already sent");
-                map.addAttribute("editMode", false);
-            } else if (requestList.get(0).getRequestPassTime() == 0) {
-                map.addAttribute("message", "Access rejected - ticket requested by someone else");
-                map.addAttribute("editMode", false);
-            } else {
-                map.addAttribute("editMode", true);
-            }
+                user.getUserId())) {
+            map.addAttribute("editMode", true);
         } else {
             ticketLockRequest.addTicketLockRequest(
                     Integer.valueOf(ticketId),
-                    ((User) request.getSession().getAttribute("user")).getUserId());
-            map.addAttribute("message", "Request sent");
-            map.addAttribute("editMode", false);
-
+                    user.getUserId());
+            
             UserAlertService userAlertService = new UserAlertService();
             userAlertService.setCon(con);
-            userAlertService.insertUserAlert((((User) request.getSession().getAttribute("user")).getUserId()), Integer.valueOf(ticketId), "(" + ticketId + ") Access requested");
+            userAlertService.insertUserAlert(user.getUserId(), Integer.valueOf(ticketId), "(" + ticketId + ") Access requested");
 
+            map.addAttribute("editMode", false);
         }
 
         TicketService ticketService = new TicketService();
@@ -123,6 +112,29 @@ public class TicketController {
             @RequestParam(value = "newstatus", required = true) String newStatus,
             @RequestParam(value = "logentry", required = true) String logEntry,
             ModelMap map) {
+
+        JdbcTemplate con = new JdbcTemplate(dataSource);
+
+        // Checks if this ticket is open for editing by this user
+        TicketService ticketService = new TicketService();
+        ticketService.setCon(con);
+
+        Ticket ticket = ticketService.getTicketById(Integer.valueOf(ticketId), true);
+
+        // Checks if the description changed
+        if (!oldShortDescription.equals(newShortDescription)) {
+
+        }
+
+        // Checks if the status has changed
+        if (newStatus.length() > 0) {
+            // Check if the status is a legal status
+        }
+
+        // Checks if a log entry has been made
+        if (logEntry.length() > 0) {
+
+        }
         /*
          List<Object> objectList = ticketService.select("ticket_id", ticketId);
          Ticket ticket = (Ticket) objectList.get(0);
