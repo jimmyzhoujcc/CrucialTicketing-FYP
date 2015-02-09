@@ -16,5 +16,7 @@ import java.util.Map;
 public interface TicketLogDao extends DatabaseService {
     public TicketLog getTicketLogByTicketId(int ticketId);
 
+    public void addTicketLog(int ticketId, int userId, String logEntry);
+    
     public List<TicketLog> rowMapper(List<Map<String, Object>> resultSet);
 }

@@ -1,5 +1,6 @@
 var marker = 0;
 var timeForNotificationInterval = 3000;
+var pageDefaultTitle = document.title;
 
 $(document).ready(function ()
 {
@@ -56,7 +57,12 @@ function checkForNotification() {
             $('.notification_' + (i + 1)).addClass('notification');
         }
 
-        $('#alertcount').html(obj.unread);
+        if (obj.unread === 0) {
+            document.title = pageDefaultTitle;
+        } else {
+            document.title = "(" + obj.unread + ") " + pageDefaultTitle;
+            $('#alertcount').html(obj.unread);
+        }
     });
 
 

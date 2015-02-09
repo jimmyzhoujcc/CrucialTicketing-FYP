@@ -7,6 +7,7 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"  %>
 <c:if test="${fn:length(alert)>0}">
     <div class="alert alert-danger" role="alert">${alert}</div>
+    <% request.removeAttribute("alert"); %>
 </c:if>
 <br />
 

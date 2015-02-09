@@ -28,6 +28,15 @@ public class TicketLogService implements TicketLogDao {
     }
 
     @Override
+    public void addTicketLog(int ticketId, int userId, String logEntry) {
+        int stamp = (int)(System.currentTimeMillis() / 1000);
+        String sql = "INSERT INTO ticket_log (ticket_id, user_id, ticket_log_entry, stamp) "
+                + "VALUES (?, ?, ?, ?)";
+        
+        jdbcTemplate.update(sql, new Object[] {ticketId, userId, logEntry, stamp});
+    }
+    
+    @Override
     public List<TicketLog> rowMapper(List<Map<String, Object>> resultSet) {
         List<TicketLog> ticketLogList = new ArrayList<>();
         

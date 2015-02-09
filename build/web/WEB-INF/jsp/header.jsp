@@ -15,6 +15,10 @@
             var homeURI = "<%=request.getContextPath()%>";
         </script>
 
+         <link rel="icon" 
+              type="image/png" 
+              href="<%=request.getContextPath()%>/img/ticket.png">
+         
         <!-- jQuery -->
         <script src="<%=request.getContextPath()%>/js/jquery-1.11.2.min.js"></script>
 

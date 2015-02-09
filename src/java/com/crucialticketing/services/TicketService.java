@@ -41,6 +41,18 @@ public class TicketService implements TicketDao {
     }
 
     @Override
+    public void updateDescription(int ticketId, String newDescription) {
+        String sql = "UPDATE ticket SET short_description=? WHERE ticket_id=?";
+        jdbcTemplate.update(sql, new Object[]{newDescription, ticketId});
+    }
+
+    @Override
+    public void updateStatus(int ticketId, int newStatusId) {
+        String sql = "UPDATE ticket SET current_status_id=? WHERE ticket_id=?";
+        jdbcTemplate.update(sql, new Object[]{newStatusId, ticketId});
+    }
+
+    @Override
     public void setCon(JdbcTemplate con) {
         jdbcTemplate = con;
     }
@@ -75,7 +87,7 @@ public class TicketService implements TicketDao {
             if (populateInternalData) {
                 ticket.setTicketLog(ticketLogService.getTicketLogByTicketId((int) row.get("ticket_id")));
             }
-            
+
             ticketList.add(ticket);
         }
         return ticketList;

@@ -9,6 +9,7 @@ import com.crucialticketing.entities.Ticket;
 import com.crucialticketing.entities.TicketLockRequest;
 import com.crucialticketing.entities.User;
 import com.crucialticketing.services.TicketLockRequestService;
+import com.crucialticketing.services.TicketLogService;
 import com.crucialticketing.services.TicketService;
 import com.crucialticketing.services.UserAlertService;
 import java.util.List;
@@ -76,8 +77,8 @@ public class TicketController {
         TicketLockRequestService ticketLockRequest = new TicketLockRequestService();
         ticketLockRequest.setCon(con);
 
-         User user = (User) request.getSession().getAttribute("user");
-         
+        User user = (User) request.getSession().getAttribute("user");
+
         if (ticketLockRequest.ticketOpenForEditByUser(
                 Integer.valueOf(ticketId),
                 user.getUserId())) {
@@ -86,7 +87,7 @@ public class TicketController {
             ticketLockRequest.addTicketLockRequest(
                     Integer.valueOf(ticketId),
                     user.getUserId());
-            
+
             UserAlertService userAlertService = new UserAlertService();
             userAlertService.setCon(con);
             userAlertService.insertUserAlert(user.getUserId(), Integer.valueOf(ticketId), "(" + ticketId + ") Access requested");
@@ -121,47 +122,57 @@ public class TicketController {
 
         Ticket ticket = ticketService.getTicketById(Integer.valueOf(ticketId), true);
 
+        User user = (User) request.getSession().getAttribute("user");
+
+        // Checks if correct role is maintained 
+        if (!user.hasRole("MAINT_"
+                + ticket.getApplicationControl().getTicketType().getTicketTypeId() + "_TICKET_"
+                + ticket.getApplicationControl().getApplication().getApplicationId())) {
+            map.put("ticketObject", ticket);
+            map.addAttribute("editMode", false);
+            map.addAttribute("page", "main/ticket.jsp");
+            map.addAttribute("alert", "You do not have the correct role privledges to perform a save operation");
+            return "mainview";
+        }
+
+        // Checks if this user has a open ticket lock
+        TicketLockRequestService ticketLockRequestService = new TicketLockRequestService();
+        ticketLockRequestService.setCon(con);
+
+        if (!ticketLockRequestService.ticketOpenForEditByUser(Integer.valueOf(ticketId), user.getUserId())) {
+            map.put("ticketObject", ticket);
+            map.addAttribute("editMode", false);
+            map.addAttribute("page", "main/ticket.jsp");
+            map.addAttribute("alert", "You do not have exclusive rights to save this ticket");
+            return "mainview";
+        }
+
         // Checks if the description changed
         if (!oldShortDescription.equals(newShortDescription)) {
-
+            ticketService.updateDescription(Integer.valueOf(ticketId), newShortDescription);
         }
 
         // Checks if the status has changed
         if (newStatus.length() > 0) {
             // Check if the status is a legal status
+
+            ticketService.updateStatus(Integer.valueOf(ticketId), Integer.valueOf(newStatus));
         }
 
         // Checks if a log entry has been made
         if (logEntry.length() > 0) {
-
+            logEntry = logEntry.replaceAll("(\r\n|\n)", "<br />");
+            TicketLogService ticketLogService = new TicketLogService();
+            ticketLogService.setCon(con);
+            ticketLogService.addTicketLog(Integer.valueOf(ticketId), user.getUserId(), logEntry);
         }
-        /*
-         List<Object> objectList = ticketService.select("ticket_id", ticketId);
-         Ticket ticket = (Ticket) objectList.get(0);
 
-         // Checking description has changed
-         if (!oldShortDescription.equals(newShortDescription)) {
-         User userInControl = (User)request.getSession().getAttribute("user");
-         ticketService.update("ticket_id", ticketId, "short_description", newShortDescription);
-         TicketLogEntry ticketLogEntry = new TicketLogEntry(Integer.valueOf(ticketId), -1, new User(4, "System", "Message"), "Short description was changed by ("+userInControl.getUserId() + ") "+userInControl.getFirstName() + " "+userInControl.getLastName(), -1);
-         ticketLogService.insert(ticketLogEntry);
-         }
+        ticket = ticketService.getTicketById(Integer.valueOf(ticketId), true);
 
-         // Checking if a new status has been selected
-         if (newStatus.length() > 0) {
-         ticketService.update("ticket_id", ticketId, "current_status_id", newStatus);
-         }
-         // Checking if a log entry has been added
+        map.put("ticketObject", ticket);
+        map.addAttribute("page", "main/ticket.jsp");
+        map.addAttribute("editMode", false);
 
-         ticketService.update("ticket_id", ticketId, "lock", "0");
-        
-         objectList = ticketService.select("ticket_id", ticketId);
-         ticket = (Ticket) objectList.get(0);
-
-         map.put("ticketObject", ticket);
-         map.addAttribute("page", "main/ticket.jsp");
-         map.addAttribute("editMode", false);
-         */
         return "mainview";
     }
 

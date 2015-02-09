@@ -8,9 +8,10 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <div class="row">
-    <div class="col-xs-12 col-sm-6 col-md-10">
+    <div class="col-xs-12 col-sm-8 col-md-10">
         <c:if test="${fn:length(alert)>0}">
             <div class="alert alert-danger" role="alert">${alert}</div>
+            <% request.removeAttribute("alert"); %>
         </c:if>
         <h3><span class="label label-default">${ticketObject.ticketId}</span> ${ticketObject.shortDescription}</h3>
 
@@ -50,7 +51,7 @@
                 Workflow: ${ticketObject.applicationControl.workflow.workflowName}
                 <br /><br />
                 Current status: ${ticketObject.currentWorkflowStep.status.statusName}<br />
-                
+
                 Current Queue: 
                 <c:if test="${ticketObject.currentWorkflowStep.queue.queueId == -1}">
                     Reporting user
@@ -149,11 +150,11 @@
                                         <fmt:formatDate type="both" dateStyle="long" timeStyle="long" value="${dateValue}" />
 
                                     </small></h4>
-                                    ${ticketLogEntry.logEntry}
+                                ${ticketLogEntry.logEntry}
                             </div>
                         </div>
-                            
-                            <hr class="style-three" />
+
+                        <hr class="style-three" />
 
                     </c:forEach>
 
@@ -163,7 +164,7 @@
         </div>
     </div>
 
-    <div class="ticketnav col-xs-6 col-md-2" style="position:fixed; right:0">
+    <div class="ticketnav col-xs-4 col-md-2" style="position:fixed; right:0">
         <div class="panel panel-primary">
             <div class="panel-heading">
                 <h3 class="panel-title">Quick Navigation</h3>
@@ -171,11 +172,11 @@
             <div class="panel-body">
                 <a href="#">Basic information</a>
                 <br />
-                <a href="#">SLA & KPI Information</a>
-                <br />
-                <a href="#">Involvement Indicator</a>
+                <a href="#">SLA Information</a>
                 <br />
                 <a href="#">Ticket Log</a>
+                <br />
+                <a href="#">Attachments</a>
             </div>
         </div>
 
@@ -227,7 +228,7 @@
                             document.getElementById('form_logentry').value = document.getElementById('entry_logentry').value;
                             document.getElementById('form_new_shortdescription').value = document.getElementById('entry_new_shortdescription').value;
                         }
-                        </script>
+                    </script>
                     <form method="POST" action="<%=request.getContextPath()%>/home/update/saveticket/">
                         <input type="submit" value="Save Ticket" class="btn btn-success" onclick="javascript:modify_value();" />
                         <input type="hidden" value="${ticketObject.ticketId}" name="ticketid" />

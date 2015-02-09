@@ -77,6 +77,7 @@ if included on the main header which services the login pages -->
 
 </ul>
 <div class="main">
+    
     <jsp:include page="<%=pageName%>"/>
 </div>
 

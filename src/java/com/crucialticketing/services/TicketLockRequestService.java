@@ -17,7 +17,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
  */
 public class TicketLockRequestService implements TicketLockRequestDao {
 
-    private int buffer = (20*60) + 30; // 20*60 for 20 minutes of editing - buffer of 30 seconds
+    private int buffer = (20*60); // 20*60 for 20 minutes of editing
     JdbcTemplate jdbcTemplate;
     String insert = "INSERT INTO ticket_lock_request (ticket_id, user_id, request_time, request_pass_time) "
             + "VALUES (?, ?, ?, ?)";

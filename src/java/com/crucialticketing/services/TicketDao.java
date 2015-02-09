@@ -18,5 +18,9 @@ public interface TicketDao extends DatabaseService {
     
     public List<Ticket> getTicketList(boolean populateInternalData);
     
+    public void updateDescription(int ticketId, String newDescription);
+    
+    public void updateStatus(int ticketId, int newStatusId);
+    
     public List<Ticket> rowMapper(List<Map<String, Object>> resultSet, boolean populateInternalData);
 }
