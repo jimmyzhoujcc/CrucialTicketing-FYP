@@ -73,7 +73,7 @@ public class TicketService implements TicketDao {
         for (Map row : resultSet) {
             Ticket ticket = new Ticket();
 
-            ticket.setTicketId(String.valueOf(row.get("ticket_id")));
+            ticket.setTicketId((int)row.get("ticket_id"));
             ticket.setShortDescription((String) row.get("short_description"));
 
             ticket.setMessageProcessor(userService.getUserById((int) row.get("message_processor_id"), false));

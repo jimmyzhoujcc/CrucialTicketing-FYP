@@ -5,6 +5,8 @@
  */
 package com.crucialticketing.entities;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -13,15 +15,17 @@ import org.springframework.web.multipart.MultipartFile;
  */
 public class UploadedFile {
 
-    private MultipartFile file;
+    private List<MultipartFile> files;
 
-    public UploadedFile() {}
-    
-    public MultipartFile getFile() {
-        return file;
+    public UploadedFile() {
+        files = new ArrayList<>();
     }
 
-    public void setFile(MultipartFile file) {
-        this.file = file;
+    public List<MultipartFile> getFiles() {
+        return files;
     }
+
+    public void setFile(List<MultipartFile> files) {
+        this.files = files;
+    }  
 }

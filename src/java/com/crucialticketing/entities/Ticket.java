@@ -12,7 +12,7 @@ import java.util.List;
  * @author Owner
  */
 public class Ticket {
-    private String ticketId;
+    private int ticketId;
     
     private ApplicationControl applicationControl;
     
@@ -33,11 +33,15 @@ public class Ticket {
     
     public Ticket() {}
 
-    public String getTicketId() {
+    public Ticket(int ticketId) {
+        this.ticketId = ticketId;
+    }
+    
+    public int getTicketId() {
         return ticketId;
     }
 
-    public void setTicketId(String ticketId) {
+    public void setTicketId(int ticketId) {
         this.ticketId = ticketId;
     }
 

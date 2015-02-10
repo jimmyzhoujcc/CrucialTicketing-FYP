@@ -13,8 +13,21 @@ Welcome to Crucial Ticketing
 Please use the tabs provided to navigate through the program
 
 <br />
-
-<form method="post" action="../../../home/uploadfile" enctype="multipart/form-data">
-		<input type="file" name="fileUploaded" /> <input type="submit" />
-	</form>
-
+ <form:form id="upload_file" method="post" action="../../../home/uploadfile"
+            modelAttribute="uploadedfile" enctype="multipart/form-data">
+ 
+            <p>Select files to upload. Press Add button to add more file
+                inputs.</p>
+ 
+            <table id="fileTable">
+                <tr>
+                    <td><input name="files[0]" type="file" /></td>
+                </tr>
+                <tr>
+                    <td><input name="files[1]" type="file" /></td>
+                </tr>
+            </table>
+            <br />
+            <input type="submit" value="Upload" />
+            <input id="addFile" type="button" value="Add File" />
+        </form:form>

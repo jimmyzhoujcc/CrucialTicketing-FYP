@@ -32,45 +32,46 @@ public class UploadController {
      * Upload single file using Spring Controller
      *
      * @param name
+     * @param uploadForm
      * @param file
      * @return
      */
     @RequestMapping(value = "uploadfile", method = RequestMethod.POST)
     public String handleFormUpload(
             HttpServletRequest request,
-            @RequestParam("fileUploaded") MultipartFile file,
+            @ModelAttribute("uploadedfile") UploadedFile uploadForm,
             ModelMap map) {
 
         try {
-            if (!file.isEmpty()) {
-                byte[] bytes = file.getBytes();
+            for (MultipartFile file : uploadForm.getFiles()) {
+                if (!file.isEmpty()) {
+                    byte[] bytes = file.getBytes();
 
-                String fileName = file.getOriginalFilename();
+                    String fileName = file.getOriginalFilename();
 
-                String extension = ".unknown";
+                    String extension = ".unknown";
 
-                int i = fileName.lastIndexOf('.');
+                    int i = fileName.lastIndexOf('.');
 
-                if (i > 0) {
-                    extension = fileName.substring(i + 1);
-                    fileName = fileName.substring(0, i);
+                    if (i > 0) {
+                        extension = fileName.substring(i + 1);
+                        fileName = fileName.substring(0, i);
+                    }
+
+                    String saveFile = request.getServletContext().getRealPath("/WEB-INF/upload/" + fileName + "." + extension);
+
+                    FileOutputStream output = new FileOutputStream(new File(saveFile));
+                    output.write(bytes);
+                    output.close();
+
                 }
-
-                String saveFile = request.getServletContext().getRealPath("/WEB-INF/upload/" + fileName + "." + extension);
-
-                FileOutputStream output = new FileOutputStream(new File(saveFile));
-                output.write(bytes);
-                output.close();
-
             }
         } catch (Exception e) {
 
         }
- 
 
         map.addAttribute("page", "menu/main.jsp");
         return "mainview";
     }
 
- 
 }

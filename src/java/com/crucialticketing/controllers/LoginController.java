@@ -60,7 +60,7 @@ public class LoginController {
                 return "/login/login";
             }
 
-            map.addAttribute("uploadedFile", new UploadedFile());
+            map.addAttribute("uploadedfile", new UploadedFile());
             map.addAttribute("page", "menu/main.jsp");
             return "mainview";
         }

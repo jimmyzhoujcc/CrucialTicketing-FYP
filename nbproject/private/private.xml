@@ -3,11 +3,15 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
+            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/dan-project/src/java/com/crucialticketing/services/SeverityService.java</file>
+            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/dan-project/src/java/com/crucialticketing/services/TicketService.java</file>
             <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/dan-project/web/WEB-INF/jsp/menu/main.jsp</file>
+            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/dan-project/src/java/com/crucialticketing/services/AttachmentService.java</file>
             <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/dan-project/src/java/com/crucialticketing/controllers/UploadController.java</file>
-            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/dan-project/src/java/com/crucialticketing/controllers/LoginController.java</file>
-            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/dan-project/src/java/com/crucialticketing/entities/UploadedFile.java</file>
-            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/dan-project/web/WEB-INF/dispatcher-servlet.xml</file>
+            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/dan-project/src/java/com/crucialticketing/entities/Ticket.java</file>
+            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/dan-project/src/java/com/crucialticketing/services/AttachmentDao.java</file>
+            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/dan-project/src/java/com/crucialticketing/services/QueueService.java</file>
+            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/dan-project/src/java/com/crucialticketing/entities/Attachment.java</file>
         </group>
     </open-files>
 </project-private>
