@@ -3,14 +3,11 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/CrucialTicketing/web/WEB-INF/jsp/menu/main.jsp</file>
-            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/CrucialTicketing/web/WEB-INF/jsp/main/queryticket.jsp</file>
-            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/CrucialTicketing/src/java/com/crucialticketing/controllers/SecurityController.java</file>
-            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/CrucialTicketing/web/WEB-INF/jsp/main/ticket.jsp</file>
-            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/CrucialTicketing/src/java/com/crucialticketing/controllers/TicketController.java</file>
-            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/CrucialTicketing/web/WEB-INF/jsp/login/login.jsp</file>
-            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/CrucialTicketing/web/WEB-INF/jsp/header.jsp</file>
-            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/CrucialTicketing/web/WEB-INF/jsp/mainview.jsp</file>
+            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/dan-project/web/WEB-INF/jsp/menu/main.jsp</file>
+            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/dan-project/src/java/com/crucialticketing/controllers/UploadController.java</file>
+            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/dan-project/src/java/com/crucialticketing/controllers/LoginController.java</file>
+            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/dan-project/src/java/com/crucialticketing/entities/UploadedFile.java</file>
+            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/dan-project/web/WEB-INF/dispatcher-servlet.xml</file>
         </group>
     </open-files>
 </project-private>

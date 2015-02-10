@@ -1,5 +1,6 @@
 package com.crucialticketing.controllers;
 
+import com.crucialticketing.entities.UploadedFile;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,6 +26,7 @@ public class DefaultController {
     @RequestMapping(value = "/{pagename}/", method = RequestMethod.GET)
     public String index(@PathVariable(value = "pagename") String pageName, ModelMap map) {
 
+        map.addAttribute("uploadedFile", new UploadedFile());
         map.addAttribute("page", "menu/" + pageName + ".jsp");
         return "mainview";
     }

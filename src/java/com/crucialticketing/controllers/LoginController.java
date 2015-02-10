@@ -6,6 +6,7 @@
 package com.crucialticketing.controllers;
 
 import com.crucialticketing.entities.Login;
+import com.crucialticketing.entities.UploadedFile;
 import com.crucialticketing.entities.User;
 import com.crucialticketing.services.UserRoleConnectionService;
 import com.crucialticketing.services.UserService;
@@ -59,6 +60,7 @@ public class LoginController {
                 return "/login/login";
             }
 
+            map.addAttribute("uploadedFile", new UploadedFile());
             map.addAttribute("page", "menu/main.jsp");
             return "mainview";
         }
