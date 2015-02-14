@@ -15,17 +15,35 @@ import org.springframework.web.multipart.MultipartFile;
  */
 public class UploadedFile {
 
-    private List<MultipartFile> files;
+    private MultipartFile file;
+    private String name;
+    private String description;
 
     public UploadedFile() {
-        files = new ArrayList<>();
     }
 
-    public List<MultipartFile> getFiles() {
-        return files;
+    public MultipartFile getFile() {
+        return file;
     }
 
-    public void setFile(List<MultipartFile> files) {
-        this.files = files;
-    }  
+    public void setFile(MultipartFile file) {
+        this.file = file;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
 }

@@ -24,16 +24,16 @@ public class WorkflowMap {
     }
     
     
-    public void addStatus(WorkflowStatus status, Role role, Queue queue) {
+    public void addStep(WorkflowStatus status, Role role, Queue queue, int clockActive) {
         List<WorkflowStep> newList = new ArrayList<>();
-        workflow.add(new WorkflowStep(status, role, queue, newList));
+        workflow.add(new WorkflowStep(status, role, queue, newList, clockActive));
     }
 
-    public void removeStatus(WorkflowStep workflowStage) {
-        workflow.remove(workflowStage);
+    public void removeStep(WorkflowStep workflowStep) {
+        workflow.remove(workflowStep);
     }
 
-    public boolean doesStatusExist(int workflowStatusId) {
+    public boolean doesStepExist(int workflowStatusId) {
         for (WorkflowStep workflowStage : workflow) {
             if (workflowStage.getStatus().getStatusId() == workflowStatusId) {
                 return true;

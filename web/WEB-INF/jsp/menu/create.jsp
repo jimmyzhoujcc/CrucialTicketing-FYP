@@ -7,7 +7,7 @@
     Tickets
     <br />
     <ul>
-        <li><a href="#">Incident Ticket</a></li>
+        <li><a href="<%=request.getContextPath()%>/home/create/preticket/">Incident Ticket</a></li>
         <li><a href="#">Problem Ticket</a></li>
         <li><a href="#">Change Ticket</a></li>
         <li><a href="#">Service Request Ticket</a></li>

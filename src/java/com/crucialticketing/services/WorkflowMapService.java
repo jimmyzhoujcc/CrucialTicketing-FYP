@@ -56,18 +56,20 @@ public class WorkflowMapService implements WorkflowMapDao {
         queueService.setCon(jdbcTemplate);
 
         for (Map row : resultSet) {
-            if (!workflowMap.doesStatusExist((int) row.get("from_workflow_status_id"))) {
-                workflowMap.addStatus(
+            if (!workflowMap.doesStepExist((int) row.get("from_workflow_status_id"))) {
+                workflowMap.addStep(
                         workflowStatusService.getWorkflowStatusById((int) row.get("from_workflow_status_id")),
                         new Role(-1, "n/a"),
-                        new Queue(-1, "n/a"));
+                        new Queue(-1, "n/a"), 
+                        0);
             }
 
-            if (!workflowMap.doesStatusExist((int) row.get("to_workflow_status_id"))) {
-                workflowMap.addStatus(
+            if (!workflowMap.doesStepExist((int) row.get("to_workflow_status_id"))) {
+                workflowMap.addStep(
                         workflowStatusService.getWorkflowStatusById((int) row.get("to_workflow_status_id")),
                         roleService.getRoleById((int) row.get("role_id")),
-                        queueService.getQueueById((int) row.get("queue_id")));
+                        queueService.getQueueById((int) row.get("queue_id")), 
+                        (int) row.get("clock_active"));
             }
 
             WorkflowStep workflowStageStart = workflowMap.getWorkflowStageByStatus((int) row.get("from_workflow_status_id"));

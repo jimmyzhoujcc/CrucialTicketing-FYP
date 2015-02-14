@@ -30,6 +30,8 @@ public class Ticket {
     private int timeDateReopened;  
     
     private TicketLog ticketLog;
+    private List<Attachment> attachmentList;
+    private ChangeLog changeLog;
     
     public Ticket() {}
 
@@ -131,5 +133,24 @@ public class Ticket {
 
     public void setTicketLog(TicketLog ticketLog) {
         this.ticketLog = ticketLog;
-    }    
+    } 
+
+    public List<Attachment> getAttachmentList() {
+        return attachmentList;
+    }
+
+    public void setAttachmentList(List<Attachment> attachmentList) {
+        this.attachmentList = attachmentList;
+    }
+
+    public ChangeLog getChangeLog() {
+        return changeLog;
+    }
+
+    public void setChangeLog(ChangeLog changeLog) {
+        this.changeLog = changeLog;
+    }
+    
+    
+    
 }

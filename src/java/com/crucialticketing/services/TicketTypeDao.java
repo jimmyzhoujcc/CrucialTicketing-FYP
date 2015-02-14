@@ -18,5 +18,7 @@ public interface TicketTypeDao extends DatabaseService {
     
     public List<TicketType> getTicketTypeList();
     
+    public boolean doesTicketTypeExist(int ticketTypeId);
+    
     public List<TicketType> rowMapper(List<Map<String, Object>> resultSet);
 }

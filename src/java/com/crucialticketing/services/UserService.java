@@ -32,18 +32,25 @@ public class UserService implements UserDao {
     }
     
     @Override
-    public User getUserByUsername(String username, boolean populateLogin) {
+    public User getUserByUsername(String username, boolean populateInternal) {
         String sql = "SELECT * FROM user WHERE username=?";
         List<Map<String, Object>> rs = con.queryForList(sql, new Object[]{username});
         if (rs.size() != 1) {
             return new User();
         }
-        return (this.rowMapper(rs, populateLogin)).get(0);
+        return (this.rowMapper(rs, populateInternal)).get(0);
     }
 
     @Override
     public List<User> getUserList(boolean populateInternal) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+         String sql = "SELECT * FROM user";
+        List<Map<String, Object>> rs = con.queryForList(sql);
+        if (rs.isEmpty()) {
+            return new ArrayList<>();
+        }
+        List<User> userList = this.rowMapper(rs, populateInternal);
+        userList.remove(0);
+        return userList;
     }
 
     @Override

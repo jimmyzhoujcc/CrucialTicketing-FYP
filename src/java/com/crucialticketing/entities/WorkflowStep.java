@@ -16,20 +16,31 @@ public class WorkflowStep {
     private Role role;
     private Queue queue;
     private List<WorkflowStep> nextWorkflowStep;
+    private int clockActive;
     
     public WorkflowStep() {}
 
-    public WorkflowStep(WorkflowStatus status, Role role, Queue queue, List<WorkflowStep> nextWorkflowStatus) {
+    public WorkflowStep(WorkflowStatus status, Role role, Queue queue, List<WorkflowStep> nextWorkflowStep, int clockActive) {
         this.status = status;
         this.role = role;
         this.queue = queue;
-        this.nextWorkflowStep = nextWorkflowStatus;
+        this.nextWorkflowStep = nextWorkflowStep;
+        this.clockActive = clockActive;
     }
 
     public void addNextNode(WorkflowStep nextNode) {
         nextWorkflowStep.add(nextNode);
     }
 
+    public boolean isLegalStep(int workflowStatusId) {
+        for (WorkflowStep workflowStep : nextWorkflowStep) {
+            if(workflowStep.getStatus().getStatusId() == workflowStatusId) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
     public WorkflowStatus getStatus() {
         return status;
     }
@@ -61,7 +72,16 @@ public class WorkflowStep {
     public void setNextWorkflowStep(List<WorkflowStep> nextWorkflowStep) {
         this.nextWorkflowStep = nextWorkflowStep;
     }
+
+    public int getClockActive() {
+        return clockActive;
+    }
+
+    public void setClockActive(int clockActive) {
+        this.clockActive = clockActive;
+    }
    
+    
     
     
 }

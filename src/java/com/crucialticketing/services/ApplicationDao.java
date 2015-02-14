@@ -18,5 +18,7 @@ public interface ApplicationDao extends DatabaseService {
     
     public List<Application> getApplicationList();
     
+    public boolean doesApplicationExist(int applicationId);
+    
     public List<Application> rowMapper(List<Map<String, Object>> resultSet);
 }

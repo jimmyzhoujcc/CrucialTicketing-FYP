@@ -14,13 +14,17 @@ import java.util.Map;
  * @author DanFoley
  */
 public interface TicketDao extends DatabaseService {
-    public Ticket getTicketById(int ticketId, boolean populateInternalData);
+    public int insertTicket(String shortDescription, int applicationControlId, int createdByUserId, int reportedByUserId, int currentStatusId);
+            
+    public Ticket getTicketById(int ticketId, boolean popWorkflowMap, boolean popTicketLog, boolean popAttachments, boolean popChangeLog);
     
-    public List<Ticket> getTicketList(boolean populateInternalData);
+    public List<Ticket> getTicketList(boolean popWorkflowMap, boolean popTicketLog, boolean popAttachments, boolean popChangeLog);
     
     public void updateDescription(int ticketId, String newDescription);
     
     public void updateStatus(int ticketId, int newStatusId);
     
-    public List<Ticket> rowMapper(List<Map<String, Object>> resultSet, boolean populateInternalData);
+    public void updateApplicationControl(int ticketId, int applicationControlId);
+    
+    public List<Ticket> rowMapper(List<Map<String, Object>> resultSet, boolean popWorkflowMap, boolean popTicketLog, boolean popAttachments, boolean popChangeLog);
 }

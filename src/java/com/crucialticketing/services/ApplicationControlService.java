@@ -35,6 +35,16 @@ public class ApplicationControlService implements ApplicationControlDao {
     }
 
     @Override
+    public ApplicationControl getApplicationControlByCriteria(int ticketTypeId, int applicationId, int severityId, boolean populateWorkflowMap) {
+        String sql = "SELECT * FROM application_control WHERE ticket_type_id=? AND application_id=? AND severity_id=?";
+        List<Map<String, Object>> rs = jdbcTemplate.queryForList(sql, new Object[]{ticketTypeId, applicationId, severityId});
+        if (rs.size() != 1) {
+            return new ApplicationControl();
+        }
+        return (this.rowMapper(rs, populateWorkflowMap)).get(0);
+    }
+    
+    @Override
     public List<ApplicationControl> getApplicationControlList(boolean populateWorkflowMap) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
@@ -81,7 +91,8 @@ public class ApplicationControlService implements ApplicationControlDao {
             }
             
             applicationControl.setWorkflow(workflow);
-            
+           
+            applicationControl.setSlaClock((int) row.get("sla_clock"));
             // 
             applicationControlList.add(applicationControl);
         }

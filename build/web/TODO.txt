@@ -1,6 +1,4 @@
 () Complete save functionality
-    - changing status
-        - validating legal move
 
 () Automatic scheduled task
     - validate and execute timeout
@@ -10,7 +8,8 @@
     - editing tickets
     - saving tickets
 
-() Adding attachments
+() Adding attachments 
+    - Verify size
 
 () Creation of tickets
 

@@ -41,6 +41,8 @@ public class LoginController {
             method = RequestMethod.POST)
     public String attemptLogin(HttpServletRequest request, @ModelAttribute("login") Login login, ModelMap map) {
 
+        request.getSession().removeAttribute("alert");
+        
         JdbcTemplate con = new JdbcTemplate(dataSource);
         UserService userService = new UserService();
         userService.setCon(con);
@@ -60,7 +62,7 @@ public class LoginController {
                 return "/login/login";
             }
 
-            map.addAttribute("uploadedfile", new UploadedFile());
+            map.addAttribute("alert", "");
             map.addAttribute("page", "menu/main.jsp");
             return "mainview";
         }

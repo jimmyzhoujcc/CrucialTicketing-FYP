@@ -15,7 +15,9 @@ import java.util.Map;
  */
 public interface AttachmentDao extends DatabaseService {
     
-    public void insertAttachment(int ticketId, int userId, String fileName, int stamp);
+    public void insertAttachment(int ticketId, int userId, String fileName, String name, String description);
+    
+    public Attachment getAttachmentById(int fileUploadId);
     
     public List<Attachment> getAttachmentListByTicketId(int ticketId);
 

@@ -19,22 +19,7 @@ if included on the main header which services the login pages -->
                 <div id="notificationContainer">
                     <div id="notificationTitle">Notifications</div>
                     <div id="notificationsBody" class="notifications">
-                        <div class="notification">
-                            notification 1 <span class="notification_stamp">10:11am 12th September 2014</span>
-
-                        </div>
-                        <div class="notification">
-                            notification 1   
-                        </div>
-                        <div class="notification">
-                            notification 1   
-                        </div>
-                        <div class="notification">
-                            notification 1   
-                        </div>
-                        <div class="notification">
-                            notification 1   
-                        </div>
+                       
                     </div>
 
                     <div id="notificationFooter"><a href="#">See All</a></div>

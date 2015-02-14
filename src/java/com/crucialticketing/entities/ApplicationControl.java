@@ -15,15 +15,17 @@ public class ApplicationControl {
     private Application application;
     private Workflow workflow;
     private Severity severity;
+    private int slaClock;
     
     public ApplicationControl() {}
 
-    public ApplicationControl(int applicationControlId, TicketType ticketType, Application application, Workflow workflow, Severity severity) {
+    public ApplicationControl(int applicationControlId, TicketType ticketType, Application application, Workflow workflow, Severity severity, int slaClock) {
         this.applicationControlId = applicationControlId;
         this.ticketType = ticketType;
         this.application = application;
         this.workflow = workflow;
         this.severity = severity;
+        this.slaClock = slaClock;
     }
 
     public int getApplicationControlId() {
@@ -34,7 +36,6 @@ public class ApplicationControl {
         this.applicationControlId = applicationControlId;
     }
 
-    
     public TicketType getTicketType() {
         return ticketType;
     }
@@ -57,7 +58,7 @@ public class ApplicationControl {
 
     public void setWorkflow(Workflow workflow) {
         this.workflow = workflow;
-    } 
+    }
 
     public Severity getSeverity() {
         return severity;
@@ -66,6 +67,15 @@ public class ApplicationControl {
     public void setSeverity(Severity severity) {
         this.severity = severity;
     }
+
+    public int getSlaClock() {
+        return slaClock;
+    }
+
+    public void setSlaClock(int slaClock) {
+        this.slaClock = slaClock;
+    }
+
     
     
 }

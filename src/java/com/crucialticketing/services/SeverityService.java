@@ -35,7 +35,20 @@ public class SeverityService implements SeverityDao {
 
     @Override
     public List<Severity> getSeverityList() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        String sql = "SELECT * FROM severity";
+        List<Map<String, Object>> rs = jdbcTemplate.queryForList(sql);
+        if (rs.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return this.rowMapper(rs);
+    }
+    
+    @Override
+    public boolean doesSeverityExist(int severityId) {
+        if(this.getSeverityById(severityId).getSeverityId() == 0) {
+            return false;
+        }
+        return true;
     }
 
     @Override

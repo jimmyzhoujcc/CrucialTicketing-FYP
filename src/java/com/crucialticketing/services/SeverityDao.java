@@ -18,5 +18,7 @@ public interface SeverityDao extends DatabaseService {
     
     public List<Severity> getSeverityList();
     
+    public boolean doesSeverityExist(int severityId);
+    
     public List<Severity> rowMapper(List<Map<String, Object>> resultSet);
 }

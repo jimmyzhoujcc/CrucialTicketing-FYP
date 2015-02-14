@@ -5,12 +5,22 @@
  */
 package com.crucialticketing.services;
 
+import com.crucialticketing.entities.ChangeLog;
+import com.crucialticketing.entities.Severity;
 import com.crucialticketing.entities.Ticket;
+import com.mysql.jdbc.PreparedStatement;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.sql.DataSource;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 
 /**
  *
@@ -24,20 +34,52 @@ public class TicketService implements TicketDao {
     DataSource dataSource;
 
     @Override
-    public Ticket getTicketById(int ticketId, boolean populateInternalData) {
+    public int insertTicket(final String shortDescription, final int applicationControlId,
+            final int createdByUserId, final int reportedByUserId, final int currentStatusId) {
+        final String sql = "INSERT INTO ticket ("
+                + "short_description, "
+                + "application_control_id, "
+                + "created_by_id, "
+                + "reported_by_id, "
+                + "current_status_id) VALUES (?, ?, ?, ?, ?)";
+
+        KeyHolder holder = new GeneratedKeyHolder();
+
+        jdbcTemplate.update(new PreparedStatementCreator() {
+
+            @Override
+            public PreparedStatement createPreparedStatement(Connection connection)
+                    throws SQLException {
+                PreparedStatement ps = (PreparedStatement) connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+                ps.setString(1, shortDescription);
+                ps.setInt(2, applicationControlId);
+                ps.setInt(3, createdByUserId);
+                ps.setInt(4, reportedByUserId);
+                ps.setInt(5, currentStatusId);
+                return ps;
+            }
+        }, holder);
+
+        return holder.getKey().intValue();
+    }
+
+    @Override
+    public Ticket getTicketById(int ticketId, boolean popWorkflowMap,
+            boolean popTicketLog, boolean popAttachments, boolean popChangeLog) {
         String sql = selectByTicketId;
         List<Map<String, Object>> rs = jdbcTemplate.queryForList(sql, new Object[]{ticketId});
         if (rs.size() != 1) {
             return new Ticket();
         }
-        return (this.rowMapper(rs, populateInternalData)).get(0);
+        return (this.rowMapper(rs, popWorkflowMap, popTicketLog, popAttachments, popChangeLog)).get(0);
     }
 
     @Override
-    public List<Ticket> getTicketList(boolean populateInternalData) {
+    public List<Ticket> getTicketList(boolean popWorkflowMap,
+            boolean popTicketLog, boolean popAttachments, boolean popChangeLog) {
         String sql = selectByTicketId;
         List<Map<String, Object>> rs = jdbcTemplate.queryForList(sql);
-        return this.rowMapper(rs, populateInternalData);
+        return this.rowMapper(rs, popWorkflowMap, popTicketLog, popAttachments, popChangeLog);
     }
 
     @Override
@@ -53,12 +95,18 @@ public class TicketService implements TicketDao {
     }
 
     @Override
+    public void updateApplicationControl(int ticketId, int applicationControlId) {
+        String sql = "UPDATE ticket SET application_control_id=? WHERE ticket_id=?";
+        jdbcTemplate.update(sql, new Object[]{applicationControlId, ticketId});
+    }
+
+    @Override
     public void setCon(JdbcTemplate con) {
         jdbcTemplate = con;
     }
 
     @Override
-    public List<Ticket> rowMapper(List<Map<String, Object>> resultSet, boolean populateInternalData) {
+    public List<Ticket> rowMapper(List<Map<String, Object>> resultSet, boolean popWorkflowMap, boolean popTicketLog, boolean popAttachments, boolean popChangeLog) {
         List<Ticket> ticketList = new ArrayList<>();
 
         UserService userService = new UserService();
@@ -70,22 +118,37 @@ public class TicketService implements TicketDao {
         TicketLogService ticketLogService = new TicketLogService();
         ticketLogService.setCon(jdbcTemplate);
 
+        AttachmentService attachmentService = new AttachmentService();
+        attachmentService.setCon(jdbcTemplate);
+
+        ChangeLogService changeLogService = new ChangeLogService();
+        changeLogService.setCon(jdbcTemplate);
+
         for (Map row : resultSet) {
             Ticket ticket = new Ticket();
 
-            ticket.setTicketId((int)row.get("ticket_id"));
+            ticket.setTicketId((int) row.get("ticket_id"));
             ticket.setShortDescription((String) row.get("short_description"));
 
-            ticket.setMessageProcessor(userService.getUserById((int) row.get("message_processor_id"), false));
             ticket.setReportedBy(userService.getUserById((int) row.get("reported_by_id"), false));
             ticket.setCreatedBy(userService.getUserById((int) row.get("created_by_id"), false));
 
-            ticket.setApplicationControl(applicationControlService.getApplicationControlById((int) row.get("application_control_id"), populateInternalData));
+            ticket.setApplicationControl(applicationControlService.getApplicationControlById((int) row.get("application_control_id"), popWorkflowMap));
 
             ticket.setCurrentWorkflowStep(ticket.getApplicationControl().getWorkflow().getWorkflowMap().getWorkflowStageByStatus(((int) row.get("current_status_id"))));
 
-            if (populateInternalData) {
+            if (popTicketLog) {
                 ticket.setTicketLog(ticketLogService.getTicketLogByTicketId((int) row.get("ticket_id")));
+            }
+
+            if (popAttachments) {
+                ticket.setAttachmentList(attachmentService.getAttachmentListByTicketId((int) row.get("ticket_id")));
+            }
+
+            if (popChangeLog) {
+                ChangeLog changeLog = changeLogService.getChangeLogByTicketId((int) row.get("ticket_id"));
+                changeLog.setTimeElapsed();
+                ticket.setChangeLog(changeLog);
             }
 
             ticketList.add(ticket);

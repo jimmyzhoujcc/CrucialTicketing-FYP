@@ -36,7 +36,20 @@ public class TicketTypeService implements TicketTypeDao {
 
     @Override
     public List<TicketType> getTicketTypeList() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        String sql = "SELECT * FROM ticket_type";
+        List<Map<String,Object>> rs = jdbcTemplate.queryForList(sql);
+        if(rs.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return this.rowMapper(rs);
+    }
+    
+    @Override
+    public boolean doesTicketTypeExist(int ticketTypeId) {
+        if(this.getTicketTypeById(ticketTypeId).getTicketTypeId() == 0) {
+            return false;
+        }
+        return true;
     }
 
     @Override

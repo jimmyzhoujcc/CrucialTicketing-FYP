@@ -16,6 +16,8 @@ import java.util.Map;
 public interface ApplicationControlDao extends DatabaseService {
     public ApplicationControl getApplicationControlById(int ticketId, boolean populateWorkflowMap);
     
+    public ApplicationControl getApplicationControlByCriteria(int ticketTypeId, int applicationId, int severityId, boolean populateWorkflowMap);
+    
     public List<ApplicationControl> getApplicationControlList(boolean populateWorkflowMap);
     
     public List<ApplicationControl> rowMapper(List<Map<String, Object>> resultSet, boolean populateWorkflowMap);

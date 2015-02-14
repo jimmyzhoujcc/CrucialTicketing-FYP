@@ -14,6 +14,8 @@ public class Attachment {
     private Ticket ticket;
     private User user;
     private String fileName;
+    private String name;
+    private String description;
     private int stamp;
 
     public Attachment() {}
@@ -58,6 +60,22 @@ public class Attachment {
         this.fileName = fileName;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     public int getStamp() {
         return stamp;
     }
@@ -65,9 +83,7 @@ public class Attachment {
     public void setStamp(int stamp) {
         this.stamp = stamp;
     }
-    
-    
-    
+
     
     
 }
