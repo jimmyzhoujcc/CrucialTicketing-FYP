@@ -62,12 +62,14 @@ class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
 </bean> 
     
   
+  
 <!-- <bean id="ticketAccessJob" class="com.crucialticketing.schedule.TicketAccessJob" /> -->
 
 
 <!-- Run every 2 seconds -->  
 <task:scheduled-tasks  scheduler="myScheduler">
     <task:scheduled ref="ticketAccessJob" method="executeTicketAccessJob" cron="*/2 * * * * *" />  
+    <task:scheduled ref="userCreationJob" method="executeUserCreationJob" cron="*/2 * * * * *" />   
 </task:scheduled-tasks>  
 <task:scheduler id="myScheduler" pool-size="1"/>
 

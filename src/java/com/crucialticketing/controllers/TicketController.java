@@ -86,24 +86,21 @@ public class TicketController {
         ticketTypeService.setCon(con);
         if (!ticketTypeService.doesTicketTypeExist(Integer.valueOf(ticketTypeId))) {
             map.addAttribute("alert", "This ticket type no longer exists");
-            map.addAttribute("page", "main/createticketselection.jsp");
-            return "mainview";
+            return preTicketCreation(map);
         }
 
         SeverityService severityService = new SeverityService();
         severityService.setCon(con);
         if (!severityService.doesSeverityExist(Integer.valueOf(severityId))) {
             map.addAttribute("alert", "This severity no longer exists");
-            map.addAttribute("page", "main/createticketselection.jsp");
-            return "mainview";
+            return preTicketCreation(map);
         }
 
         ApplicationService applicationService = new ApplicationService();
         applicationService.setCon(con);
         if (!applicationService.doesApplicationExist(Integer.valueOf(applicationId))) {
             map.addAttribute("alert", "This application no longer exists");
-            map.addAttribute("page", "main/createticketselection.jsp");
-            return "mainview";
+            return preTicketCreation(map);
         }
 
         ApplicationControlService applicationControlService = new ApplicationControlService();
@@ -116,8 +113,7 @@ public class TicketController {
 
         if (applicationControl.getApplicationControlId() == 0) {
             map.addAttribute("alert", "A workflow is not currently setup for this configuration");
-            map.addAttribute("page", "main/createticketselection.jsp");
-            return "mainview";
+            return preTicketCreation(map);
         }
 
         User user = (User) request.getSession().getAttribute("user");
@@ -129,8 +125,7 @@ public class TicketController {
 
             // Not allowed
             map.addAttribute("alert", "You do not have the correct role privledges to perform this operation");
-            map.addAttribute("page", "main/createticketselection.jsp");
-            return "mainview";
+            return preTicketCreation(map);
         }
 
         UserService userService = new UserService();
@@ -196,7 +191,7 @@ public class TicketController {
 
             UserAlertService userAlertService = new UserAlertService();
             userAlertService.setCon(con);
-            userAlertService.insertUserAlert(user.getUserId(), Integer.valueOf(ticketId), "(" + ticketId + ") Access requested");
+            userAlertService.insertUserAlert(user.getUserId(), "(" + ticketId + ") Access requested");
 
             map.addAttribute("page", "main/closedticket.jsp");
         }
@@ -241,14 +236,16 @@ public class TicketController {
 
         // Checks if the status move is legal
         int currentStatusId = 0;
-        
+
         if (newStatus.isEmpty()) {
             currentStatusId = applicationControl.getWorkflow().getWorkflowMap()
                     .getWorkflow().get(0).getStatus().getStatusId();
+        } else {
+            currentStatusId = Integer.valueOf(newStatus);
         }
 
         WorkflowStep workflowStep = applicationControl.getWorkflow().getWorkflowMap().getWorkflow().get(0);
-        if ((workflowStep.getStatus().getStatusId() != currentStatusId) && (workflowStep.isLegalStep(currentStatusId))) {
+        if ((workflowStep.getStatus().getStatusId() != currentStatusId) && (!workflowStep.isLegalStep(currentStatusId))) {
             map.addAttribute("alert", "Status conflicts with workflow configuration");
             map.addAttribute("page", "main/createticketselection.jsp");
             return "mainview";
@@ -274,6 +271,80 @@ public class TicketController {
                 user.getUserId(),
                 user.getUserId(),
                 currentStatusId);
+
+        if (ticketId == 0) {
+            map.addAttribute("alert", "The ticket could not be saved");
+            map.addAttribute("page", "main/createticketselection.jsp");
+            return "mainview";
+        }
+
+        // Adds change log entry
+        ChangeLogService changeLogService = new ChangeLogService();
+        changeLogService.setCon(con);
+
+        changeLogService.addChangeLogEntry(
+                ticketId,
+                applicationControl.getApplicationControlId(),
+                user.getUserId(),
+                applicationControl.getWorkflow().getWorkflowMap()
+                .getWorkflow().get(0).getStatus().getStatusId());
+
+        if (currentStatusId != applicationControl.getWorkflow().getWorkflowMap()
+                .getWorkflow().get(0).getStatus().getStatusId()) {
+            changeLogService.addChangeLogEntry(
+                    ticketId,
+                    applicationControl.getApplicationControlId(),
+                    user.getUserId(),
+                    currentStatusId);
+        }
+        // Ticket log
+        TicketLogService ticketLogService = new TicketLogService();
+        ticketLogService.setCon(con);
+
+        // Checks if a log entry has been made
+        if (logEntry.length() > 0) {
+            logEntry = logEntry.replaceAll("(\r\n|\n)", "<br />");
+            ticketLogService.addTicketLog(ticketId, user.getUserId(), logEntry);
+        }
+
+        // Complete any uploads
+        AttachmentService attachmentService = new AttachmentService();
+        attachmentService.setCon(con);
+
+        try {
+            for (UploadedFile uploadedFile : uploadedFileLog.getFiles()) {
+
+                if (!uploadedFile.getFile().isEmpty()) {
+                    byte[] bytes = uploadedFile.getFile().getBytes();
+
+                    String fileName = uploadedFile.getFile().getOriginalFilename();
+
+                    String extension = "unknown";
+
+                    int i = fileName.lastIndexOf('.');
+
+                    if (i > 0) {
+                        extension = fileName.substring(i + 1);
+                        fileName = fileName.substring(0, i);
+                    }
+
+                    String saveFile = request.getServletContext().getRealPath("/WEB-INF/upload/" + fileName + "." + extension);
+
+                    FileOutputStream output = new FileOutputStream(new File(saveFile));
+                    output.write(bytes);
+                    output.close();
+
+                    attachmentService.insertAttachment(
+                            ticketId,
+                            user.getUserId(), fileName + "." + extension,
+                            uploadedFile.getName(),
+                            uploadedFile.getDescription());
+
+                }
+            }
+        } catch (Exception e) {
+
+        }
 
         map.put("ticketObject", ticketService.getTicketById(ticketId, true, true, true, true));
         map.addAttribute("page", "main/closedticket.jsp");

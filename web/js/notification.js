@@ -51,8 +51,16 @@ function checkForNotification() {
             var t = new Date(obj.userAlertLog[i].stamp * 1000);
             var formatted = t.toLocaleTimeString("en-gb", options);
 
+            var messageString = obj.userAlertLog[i].message;
+            
+            if (messageString.length > 25) {
+                var sliceString = messageString.slice(0, 25) + "...";
+            } else {
+                var sliceString = messageString;
+            }
+
             $('#notificationsBody')
-                    .append("<div id=\"notification_" + (i + 1) + "\">" + obj.userAlertLog[i].message + " <span class=\"notification_stamp\">(" + formatted + " (UTC))</span></div><br />");
+                    .append("<div class=\"notification-text\" id=\"notification_" + (i + 1) + "\">" + sliceString + " <span class=\"notification_stamp\">" + formatted + " UTC</span></div><br />");
 
             $('.notification_' + (i + 1)).addClass('notification');
         }

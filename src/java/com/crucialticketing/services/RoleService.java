@@ -34,7 +34,12 @@ public class RoleService implements RoleDao {
     
     @Override
     public List<Role> getRoleList() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        String sql = "SELECT * FROM role";
+        List<Map<String, Object>> rs = jdbcTemplate.queryForList(sql);
+        if (rs.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return this.rowMapper(rs);
     }
 
     @Override

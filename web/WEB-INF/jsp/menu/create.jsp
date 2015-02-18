@@ -3,25 +3,18 @@
     Created on : 06-Jan-2015, 21:54:12
     Author     : Owner
 --%>
+
 <div class="column1">
-    Tickets
+    <h3>Create Options</h3>
     <br />
     <ul>
-        <li><a href="<%=request.getContextPath()%>/home/create/preticket/">Incident Ticket</a></li>
-        <li><a href="#">Problem Ticket</a></li>
-        <li><a href="#">Change Ticket</a></li>
-        <li><a href="#">Service Request Ticket</a></li>
+        <li><a href="<%=request.getContextPath()%>/home/create/preticket/">Ticket</a></li>
+        <li><a href="<%=request.getContextPath()%>/home/create/user/">User</a></li>
+        <li><a href="<%=request.getContextPath()%>/home/create/queue/">Role</a></li>
+        <li><a href="<%=request.getContextPath()%>/home/create/queue/">Queue</a></li>
+        <li><a href="<%=request.getContextPath()%>/home/create/system/">System</a></li>
+        <li><a href="<%=request.getContextPath()%>/home/create/configuration/">Ticket Configuration</a></li>
+        <li><a href="<%=request.getContextPath()%>/home/create/workflow/">Workflow</a></li>
+        <li><a href="<%=request.getContextPath()%>/home/create/status/">Status</a></li>
     </ul>
 </div>
-
-<div class="column2">
-    System changes
-    <br />
-    <ul>
-        <li><a href="#">Status</a></li>
-        <li><a href="#">Workflow</a></li>
-        <li><a href="#">SLA</a></li>
-    </ul>
-</div>
-
-<br />

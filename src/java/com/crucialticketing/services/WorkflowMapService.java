@@ -59,8 +59,8 @@ public class WorkflowMapService implements WorkflowMapDao {
             if (!workflowMap.doesStepExist((int) row.get("from_workflow_status_id"))) {
                 workflowMap.addStep(
                         workflowStatusService.getWorkflowStatusById((int) row.get("from_workflow_status_id")),
-                        new Role(-1, "n/a"),
-                        new Queue(-1, "n/a"), 
+                        new Role(-1, null, null, null),
+                        new Queue(-1, null), 
                         0);
             }
 

@@ -14,6 +14,8 @@ import java.util.Map;
  * @author DanFoley
  */
 public interface UserDao extends DatabaseService {
+    public String insertUser(User user);
+    
     public User getUserById(int userId, boolean populateInternal);
     
     public User getUserByUsername(String username, boolean populateInternal);

@@ -6,36 +6,43 @@
          pageEncoding="UTF-8"%>
 
 <br />
-<div style="text-align:Center"><h2>Crucial Ticketing</h2></div>
-<br />
-<div style="margin-left:530px;text-align: center">
-    <c:if test="${fn:length(alert)>0}">
-        <div class="alert alert-danger" role="alert">${alert}</div>
-        <% request.removeAttribute("alert");%>
-    </c:if>
-    <br /><br />
 
-    <form:form method="POST" action="../attemptlogin/" commandName="login">
-        <table>
-            <tr>
-                <td>Username :</td>
-                <td><form:input path="username" value="test" />
-                </td>
-            </tr>
+<div class="row">
+    <div class="col-md-4"></div>
+    <div class="col-md-4">
 
-            <tr>
-                <td>Password :</td>
-                <td><form:input path="password" type="password" value="test" />
-                </td>
-            </tr>
+        <h2 class="main-title">Crucial Ticketing</h2>
+        
+        <c:if test="${fn:length(alert)>0}">
+            <div class="alert alert-danger" role="alert">${alert}</div>
+            <% request.removeAttribute("alert");%>
+        </c:if>
 
-            <tr>
-                <td colspan="2"><br /><input type="submit" />
-                </td>
-            </tr>
-        </table>
-    </form:form>
+
+
+        <form method="POST"  class="form-horizontal" action="<%=request.getContextPath()%>/home/login/attemptlogin/" >
+
+            <div class="form-group">
+                <label for="username" class="col-sm-2 control-label">Username</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="username" name="username" placeholder="Username" value="dan" required />
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="inputPassword3" class="col-sm-2 control-label">Password</label>
+                <div class="col-sm-10">
+                    <input type="password" class="form-control" id="inputPassword3" placeholder="Password" name="password" value="tGc3Qaic" required />
+                </div>
+            </div>
+         
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <button type="submit" class="btn btn-default">Sign in</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="col-md-4"></div>
 </div>
-
 <br /><br />
 <%@include file="../footer.jsp" %>

@@ -5,6 +5,8 @@
  */
 package com.crucialticketing.entities;
 
+import java.util.List;
+
 /**
  *
  * @author Daniel Foley
@@ -12,16 +14,20 @@ package com.crucialticketing.entities;
 public class Role {
     private int roleId;
     private String roleName;
+    private String roleDescription;
+    private List<RoleChangeLog> roleChangeLog;
     
     public Role() {}
 
-    public Role(int roleId, String roleName) {
-        this.roleId = roleId;
-        this.roleName = roleName;
-    }
-
     public int getRoleId() {
         return roleId;
+    }
+
+    public Role(int roleId, String roleName, String roleDescription, List<RoleChangeLog> roleChangeLog) {
+        this.roleId = roleId;
+        this.roleName = roleName;
+        this.roleDescription = roleDescription;
+        this.roleChangeLog = roleChangeLog;
     }
 
     public void setRoleId(int roleId) {
@@ -35,6 +41,20 @@ public class Role {
     public void setRoleName(String roleName) {
         this.roleName = roleName;
     }
-    
-    
+
+    public String getRoleDescription() {
+        return roleDescription;
+    }
+
+    public void setRoleDescription(String roleDescription) {
+        this.roleDescription = roleDescription;
+    }
+
+    public List<RoleChangeLog> getRoleChangeLog() {
+        return roleChangeLog;
+    }
+
+    public void addRoleChange(int roleChangeId, User user, int stamp, int flag) {
+        this.roleChangeLog.add(new RoleChangeLog(roleChangeId, user, stamp, flag));
+    } 
 }

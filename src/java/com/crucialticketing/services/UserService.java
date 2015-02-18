@@ -5,12 +5,12 @@
  */
 package com.crucialticketing.services;
 
-import com.crucialticketing.entities.Login;
+import com.crucialticketing.entities.Secure;
+import com.crucialticketing.entities.PasswordHash;
 import com.crucialticketing.entities.User;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import javax.sql.DataSource;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
@@ -22,6 +22,37 @@ public class UserService implements UserDao {
     private JdbcTemplate con;
 
     @Override
+    public String insertUser(User user) {
+        PasswordHash passwordHash = new PasswordHash();
+        String generatedPassword = passwordHash.generatePassword(8);
+
+        try {
+            String hash = passwordHash.createHash(generatedPassword);
+            int activated = (int) (System.currentTimeMillis() / 1000);
+            String sql = "INSERT INTO user "
+                    + "(username, hash, first_name, last_name, email_address, contact, ticket_id, activated, deactivated) "
+                    + "VALUES "
+                    + "(?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            con.update(sql, new Object[]{
+                user.getUsername(),
+                hash,
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmailAddress(),
+                user.getContact(),
+                user.getTicket().getTicketId(),
+                activated,
+                0
+            });
+
+            return generatedPassword;
+        } catch (Exception e) {
+        }
+
+        return generatedPassword;
+    }
+
+    @Override
     public User getUserById(int userId, boolean populateInternal) {
         String sql = "SELECT * FROM user WHERE user_id=?";
         List<Map<String, Object>> rs = con.queryForList(sql, new Object[]{userId});
@@ -30,7 +61,7 @@ public class UserService implements UserDao {
         }
         return (this.rowMapper(rs, populateInternal)).get(0);
     }
-    
+
     @Override
     public User getUserByUsername(String username, boolean populateInternal) {
         String sql = "SELECT * FROM user WHERE username=?";
@@ -43,7 +74,7 @@ public class UserService implements UserDao {
 
     @Override
     public List<User> getUserList(boolean populateInternal) {
-         String sql = "SELECT * FROM user";
+        String sql = "SELECT * FROM user";
         List<Map<String, Object>> rs = con.queryForList(sql);
         if (rs.isEmpty()) {
             return new ArrayList<>();
@@ -65,9 +96,8 @@ public class UserService implements UserDao {
             user.setLastName((String) row.get("last_name"));
 
             if (populateInternal) {
-                user.setLogin(new Login(
-                        (String) row.get("username"),
-                        (String) row.get("password")));
+                user.setSecure(new Secure(
+                        (String) row.get("hash")));
             }
 
             userList.add(user);

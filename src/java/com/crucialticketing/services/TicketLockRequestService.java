@@ -47,7 +47,7 @@ public class TicketLockRequestService implements TicketLockRequestDao {
     public void grantAccess(int ticketId, int userId) {
         UserAlertService userAlertService = new UserAlertService();
         userAlertService.setCon(jdbcTemplate);
-        userAlertService.insertUserAlert(userId, ticketId, "(" + ticketId + ") Access granted for edit");
+        userAlertService.insertUserAlert(userId, "(" + ticketId + ") Access granted for edit");
 
         int unixTime = (int) (System.currentTimeMillis() / 1000);
 
@@ -62,7 +62,7 @@ public class TicketLockRequestService implements TicketLockRequestDao {
 
         UserAlertService userAlertService = new UserAlertService();
         userAlertService.setCon(jdbcTemplate);
-        userAlertService.insertUserAlert(userId, ticketId, "(" + ticketId + ") Access denied for edit (in use)");
+        userAlertService.insertUserAlert(userId, "(" + ticketId + ") Access denied for edit (in use)");
     }
 
     @Override

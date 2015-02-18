@@ -12,10 +12,7 @@
     <form:form method="POST" action="${pageContext.servletContext.contextPath}/home/create/saveticket/" modelAttribute="uploadedfilelog" enctype="multipart/form-data">  
 
         <div class="col-xs-12 col-sm-8 col-md-10">
-            <c:if test="${fn:length(alert)>0}">
-                <div class="alert alert-danger" role="alert">${alert}</div>
-                <% request.removeAttribute("alert");%>
-            </c:if>
+                <h3>Ticket Creation</h3>
             <h3><span class="label label-default">Remember to save to create the ticket</h3>
 
             <br />

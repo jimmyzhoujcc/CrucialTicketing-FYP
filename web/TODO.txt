@@ -1,5 +1,3 @@
-() Complete save functionality
-
 () Automatic scheduled task
     - validate and execute timeout
 
@@ -11,6 +9,5 @@
 () Adding attachments 
     - Verify size
 
-() Creation of tickets
 
 () Style notification body

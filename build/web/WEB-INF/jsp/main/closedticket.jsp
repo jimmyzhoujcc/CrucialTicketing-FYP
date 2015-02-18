@@ -6,13 +6,11 @@
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<jsp:useBean id="dateValue" class="java.util.Date"/>
 
 <div class="row">
     <div class="col-xs-12 col-sm-8 col-md-10">
-        <c:if test="${fn:length(alert)>0}">
-            <div class="alert alert-danger" role="alert">${alert}</div>
-            <% request.removeAttribute("alert");%>
-        </c:if>
+
         <h3><span class="label label-default">${ticketObject.ticketId}</span> ${ticketObject.shortDescription}</h3>
 
         <br />
@@ -75,7 +73,9 @@
                 <br />
                 Reported By: ${ticketObject.reportedBy.firstName} ${ticketObject.reportedBy.lastName}
                 <br />
-                Processing By: ${ticketObject.messageProcessor.firstName} ${ticketObject.messageProcessor.lastName}
+                Last Processing By: 
+                ${ticketObject.changeLog.changeLog[fn:length(ticketObject.changeLog.changeLog)-1].user.firstName} 
+                ${ticketObject.changeLog.changeLog[fn:length(ticketObject.changeLog.changeLog)-1].user.lastName}
             </div>
         </div>
 
@@ -130,7 +130,6 @@
                             <div class="media-body">
                                 <h4 class="media-heading">${ticketLogEntry.user.firstName} ${ticketLogEntry.user.lastName} 
                                     <small>
-                                        <jsp:useBean id="dateValue" class="java.util.Date"/>
                                         <jsp:setProperty name="dateValue" property="time" value="${ticketLogEntry.stamp*1000}"/>
                                         <fmt:formatDate type="both" dateStyle="long" timeStyle="long" value="${dateValue}" />
 
@@ -227,7 +226,6 @@
                 </table>
             </div>
         </div>
-
     </div>
 
     <div class="ticketnav col-xs-4 col-md-2" style="position:fixed; right:0">
@@ -257,6 +255,8 @@
                     <input type="submit" value="Edit" class="btn btn-warning" />
                     <input type="hidden" name="ticketid" value="${ticketObject.ticketId}" />
                 </form>
+                <br />
+                <input type="button" value="Refresh Ticket" class="btn btn-success"  onclick="location.reload();" />
             </div>
         </div>
     </div>

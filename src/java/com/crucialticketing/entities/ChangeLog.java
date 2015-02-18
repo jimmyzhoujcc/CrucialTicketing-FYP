@@ -49,7 +49,6 @@ public class ChangeLog {
             if (prevChangeLogEntry == null) {
                 prevChangeLogEntry = changeLogEntry;
             } else {
-
                 WorkflowStep prevWorkflowStep
                         = prevChangeLogEntry.getApplicationControl().
                         getWorkflow().getWorkflowMap().
@@ -58,10 +57,7 @@ public class ChangeLog {
                 clockActive = (prevWorkflowStep.getClockActive() != 0);
 
                 if (clockActive) {
-                    lastStampRecorded = changeLogEntry.getStamp();
-                    int stampDif = lastStampRecorded - prevChangeLogEntry.getStamp();
-                    this.timeElapsed += stampDif;
-
+                    this.timeElapsed += changeLogEntry.getStamp() - prevChangeLogEntry.getStamp();
                 }
                 // If the SLA clock has changed 
                 if (prevChangeLogEntry.getApplicationControl().getSlaClock() != changeLogEntry.getApplicationControl().getSlaClock()) {
@@ -72,9 +68,24 @@ public class ChangeLog {
                 prevChangeLogEntry = changeLogEntry;
             }
         }
-        
-        if(clockActive) {
-            this.timeElapsed += currentStamp - lastStampRecorded;
+
+        if (prevChangeLogEntry != null) {
+            WorkflowStep workflowStep = prevChangeLogEntry
+                    .getApplicationControl()
+                    .getWorkflow()
+                    .getWorkflowMap()
+                    .getWorkflowStageByStatus(prevChangeLogEntry.getWorkflowStatus().getStatusId());
+
+            if (!workflowStep.getNextWorkflowStep().isEmpty()) {
+                if (prevChangeLogEntry
+                        .getApplicationControl()
+                        .getWorkflow()
+                        .getWorkflowMap()
+                        .getWorkflowStageByStatus(prevChangeLogEntry.getWorkflowStatus().getStatusId()).getClockActive() != 0) {
+                    this.timeElapsed += currentStamp - prevChangeLogEntry.getStamp();
+                }
+            }
         }
+
     }
 }

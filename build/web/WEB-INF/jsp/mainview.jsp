@@ -19,7 +19,7 @@ if included on the main header which services the login pages -->
                 <div id="notificationContainer">
                     <div id="notificationTitle">Notifications</div>
                     <div id="notificationsBody" class="notifications">
-                       
+
                     </div>
 
                     <div id="notificationFooter"><a href="#">See All</a></div>
@@ -62,7 +62,13 @@ if included on the main header which services the login pages -->
 
 </ul>
 <div class="main">
-    
+    <c:if test="${requestScope.alert != null}">
+        <div class="alert alert-danger" role="alert">${requestScope.alert}</div>
+    </c:if>
+    <c:if test="${requestScope.success != null}">
+        <div class="alert alert-success" role="alert">${requestScope.success}</div>
+    </c:if>
+
     <jsp:include page="<%=pageName%>"/>
 </div>
 

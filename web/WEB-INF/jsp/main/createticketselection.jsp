@@ -12,11 +12,9 @@
     <form:form method="POST" action="${pageContext.servletContext.contextPath}/home/create/createticket/">  
 
         <div class="col-xs-12 col-sm-8 col-md-10">
-            <c:if test="${fn:length(alert)>0}">
-                <div class="alert alert-danger" role="alert">${alert}</div>
-                <% request.removeAttribute("alert");%>
-            </c:if>
 
+
+            <h3>Ticket Creation</h3>
             <br />
 
             <div class="panel panel-primary">
@@ -32,7 +30,7 @@
                         </c:forEach>
                     </select>
                     <br /><br />
-                    
+
                     Severity: 
                     <select name="severityId">
                         <c:forEach var="severity" items="${severityList}">
@@ -40,7 +38,7 @@
                         </c:forEach>
                     </select>
                     <br /><br />
-                    
+
                     Application: 
                     <select name="applicationId">
                         <c:forEach var="application" items="${applicationList}">
@@ -63,20 +61,20 @@
 
                     <div class="btn-group">
 
-                    <input type="submit" value="Next" class="btn btn-success" />
-                    <br /><br />
-                    <input type="button" id="cancelEdit" value="Cancel (Exit)" class="btn btn-danger" />
-                    <script>
-                        $('#cancelEdit').on('click', function () {
-                            window.history.back();
-                        });
-                    </script>
+                        <input type="submit" value="Next" class="btn btn-success" />
+                        <br /><br />
+                        <input type="button" id="cancelEdit" value="Cancel (Exit)" class="btn btn-danger" />
+                        <script>
+                            $('#cancelEdit').on('click', function () {
+                                window.history.back();
+                            });
+                        </script>
 
+                    </div>
                 </div>
             </div>
-        </div>
 
-    </form:form>  
-</div>
+        </form:form>  
+    </div>
 
 

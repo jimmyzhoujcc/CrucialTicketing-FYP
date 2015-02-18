@@ -18,14 +18,24 @@ import org.springframework.jdbc.core.JdbcTemplate;
 public class UserAlertService implements UserAlertDao {
 
     private JdbcTemplate con;
-    private String select = "SELECT * FROM user_alert WHERE `user_id`=? ORDER BY stamp DESC";
-    private String insert = "INSERT INTO user_alert (`user_id`, `ticket_id`, `message`, `stamp`, `read`) "
-            + "VALUES (?, ?, ?, ?, ?)";
+    private String select = "SELECT * FROM user_alert WHERE user_id=? ORDER BY user_alert_id DESC";
+    private String insert = "INSERT INTO user_alert (user_id, message, `read`, stamp) "
+            + "VALUES (?, ?, ?, ?)";
     
     @Override
-    public void insertUserAlert(int userId, int ticketId, String message) {
-        int unixTime = (int)(System.currentTimeMillis() / 1000);
-        con.update(insert, new Object[]{userId, ticketId, message, unixTime, 0});
+    public void insertUserAlert(int userId, String message) {
+        int stamp = (int)(System.currentTimeMillis() / 1000);
+        con.update(insert, new Object[]{userId, message, 0, stamp});
+    }
+    
+    @Override
+    public UserAlert getUserAlertById(int userAlertId) {
+        String sql = "SELECT * FROM user_alert WHERE user_alert_id=?";
+        List<Map<String, Object>> rs = con.queryForList(sql, new Object[]{userAlertId});
+        if (rs.isEmpty()) {
+            return new UserAlert();
+        }
+        return rowMapper(rs).get(0);
     }
     
     @Override
@@ -57,10 +67,9 @@ public class UserAlertService implements UserAlertDao {
 
             userAlert.setUserAlertId((int) row.get("user_alert_id"));
             userAlert.setUserId((int) row.get("user_id"));
-            userAlert.setTicketId((int) row.get("ticket_id"));
             userAlert.setMessage((String) row.get("message"));
-            userAlert.setStamp((int) row.get("stamp"));
             userAlert.setRead((boolean) ((int)row.get("read") != 0));
+             userAlert.setStamp((int) row.get("stamp"));
 
             userAlertList.add(userAlert);
         }

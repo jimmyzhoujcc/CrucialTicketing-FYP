@@ -14,7 +14,9 @@ import java.util.Map;
  * @author DanFoley
  */
 public interface UserAlertDao extends DatabaseService {
-    public void insertUserAlert(int userId, int ticketId, String message);
+    public void insertUserAlert(int userId, String message);
+    
+    public UserAlert getUserAlertById(int userAlertId);
     
     public int getAlertCountByUserId(int userId);
     
