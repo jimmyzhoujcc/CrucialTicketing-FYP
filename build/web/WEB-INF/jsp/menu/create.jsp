@@ -10,7 +10,7 @@
     <ul>
         <li><a href="<%=request.getContextPath()%>/home/create/preticket/">Ticket</a></li>
         <li><a href="<%=request.getContextPath()%>/home/create/user/">User</a></li>
-        <li><a href="<%=request.getContextPath()%>/home/create/queue/">Role</a></li>
+        <li><a href="<%=request.getContextPath()%>/home/create/role/">Role</a></li>
         <li><a href="<%=request.getContextPath()%>/home/create/queue/">Queue</a></li>
         <li><a href="<%=request.getContextPath()%>/home/create/system/">System</a></li>
         <li><a href="<%=request.getContextPath()%>/home/create/configuration/">Ticket Configuration</a></li>

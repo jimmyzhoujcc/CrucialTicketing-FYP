@@ -21,13 +21,9 @@ public class User {
     private List<UserRoleConnection> roleList;
     private String emailAddress;
     private String contact;
-    private Ticket ticket;
-    private int activatedTime;
-    private int deactivatedTime;
     
 
     public User() {
-        this.ticket = new Ticket();
         this.secure = new Secure();
         this.roleList = new ArrayList<>();
     }
@@ -114,31 +110,5 @@ public class User {
     public void setContact(String contact) {
         this.contact = contact;
     }
-
-    public Ticket getTicket() {
-        return ticket;
-    }
-
-    public void setTicket(Ticket ticket) {
-        this.ticket = ticket;
-    }
-
-    public int getActivatedTime() {
-        return activatedTime;
-    }
-
-    public void setActivatedTime(int activatedTime) {
-        this.activatedTime = activatedTime;
-    }
-
-    public int getDeactivatedTime() {
-        return deactivatedTime;
-    }
-
-    public void setDeactivatedTime(int deactivatedTime) {
-        this.deactivatedTime = deactivatedTime;
-    }
-
-    
    
 }

@@ -13,15 +13,18 @@ public class UserRequest {
     private int userRequestId;
     private User user;
     private User requestor;
+    private Ticket ticket;
     
     public UserRequest() {
         this.user = new User();
         this.requestor = new User();
+        this.ticket = new Ticket();
     }
     
-    public UserRequest(User user, User requestor) {
+    public UserRequest(User user, User requestor, Ticket ticket) {
         this.user = user;
         this.requestor = requestor;
+        this.ticket = ticket;
     }
 
     public int getUserRequestId() {
@@ -48,7 +51,13 @@ public class UserRequest {
         this.requestor = requestor;
     }
 
-    
+    public Ticket getTicket() {
+        return ticket;
+    }
+
+    public void setTicket(Ticket ticket) {
+        this.ticket = ticket;
+    }
     
     
 }

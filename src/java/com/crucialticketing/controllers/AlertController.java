@@ -8,13 +8,11 @@ package com.crucialticketing.controllers;
 import com.crucialticketing.entities.User;
 import com.crucialticketing.entities.UserAlert;
 import com.crucialticketing.entities.UserAlertLog;
-import com.crucialticketing.services.UserAlertService;
+import com.crucialticketing.daos.services.UserAlertService;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import javax.sql.DataSource;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,7 +29,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class AlertController {
 
     @Autowired
-    DataSource dataSource;
+    UserAlertService userAlertService;
 
     @RequestMapping(value = "/", method = RequestMethod.POST)
     public @ResponseBody
@@ -40,10 +38,6 @@ public class AlertController {
         HttpSession sessionInfo = httpRequest.getSession();
 
         User user = (User) sessionInfo.getAttribute("user");
-
-        UserAlertService userAlertService = new UserAlertService();
-        JdbcTemplate con = new JdbcTemplate(dataSource);
-        userAlertService.setCon(con);
 
         UserAlertLog userAlertLog = new UserAlertLog(
                 userAlertService.getUserAlertListByUserId(user.getUserId()),
@@ -69,10 +63,6 @@ public class AlertController {
 
         User user = (User) sessionInfo.getAttribute("user");
 
-        UserAlertService userAlertService = new UserAlertService();
-        JdbcTemplate con = new JdbcTemplate(dataSource);
-        userAlertService.setCon(con);
-
         userAlertService.clearNotificationCount(user.getUserId(), Integer.valueOf(marker));
 
         return "complete";
@@ -80,11 +70,6 @@ public class AlertController {
 
     @RequestMapping(value = "/singlealert/", method = RequestMethod.GET)
     public String getSingleAlert(@RequestParam(value = "useralertid", required = true) String userAlertId, ModelMap map) {
-        JdbcTemplate con = new JdbcTemplate(dataSource);
-
-        UserAlertService userAlertService = new UserAlertService();
-        userAlertService.setCon(con);
-
         UserAlert userAlert = userAlertService.getUserAlertById(Integer.valueOf(userAlertId));
         map.addAttribute("userAlert", userAlert);
         map.addAttribute("page", "/main/alert/alertsingle.jsp");

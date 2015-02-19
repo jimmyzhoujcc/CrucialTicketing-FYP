@@ -7,21 +7,15 @@ package com.crucialticketing.controllers;
 
 import com.crucialticketing.entities.Secure;
 import com.crucialticketing.entities.PasswordHash;
-import com.crucialticketing.entities.UploadedFile;
 import com.crucialticketing.entities.User;
-import com.crucialticketing.services.UserRoleConnectionService;
-import com.crucialticketing.services.UserService;
+import com.crucialticketing.daos.services.UserRoleConnectionService;
+import com.crucialticketing.daos.services.UserService;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
-import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -35,8 +29,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class LoginController {
 
     @Autowired
-    DataSource dataSource;
-
+    UserService userService;
+    
+    @Autowired
+    UserRoleConnectionService userRoleConnectionService;
+    
     @RequestMapping(value = "/login/", method = RequestMethod.GET)
     public String defaultLoginVisit(ModelMap map) {
         return "login/login";
@@ -51,18 +48,11 @@ public class LoginController {
         try {
             request.getSession().removeAttribute("alert");
 
-            JdbcTemplate con = new JdbcTemplate(dataSource);
-            UserService userService = new UserService();
-            userService.setCon(con);
-
             User user = userService.getUserByUsername(username, true);
 
             PasswordHash passwordHash = new PasswordHash();
 
             if (passwordHash.validatePassword(password, user.getSecure().getHash())) {
-                UserRoleConnectionService userRoleConnectionService = new UserRoleConnectionService();
-                userRoleConnectionService.setCon(con);
-
                 user.setRoleList(userRoleConnectionService.getUserRoleConListByUserId(user.getUserId()));
 
                 request.getSession().setAttribute("user", user);
@@ -79,7 +69,7 @@ public class LoginController {
 
             map.addAttribute("alert", "Invalid username or password");
             return "/login/login";
-        } catch (Exception e) {}
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {}
         
         map.addAttribute("alert", "System is current experiencing technical difficulties");
         return "/login/login";

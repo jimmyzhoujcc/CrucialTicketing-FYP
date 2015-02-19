@@ -8,9 +8,6 @@
 <%@taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
 
 <div class="createuser-form-container">
-    <c:if test="${fn:length(requestScope.alert)>0}">
-        <div class="alert alert-danger" role="alert">${requestScope.alert}</div>
-    </c:if>
 
     <h3>User creation</h3>
 
@@ -38,7 +35,7 @@
 <form:form method="POST" action="${pageContext.request.contextPath}/home/create/user/create/" commandName="user">
     <div class="createuser-form-container">
         <div class="form-group"> Ticket ID
-            <form:input type="text" path="ticket.ticketId" class="form-control" placeholder="Ticket ID for this request" />
+            <input type="text" name="ticketId" class="form-control" placeholder="Ticket ID for this request" />
             <p class="help-block">Ticket ID ongoing for this request</p>
         </div>      
     </div>
@@ -47,7 +44,7 @@
 
     <div class="createuser-form-container">
         <div class="form-group">Username:
-            <form:input type="text" path="login.username" class="form-control" placeholder="Enter desired username" />
+            <form:input type="text" path="username" class="form-control" placeholder="Enter desired username" />
             <p class="help-block">Used to login to this system</p>
         </div>      
     </div>
@@ -92,31 +89,67 @@
 
     <script>
         $().ready(function () {
+
+
             $('#roleAdd').click(function () {
-                return !$('#roleList option:selected').remove().appendTo('#roleListSelected');
+                removeAllRoles();
+                
+                var table = document.getElementById('roleTable');
+
+                var rowLength = table.rows.length;
+
+                for (var i = 1; i < rowLength; i += 1) {
+                    var row = table.rows[i];
+
+                    if (document.getElementById('role_check_' + row.cells[0].innerText).checked) {
+                        roleList = document.getElementById('roleListSelected');
+                        roleList.options[roleList.options.length] = new Option(row.cells[1].innerText, row.cells[0].innerText);
+                    }
+                }
             });
-            $('#roleRemove').click(function () {
-                return !$('#roleListSelected option:selected').remove().appendTo('#roleList');
+            $('#clearRoles').click(function () {
+                removeAllRoles();
             });
+
+            function removeAllRoles() {
+                var selectBox = document.getElementById("roleListSelected");
+                var i;
+                for (i = selectBox.options.length - 1; i >= 0; i--)
+                {
+                    selectBox.remove(i);
+                }
+            }
         });
     </script>
 
     <div class="createuser-form-container">
 
         <div class="form-group">Existing roles
-            <select class="form-control" id="roleList" multiple size="5">
+            <table class="gridtable" id="roleTable">
+                <tr>
+                    <td>Role ID</td>
+                    <td>Role Name</td>
+                    <td>Role Description</td>
+                    <td>Choice</td>
+                </tr>
                 <c:forEach var="role" items="${roleList}">
-                    <option value="${role.roleId}">${role.roleName}</option>
+                    <tr>
+                        <td>${role.roleId}</td>
+                        <td>${role.roleName}</td>
+                        <td>${role.roleDescription}</td>
+                        <td>
+                            <input type="checkbox" id="role_check_${role.roleId}" />
+                        </td>
+                    </tr>
                 </c:forEach>
-            </select>
+            </table>
         </div>
     </div>
 
-
     <br class="clearfix" />
     <div class="createuser-form-container">
-        <input type="button" id="roleAdd" value="Add roles" class="btn btn-success" />
-        <input type="button" id="roleRemove" value="Remove roles" class="btn btn-danger" />
+        <input type="button" id="roleAdd" value="Update Roles" class="btn btn-success" />
+        <input type="button" id="clearRoles" value="Clear Roles" class="btn btn-danger" />
     </div>
 
     <br class="clearfix" />

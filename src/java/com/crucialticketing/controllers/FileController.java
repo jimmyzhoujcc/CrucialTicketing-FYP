@@ -6,7 +6,7 @@
 package com.crucialticketing.controllers;
 
 import com.crucialticketing.entities.Attachment;
-import com.crucialticketing.services.AttachmentService;
+import com.crucialticketing.daos.services.AttachmentService;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -14,11 +14,8 @@ import java.io.InputStream;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.sql.DataSource;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
-
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,7 +31,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class FileController {
 
     @Autowired
-    DataSource dataSource;
+    AttachmentService attachmentService;
 
     @RequestMapping(value = "/{filename}/", method = RequestMethod.GET)
     @ResponseBody
@@ -45,8 +42,6 @@ public class FileController {
 
         String fileName = request.getServletContext().getRealPath("/WEB-INF/upload/");
 
-        AttachmentService attachmentService = new AttachmentService();
-        attachmentService.setCon(new JdbcTemplate(dataSource));
         Attachment attachment = attachmentService.getAttachmentById(Integer.valueOf(fileUploadId));
 
         if (attachment.getFileUploadId() == 0) {
@@ -64,7 +59,6 @@ public class FileController {
 
             if (i > 0) {
                 extension = fileName.substring(i + 1);
-                fileName = fileName.substring(0, i);
             }
 
             response.setContentType("application/" + extension);
@@ -73,10 +67,6 @@ public class FileController {
             ServletOutputStream out = response.getOutputStream();
             IOUtils.copy(in, out);
             response.flushBuffer();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
+        } catch (Exception e) {}
     }
-
 }

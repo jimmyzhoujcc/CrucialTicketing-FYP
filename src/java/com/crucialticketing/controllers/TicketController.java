@@ -12,23 +12,21 @@ import com.crucialticketing.entities.UploadedFileLog;
 import com.crucialticketing.entities.User;
 import com.crucialticketing.entities.WorkflowStatus;
 import com.crucialticketing.entities.WorkflowStep;
-import com.crucialticketing.services.ApplicationControlService;
-import com.crucialticketing.services.ApplicationService;
-import com.crucialticketing.services.AttachmentService;
-import com.crucialticketing.services.ChangeLogService;
-import com.crucialticketing.services.SeverityService;
-import com.crucialticketing.services.TicketLockRequestService;
-import com.crucialticketing.services.TicketLogService;
-import com.crucialticketing.services.TicketService;
-import com.crucialticketing.services.TicketTypeService;
-import com.crucialticketing.services.UserAlertService;
-import com.crucialticketing.services.UserService;
+import com.crucialticketing.daos.services.ApplicationControlService;
+import com.crucialticketing.daos.services.ApplicationService;
+import com.crucialticketing.daos.services.AttachmentService;
+import com.crucialticketing.daos.services.ChangeLogService;
+import com.crucialticketing.daos.services.SeverityService;
+import com.crucialticketing.daos.services.TicketLockRequestService;
+import com.crucialticketing.daos.services.TicketLogService;
+import com.crucialticketing.daos.services.TicketService;
+import com.crucialticketing.daos.services.TicketTypeService;
+import com.crucialticketing.daos.services.UserAlertService;
+import com.crucialticketing.daos.services.UserService;
 import java.io.File;
 import java.io.FileOutputStream;
 import javax.servlet.http.HttpServletRequest;
-import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -44,7 +42,37 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class TicketController {
 
     @Autowired
-    DataSource dataSource;
+    TicketService ticketService;
+
+    @Autowired
+    ApplicationControlService applicationControlService;
+
+    @Autowired
+    TicketTypeService ticketTypeService;
+
+    @Autowired
+    ApplicationService applicationService;
+
+    @Autowired
+    SeverityService severityService;
+
+    @Autowired
+    UserService userService;
+
+    @Autowired
+    TicketLockRequestService ticketLockRequestService;
+
+    @Autowired
+    UserAlertService userAlertService;
+
+    @Autowired
+    ChangeLogService changeLogService;
+
+    @Autowired
+    TicketLogService ticketLogService;
+
+    @Autowired
+    AttachmentService attachmentService;
 
     @RequestMapping(value = "/update/ticketquery/", method = RequestMethod.GET)
     public String queryTicket(ModelMap map) {
@@ -54,18 +82,11 @@ public class TicketController {
 
     @RequestMapping(value = "/create/preticket/", method = RequestMethod.GET)
     public String preTicketCreation(ModelMap map) {
-        JdbcTemplate con = new JdbcTemplate(dataSource);
 
-        TicketTypeService ticketTypeService = new TicketTypeService();
-        ticketTypeService.setCon(con);
         map.addAttribute("ticketTypeList", ticketTypeService.getTicketTypeList());
 
-        ApplicationService applicationService = new ApplicationService();
-        applicationService.setCon(con);
         map.addAttribute("applicationList", applicationService.getApplicationList());
 
-        SeverityService severityService = new SeverityService();
-        severityService.setCon(con);
         map.addAttribute("severityList", severityService.getSeverityList());
 
         map.addAttribute("page", "main/createticketselection.jsp");
@@ -79,32 +100,22 @@ public class TicketController {
             @RequestParam(value = "applicationId", required = true) String applicationId,
             ModelMap map) {
 
-        JdbcTemplate con = new JdbcTemplate(dataSource);
-
         // Pre checks
-        TicketTypeService ticketTypeService = new TicketTypeService();
-        ticketTypeService.setCon(con);
         if (!ticketTypeService.doesTicketTypeExist(Integer.valueOf(ticketTypeId))) {
             map.addAttribute("alert", "This ticket type no longer exists");
             return preTicketCreation(map);
         }
 
-        SeverityService severityService = new SeverityService();
-        severityService.setCon(con);
         if (!severityService.doesSeverityExist(Integer.valueOf(severityId))) {
             map.addAttribute("alert", "This severity no longer exists");
             return preTicketCreation(map);
         }
 
-        ApplicationService applicationService = new ApplicationService();
-        applicationService.setCon(con);
         if (!applicationService.doesApplicationExist(Integer.valueOf(applicationId))) {
             map.addAttribute("alert", "This application no longer exists");
             return preTicketCreation(map);
         }
 
-        ApplicationControlService applicationControlService = new ApplicationControlService();
-        applicationControlService.setCon(con);
         ApplicationControl applicationControl = applicationControlService.getApplicationControlByCriteria(
                 Integer.valueOf(ticketTypeId),
                 Integer.valueOf(applicationId),
@@ -128,8 +139,6 @@ public class TicketController {
             return preTicketCreation(map);
         }
 
-        UserService userService = new UserService();
-        userService.setCon(con);
         map.addAttribute("userList", userService.getUserList(false));
 
         Ticket ticket = new Ticket();
@@ -147,10 +156,6 @@ public class TicketController {
             map.addAttribute("page", "main/queryticket.jsp");
             return "mainview";
         }
-
-        JdbcTemplate con = new JdbcTemplate(dataSource);
-        TicketService ticketService = new TicketService();
-        ticketService.setCon(con);
 
         Ticket ticket = ticketService.getTicketById(Integer.valueOf(ticketId), true, true, true, true);
 
@@ -171,33 +176,22 @@ public class TicketController {
             HttpServletRequest request,
             ModelMap map) {
 
-        JdbcTemplate con = new JdbcTemplate(dataSource);
-        TicketLockRequestService ticketLockRequest = new TicketLockRequestService();
-        ticketLockRequest.setCon(con);
-
         User user = (User) request.getSession().getAttribute("user");
 
-        if (ticketLockRequest.ticketOpenForEditByUser(
+        if (ticketLockRequestService.ticketOpenForEditByUser(
                 Integer.valueOf(ticketId),
                 user.getUserId())) {
-            SeverityService severityService = new SeverityService();
-            severityService.setCon(con);
             map.addAttribute("severityList", severityService.getSeverityList());
             map.addAttribute("page", "main/openticket.jsp");
         } else {
-            ticketLockRequest.addTicketLockRequest(
+            ticketLockRequestService.addTicketLockRequest(
                     Integer.valueOf(ticketId),
                     user.getUserId());
 
-            UserAlertService userAlertService = new UserAlertService();
-            userAlertService.setCon(con);
             userAlertService.insertUserAlert(user.getUserId(), "(" + ticketId + ") Access requested");
 
             map.addAttribute("page", "main/closedticket.jsp");
         }
-
-        TicketService ticketService = new TicketService();
-        ticketService.setCon(con);
 
         Ticket ticket = ticketService.getTicketById(Integer.valueOf(ticketId), true, true, true, true);
         map.put("ticketObject", ticket);
@@ -217,11 +211,6 @@ public class TicketController {
             @ModelAttribute("uploadfilelist") UploadedFileLog uploadedFileLog,
             ModelMap map) {
 
-        JdbcTemplate con = new JdbcTemplate(dataSource);
-
-        ApplicationControlService applicationControlService = new ApplicationControlService();
-        applicationControlService.setCon(con);
-
         // Checks if the IDs provided match the application control ID details from DB
         // This provides a level of security with the application control ID being correct
         ApplicationControl applicationControl = applicationControlService.getApplicationControlById(Integer.valueOf(applicationControlId), true);
@@ -235,7 +224,7 @@ public class TicketController {
         }
 
         // Checks if the status move is legal
-        int currentStatusId = 0;
+        int currentStatusId;
 
         if (newStatus.isEmpty()) {
             currentStatusId = applicationControl.getWorkflow().getWorkflowMap()
@@ -262,9 +251,6 @@ public class TicketController {
             return "mainview";
         }
 
-        TicketService ticketService = new TicketService();
-        ticketService.setCon(con);
-
         int ticketId = ticketService.insertTicket(
                 shortDescription,
                 applicationControl.getApplicationControlId(),
@@ -279,9 +265,6 @@ public class TicketController {
         }
 
         // Adds change log entry
-        ChangeLogService changeLogService = new ChangeLogService();
-        changeLogService.setCon(con);
-
         changeLogService.addChangeLogEntry(
                 ticketId,
                 applicationControl.getApplicationControlId(),
@@ -298,8 +281,6 @@ public class TicketController {
                     currentStatusId);
         }
         // Ticket log
-        TicketLogService ticketLogService = new TicketLogService();
-        ticketLogService.setCon(con);
 
         // Checks if a log entry has been made
         if (logEntry.length() > 0) {
@@ -308,43 +289,7 @@ public class TicketController {
         }
 
         // Complete any uploads
-        AttachmentService attachmentService = new AttachmentService();
-        attachmentService.setCon(con);
-
-        try {
-            for (UploadedFile uploadedFile : uploadedFileLog.getFiles()) {
-
-                if (!uploadedFile.getFile().isEmpty()) {
-                    byte[] bytes = uploadedFile.getFile().getBytes();
-
-                    String fileName = uploadedFile.getFile().getOriginalFilename();
-
-                    String extension = "unknown";
-
-                    int i = fileName.lastIndexOf('.');
-
-                    if (i > 0) {
-                        extension = fileName.substring(i + 1);
-                        fileName = fileName.substring(0, i);
-                    }
-
-                    String saveFile = request.getServletContext().getRealPath("/WEB-INF/upload/" + fileName + "." + extension);
-
-                    FileOutputStream output = new FileOutputStream(new File(saveFile));
-                    output.write(bytes);
-                    output.close();
-
-                    attachmentService.insertAttachment(
-                            ticketId,
-                            user.getUserId(), fileName + "." + extension,
-                            uploadedFile.getName(),
-                            uploadedFile.getDescription());
-
-                }
-            }
-        } catch (Exception e) {
-
-        }
+        this.fileUploadHandler(request, uploadedFileLog, Integer.valueOf(ticketId), user);
 
         map.put("ticketObject", ticketService.getTicketById(ticketId, true, true, true, true));
         map.addAttribute("page", "main/closedticket.jsp");
@@ -362,12 +307,7 @@ public class TicketController {
             @ModelAttribute("uploadfilelist") UploadedFileLog uploadedFileLog,
             ModelMap map) {
 
-        JdbcTemplate con = new JdbcTemplate(dataSource);
-
         // Checks if this ticket is open for editing by this user
-        TicketService ticketService = new TicketService();
-        ticketService.setCon(con);
-
         Ticket ticket = ticketService.getTicketById(Integer.valueOf(ticketId), true, true, true, true);
 
         User user = (User) request.getSession().getAttribute("user");
@@ -383,9 +323,6 @@ public class TicketController {
         }
 
         // Checks if this user has a open ticket lock
-        TicketLockRequestService ticketLockRequestService = new TicketLockRequestService();
-        ticketLockRequestService.setCon(con);
-
         if (!ticketLockRequestService.ticketOpenForEditByUser(Integer.valueOf(ticketId), user.getUserId())) {
             map.put("ticketObject", ticket);
             map.addAttribute("page", "main/closedticket.jsp");
@@ -393,17 +330,11 @@ public class TicketController {
             return "mainview";
         }
 
-        TicketLogService ticketLogService = new TicketLogService();
-        ticketLogService.setCon(con);
-
         boolean changeLogEntryRequired = false;
         boolean severityChange = false;
 
         if (Integer.valueOf(severity) != ticket.getApplicationControl().getSeverity().getSeverityId()) {
             severityChange = true;
-
-            ApplicationControlService applicationControlService = new ApplicationControlService();
-            applicationControlService.setCon(con);
 
             ApplicationControl applicationControl = applicationControlService.getApplicationControlByCriteria(
                     ticket.getApplicationControl().getTicketType().getTicketTypeId(),
@@ -486,9 +417,33 @@ public class TicketController {
         }
 
         // Complete any uploads
-        AttachmentService attachmentService = new AttachmentService();
-        attachmentService.setCon(con);
+        this.fileUploadHandler(request, uploadedFileLog, Integer.valueOf(ticketId), user);
 
+        // Grabs fresh version of ticket from DB
+        ticket = ticketService.getTicketById(Integer.valueOf(ticketId), true, true, true, true);
+
+        // Adds change log entry if required
+        if (changeLogEntryRequired) {
+            changeLogService.addChangeLogEntry(
+                    ticket.getTicketId(),
+                    ticket.getApplicationControl().getApplicationControlId(),
+                    user.getUserId(),
+                    ticket.getCurrentWorkflowStep().getStatus().getStatusId());
+        }
+
+        ticket = ticketService.getTicketById(Integer.valueOf(ticketId), true, true, true, true);
+
+        map.put("ticketObject", ticket);
+        map.addAttribute("page", "main/closedticket.jsp");
+
+        return "mainview";
+    }
+
+    private void fileUploadHandler(
+            HttpServletRequest request,
+            UploadedFileLog uploadedFileLog,
+            int ticketId,
+            User user) {
         try {
             for (UploadedFile uploadedFile : uploadedFileLog.getFiles()) {
 
@@ -506,45 +461,28 @@ public class TicketController {
                         fileName = fileName.substring(0, i);
                     }
 
-                    String saveFile = request.getServletContext().getRealPath("/WEB-INF/upload/" + fileName + "." + extension);
+                    String saveFile = request.getServletContext().getRealPath("/WEB-INF/upload/" + ticketId + "/" + fileName + "." + extension);
 
-                    FileOutputStream output = new FileOutputStream(new File(saveFile));
-                    output.write(bytes);
-                    output.close();
+                    File fileDirectory = new File(request.getServletContext().getRealPath("/WEB-INF/upload/" + ticketId + "/"));
 
-                    attachmentService.insertAttachment(
-                            Integer.valueOf(ticketId),
-                            user.getUserId(), fileName + "." + extension,
-                            uploadedFile.getName(),
-                            uploadedFile.getDescription());
+                    if (!fileDirectory.exists()) {
+                        fileDirectory.mkdir();
+                    }
 
+                    try (FileOutputStream output = new FileOutputStream(new File(saveFile))) {
+                        output.write(bytes);
+
+                        attachmentService.insertAttachment(
+                                ticketId,
+                                user.getUserId(), fileName + "." + extension,
+                                uploadedFile.getName(),
+                                uploadedFile.getDescription());
+                    }
                 }
             }
         } catch (Exception e) {
 
         }
-
-        // Grabs fresh version of ticket from DB
-        ticket = ticketService.getTicketById(Integer.valueOf(ticketId), true, true, true, true);
-
-        // Adds change log entry if required
-        ChangeLogService changeLogService = new ChangeLogService();
-        changeLogService.setCon(con);
-
-        if (changeLogEntryRequired) {
-            changeLogService.addChangeLogEntry(
-                    ticket.getTicketId(),
-                    ticket.getApplicationControl().getApplicationControlId(),
-                    user.getUserId(),
-                    ticket.getCurrentWorkflowStep().getStatus().getStatusId());
-        }
-
-        ticket = ticketService.getTicketById(Integer.valueOf(ticketId), true, true, true, true);
-
-        map.put("ticketObject", ticket);
-        map.addAttribute("page", "main/closedticket.jsp");
-
-        return "mainview";
     }
 
 }

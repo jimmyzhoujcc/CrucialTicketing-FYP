@@ -54,7 +54,7 @@ public class Role {
         return roleChangeLog;
     }
 
-    public void addRoleChange(int roleChangeId, User user, int stamp, int flag) {
-        this.roleChangeLog.add(new RoleChangeLog(roleChangeId, user, stamp, flag));
-    } 
+    public void addRoleChange(int roleChangeId, User user, int stamp, int flag, Ticket ticket) {
+        this.roleChangeLog.add(new RoleChangeLog(roleChangeId, user, stamp, flag, ticket));
+    }
 }

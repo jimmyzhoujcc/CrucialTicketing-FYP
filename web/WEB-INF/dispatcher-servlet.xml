@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:batch="http://www.springframework.org/schema/batch"
-	xmlns:context="http://www.springframework.org/schema/context"
-	xmlns:task="http://www.springframework.org/schema/task" 
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.springframework.org/schema/batch
+       xmlns:batch="http://www.springframework.org/schema/batch"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:task="http://www.springframework.org/schema/task" 
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/batch
 	http://www.springframework.org/schema/batch/spring-batch-2.2.xsd
 	http://www.springframework.org/schema/beans 
 	http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
@@ -24,54 +24,105 @@
         <property name="suffix" value=".jsp" />
     </bean>
     
-    <bean id="multipartResolver"
-class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
+    <bean id="multipartResolver" 
+          class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
 
+    <!-- Beans for DAO -->
+    <bean id="applicationControlService" class="com.crucialticketing.daos.services.ApplicationControlService">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
     
-    <!-- declare beans -->  
-<!--
-    <bean id="applicationControlService" class="com.crucialticketing.services.ApplicationControlService" />  
-    <bean id="applicationService" class="com.crucialticketing.services.ApplicationService" />  
-   
-    <bean id="queueService" class="com.crucialticketing.services.QueueService" />  
-    <bean id="roleService" class="com.crucialticketing.services.RoleService" />  
-   
-    <bean id="ticketService" class="com.crucialticketing.services.TicketService" />  
-    <bean id="ticketTypeService" class="com.crucialticketing.services.TicketTypeService" />  
-    <bean id="severityService" class="com.crucialticketing.services.SeverityService" />  
-    <bean id="ticketLogService" class="com.crucialticketing.services.TicketLogService" />  
-   
-    <bean id="userService" class="com.crucialticketing.services.UserService" />  
-   
-    <bean id="workflowService" class="com.crucialticketing.services.WorkflowService" />  
-    <bean id="workflowMapService" class="com.crucialticketing.services.WorkflowMapService" />  
-    <bean id="workflowStatusService" class="com.crucialticketing.services.WorkflowStatusService" />
- 
-    <bean id="ticketLockRequestService" class="com.crucialticketing.services.TicketLockRequestService" />
+    <bean id="applicationService" class="com.crucialticketing.daos.services.ApplicationService">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
     
-    <bean id="userAlertService" class="com.crucialticketing.services.UserAlertService" />
--->
+    <bean id="attachmentService" class="com.crucialticketing.daos.services.AttachmentService">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
 
-<!-- declare datasource bean -->  
-<bean id="dataSource"  
+    <bean id="changeLogService" class="com.crucialticketing.daos.services.ChangeLogService">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+
+    <bean id="queueService" class="com.crucialticketing.daos.services.QueueService">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    
+    <bean id="roleChangeLogService" class="com.crucialticketing.daos.services.RoleChangeLogService">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    
+    <bean id="roleRequestService" class="com.crucialticketing.daos.services.RoleRequestService">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    
+    <bean id="roleService" class="com.crucialticketing.daos.services.RoleService">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    
+    <bean id="severityService" class="com.crucialticketing.daos.services.SeverityService">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    
+    <bean id="ticketLockRequestService" class="com.crucialticketing.daos.services.TicketLockRequestService">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    
+    <bean id="ticketLogService" class="com.crucialticketing.daos.services.TicketLogService">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    
+    <bean id="ticketService" class="com.crucialticketing.daos.services.TicketService">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    
+    <bean id="ticketTypeService" class="com.crucialticketing.daos.services.TicketTypeService">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    
+    <bean id="userAlertService" class="com.crucialticketing.daos.services.UserAlertService">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    
+    <bean id="userRequestService" class="com.crucialticketing.daos.services.UserRequestService">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    
+    <bean id="userRoleConnectionService" class="com.crucialticketing.daos.services.UserRoleConnectionService">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+
+    <bean id="userService" class="com.crucialticketing.daos.services.UserService">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    
+    <bean id="workflowMapService" class="com.crucialticketing.daos.services.WorkflowMapService">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    
+    <bean id="workflowService" class="com.crucialticketing.daos.services.WorkflowService">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    
+    <bean id="workflowStatusService" class="com.crucialticketing.daos.services.WorkflowStatusService">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    
+    <!-- declare datasource bean -->  
+    <bean id="dataSource"  
           class="org.springframework.jdbc.datasource.DriverManagerDataSource">  
-    <property name="driverClassName" value="com.mysql.jdbc.Driver" />  
-    <property name="url" value="jdbc:mysql://localhost:3306/crucialticketing" />  
-    <property name="username" value="root" />  
-    <property name="password" value="" />  
-</bean> 
+        <property name="driverClassName" value="com.mysql.jdbc.Driver" />  
+        <property name="url" value="jdbc:mysql://localhost:3306/crucialticketing" />  
+        <property name="username" value="root" />  
+        <property name="password" value="" />  
+    </bean> 
     
-  
-  
-<!-- <bean id="ticketAccessJob" class="com.crucialticketing.schedule.TicketAccessJob" /> -->
+    <!-- Run every 2 seconds -->  
+    <task:scheduled-tasks  scheduler="myScheduler">
+        <task:scheduled ref="ticketAccessJob" method="executeTicketAccessJob" cron="*/2 * * * * *" />  
+        <task:scheduled ref="creationJob" method="executeUserCreationJob" cron="*/2 * * * * *" /> 
+        <task:scheduled ref="creationJob" method="executeRoleCreationJob" cron="*/2 * * * * *" />   
+    </task:scheduled-tasks>  
+    <task:scheduler id="myScheduler" pool-size="1"/>
 
-
-<!-- Run every 2 seconds -->  
-<task:scheduled-tasks  scheduler="myScheduler">
-    <task:scheduled ref="ticketAccessJob" method="executeTicketAccessJob" cron="*/2 * * * * *" />  
-    <task:scheduled ref="userCreationJob" method="executeUserCreationJob" cron="*/2 * * * * *" />   
-</task:scheduled-tasks>  
-<task:scheduler id="myScheduler" pool-size="1"/>
-
-    
 </beans>

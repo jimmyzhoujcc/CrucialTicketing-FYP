@@ -1,5 +1,6 @@
 <%@include file="header.jsp" %>
 
+
 <!-- This javascript file is included here as it would trigger false alerts 
 if included on the main header which services the login pages -->
 
@@ -62,10 +63,10 @@ if included on the main header which services the login pages -->
 
 </ul>
 <div class="main">
-    <c:if test="${requestScope.alert != null}">
+    <c:if test="${fn:length(requestScope.alert) > 0}">
         <div class="alert alert-danger" role="alert">${requestScope.alert}</div>
     </c:if>
-    <c:if test="${requestScope.success != null}">
+    <c:if test="${fn:length(requestScope.success) > 0}">
         <div class="alert alert-success" role="alert">${requestScope.success}</div>
     </c:if>
 
