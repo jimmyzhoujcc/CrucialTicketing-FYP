@@ -5,9 +5,6 @@
  */
 package com.crucialticketing.entities;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  *
  * @author Daniel Foley
@@ -18,14 +15,12 @@ public class User {
     private String firstName;
     private String lastName;
     private Secure secure;
-    private List<UserRoleConnection> roleList;
     private String emailAddress;
     private String contact;
     
 
     public User() {
         this.secure = new Secure();
-        this.roleList = new ArrayList<>();
     }
 
     public User(int userId) {
@@ -36,23 +31,6 @@ public class User {
         this.userId = userId;
         this.firstName = firstName;
         this.lastName = lastName;
-    }
-
-    public void setRoleList(List<UserRoleConnection> roleList) {
-        this.roleList = roleList;
-    }
-    
-    public List<UserRoleConnection> getRoleList() {
-        return this.roleList;
-    }
-
-    public boolean hasRole(String role) {
-        for (UserRoleConnection roleCon : roleList) {
-            if(roleCon.getRole().getRoleName().equals(role)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     public int getUserId() {

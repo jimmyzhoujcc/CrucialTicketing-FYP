@@ -26,7 +26,7 @@
     
     <bean id="multipartResolver" 
           class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
-
+    
     <!-- Beans for DAO -->
     <bean id="applicationControlService" class="com.crucialticketing.daos.services.ApplicationControlService">
         <property name="dataSource" ref="dataSource" />
@@ -44,6 +44,10 @@
         <property name="dataSource" ref="dataSource" />
     </bean>
 
+    <bean id="queueRequestService" class="com.crucialticketing.daos.services.QueueRequestService">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    
     <bean id="queueService" class="com.crucialticketing.daos.services.QueueService">
         <property name="dataSource" ref="dataSource" />
     </bean>
@@ -84,11 +88,19 @@
         <property name="dataSource" ref="dataSource" />
     </bean>
     
+    <bean id="userQueueConService" class="com.crucialticketing.daos.services.UserQueueConService">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    
     <bean id="userRequestService" class="com.crucialticketing.daos.services.UserRequestService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     
-    <bean id="userRoleConnectionService" class="com.crucialticketing.daos.services.UserRoleConnectionService">
+    <bean id="userRoleConRequestService" class="com.crucialticketing.daos.services.UserRoleConRequestService">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    
+    <bean id="userRoleConService" class="com.crucialticketing.daos.services.UserRoleConService">
         <property name="dataSource" ref="dataSource" />
     </bean>
 

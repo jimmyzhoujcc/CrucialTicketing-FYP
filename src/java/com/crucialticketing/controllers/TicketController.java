@@ -16,12 +16,14 @@ import com.crucialticketing.daos.services.ApplicationControlService;
 import com.crucialticketing.daos.services.ApplicationService;
 import com.crucialticketing.daos.services.AttachmentService;
 import com.crucialticketing.daos.services.ChangeLogService;
+import com.crucialticketing.daos.services.RoleService;
 import com.crucialticketing.daos.services.SeverityService;
 import com.crucialticketing.daos.services.TicketLockRequestService;
 import com.crucialticketing.daos.services.TicketLogService;
 import com.crucialticketing.daos.services.TicketService;
 import com.crucialticketing.daos.services.TicketTypeService;
 import com.crucialticketing.daos.services.UserAlertService;
+import com.crucialticketing.daos.services.UserRoleConService;
 import com.crucialticketing.daos.services.UserService;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -57,6 +59,9 @@ public class TicketController {
     SeverityService severityService;
 
     @Autowired
+    RoleService roleService;
+
+    @Autowired
     UserService userService;
 
     @Autowired
@@ -73,6 +78,9 @@ public class TicketController {
 
     @Autowired
     AttachmentService attachmentService;
+
+    @Autowired
+    UserRoleConService userRoleConService;
 
     @RequestMapping(value = "/update/ticketquery/", method = RequestMethod.GET)
     public String queryTicket(ModelMap map) {
@@ -130,10 +138,11 @@ public class TicketController {
         User user = (User) request.getSession().getAttribute("user");
 
         // Checks if correct role is maintained 
-        if (!user.hasRole("MAINT_"
-                + ticketTypeId + "_TICKET_"
-                + applicationId)) {
-
+        if (!userRoleConService.doesConExist(user.getUserId(),
+                roleService.getRoleByRoleName(
+                        "MAINT_"
+                        + ticketTypeId + "_TICKET_"
+                        + applicationId).getRoleId())) {
             // Not allowed
             map.addAttribute("alert", "You do not have the correct role privledges to perform this operation");
             return preTicketCreation(map);
@@ -243,9 +252,12 @@ public class TicketController {
         User user = (User) request.getSession().getAttribute("user");
 
         // Checks if correct role is maintained 
-        if (!user.hasRole("MAINT_"
-                + applicationControl.getTicketType().getTicketTypeId() + "_TICKET_"
-                + applicationControl.getApplication().getApplicationId())) {
+        if (!userRoleConService.doesConExist(user.getUserId(),
+                roleService.getRoleByRoleName(
+                        "MAINT_"
+                        + applicationControl.getTicketType().getTicketTypeId()
+                        + "_TICKET_"
+                        + applicationControl.getApplication().getApplicationId()).getRoleId())) {
             map.addAttribute("alert", "You do not have the correct role privledges to perform this operation");
             map.addAttribute("page", "main/createticketselection.jsp");
             return "mainview";
@@ -313,9 +325,11 @@ public class TicketController {
         User user = (User) request.getSession().getAttribute("user");
 
         // Checks if correct role is maintained 
-        if (!user.hasRole("MAINT_"
-                + ticket.getApplicationControl().getTicketType().getTicketTypeId() + "_TICKET_"
-                + ticket.getApplicationControl().getApplication().getApplicationId())) {
+        // Checks if correct role is maintained 
+        if (!userRoleConService.doesConExist(user.getUserId(),
+                roleService.getRoleByRoleName("MAINT_"
+                        + ticket.getApplicationControl().getTicketType().getTicketTypeId() + "_TICKET_"
+                        + ticket.getApplicationControl().getApplication().getApplicationId()).getRoleId())) {
             map.put("ticketObject", ticket);
             map.addAttribute("page", "main/closedticket.jsp");
             map.addAttribute("alert", "You do not have the correct role privledges to perform a save operation");

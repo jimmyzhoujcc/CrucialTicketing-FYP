@@ -21,6 +21,10 @@ public interface RoleDao {
     
     public Role getRoleByRoleName(String roleName);
     
+    public boolean doesRoleExist(int roleId);
+    
+    public boolean doesRoleExist(String roleName);
+    
     public List<Role> getRoleList();
     
     public List<Role> rowMapper(List<Map<String, Object>> resultSet);

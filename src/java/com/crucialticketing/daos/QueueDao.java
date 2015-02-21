@@ -14,9 +14,18 @@ import java.util.Map;
  * @author DanFoley
  */
 public interface QueueDao {
+    
+    public int insertQueue(String queueName);
+    
     public Queue getQueueById(int queueId);
     
+    public Queue getQueueByQueueName(String queueName);
+    
     public List<Queue> getQueueList();
+    
+    public boolean doesQueueExist(int queueId);
+    
+    public boolean doesQueueExist(String queueName);
     
     public List<Queue> rowMapper(List<Map<String, Object>> resultSet);
 }

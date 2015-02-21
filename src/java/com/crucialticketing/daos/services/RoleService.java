@@ -59,6 +59,16 @@ public class RoleService extends JdbcDaoSupport implements RoleDao {
     }
 
     @Override
+    public boolean doesRoleExist(int roleId) {
+        return this.getRoleById(roleId).getRoleId() != 0;
+    }
+    
+    @Override
+    public boolean doesRoleExist(String roleName) {
+        return this.getRoleByRoleName(roleName).getRoleId() != 0;
+    }
+    
+    @Override
     public List<Role> rowMapper(List<Map<String, Object>> resultSet) {
         List<Role> roleList = new ArrayList<>();
 

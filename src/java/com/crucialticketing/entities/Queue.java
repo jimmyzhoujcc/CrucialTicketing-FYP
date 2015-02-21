@@ -5,6 +5,8 @@
  */
 package com.crucialticketing.entities;
 
+import java.util.List;
+
 /**
  *
  * @author Daniel Foley
@@ -12,6 +14,7 @@ package com.crucialticketing.entities;
 public class Queue {
     private int queueId;
     private String queueName;
+    private List<UserQueueCon> userList;
     
     public Queue() {}
 

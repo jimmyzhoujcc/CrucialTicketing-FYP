@@ -5,10 +5,11 @@
  */
 package com.crucialticketing.controllers;
 
+import com.crucialticketing.daos.services.RoleService;
 import com.crucialticketing.entities.Secure;
 import com.crucialticketing.entities.PasswordHash;
 import com.crucialticketing.entities.User;
-import com.crucialticketing.daos.services.UserRoleConnectionService;
+import com.crucialticketing.daos.services.UserRoleConService;
 import com.crucialticketing.daos.services.UserService;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
@@ -30,10 +31,13 @@ public class LoginController {
 
     @Autowired
     UserService userService;
-    
+
     @Autowired
-    UserRoleConnectionService userRoleConnectionService;
-    
+    RoleService roleService;
+
+    @Autowired
+    UserRoleConService userRoleConService;
+
     @RequestMapping(value = "/login/", method = RequestMethod.GET)
     public String defaultLoginVisit(ModelMap map) {
         return "login/login";
@@ -53,24 +57,25 @@ public class LoginController {
             PasswordHash passwordHash = new PasswordHash();
 
             if (passwordHash.validatePassword(password, user.getSecure().getHash())) {
-                user.setRoleList(userRoleConnectionService.getUserRoleConListByUserId(user.getUserId()));
 
-                request.getSession().setAttribute("user", user);
-
-                if (!user.hasRole("END_USER")) {
+                if (!userRoleConService.doesConExist(user.getUserId(),
+                        roleService.getRoleByRoleName("END_USER").getRoleId())) {
                     map.addAttribute("alert", "User does not have the correct privledges to login");
                     return "/login/login";
                 }
 
-                map.addAttribute("alert", "");
+                request.getSession().setAttribute("user", user);
+                request.getSession().setAttribute("active", true);
+
                 map.addAttribute("page", "menu/main.jsp");
                 return "mainview";
             }
 
             map.addAttribute("alert", "Invalid username or password");
             return "/login/login";
-        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {}
-        
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+        }
+
         map.addAttribute("alert", "System is current experiencing technical difficulties");
         return "/login/login";
     }

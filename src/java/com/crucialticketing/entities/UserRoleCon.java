@@ -9,31 +9,29 @@ package com.crucialticketing.entities;
  *
  * @author DanFoley
  */
-public class UserRoleConnection {
-    private int userRoleConnectionId;
+public class UserRoleCon {
+    private int userRoleConId;
     private User user;
     private Role role;
     private int validFrom;
     private int validTo;
-    private int added;
-    
-    public UserRoleConnection() {}
 
-    public UserRoleConnection(int userRoleConnectionId, User user, Role role, int validFrom, int validTo, int added) {
-        this.userRoleConnectionId = userRoleConnectionId;
+    public UserRoleCon() {}
+
+    public UserRoleCon(int userRoleConId, User user, Role role, int validFrom, int validTo) {
+        this.userRoleConId = userRoleConId;
         this.user = user;
         this.role = role;
         this.validFrom = validFrom;
         this.validTo = validTo;
-        this.added = added;
     }
 
-    public int getUserRoleConnectionId() {
-        return userRoleConnectionId;
+    public int getUserRoleConId() {
+        return userRoleConId;
     }
 
-    public void setUserRoleConnectionId(int userRoleConnectionId) {
-        this.userRoleConnectionId = userRoleConnectionId;
+    public void setUserRoleConId(int userRoleConId) {
+        this.userRoleConId = userRoleConId;
     }
 
     public User getUser() {
@@ -66,17 +64,5 @@ public class UserRoleConnection {
 
     public void setValidTo(int validTo) {
         this.validTo = validTo;
-    }
-
-    public int getAdded() {
-        return added;
-    }
-
-    public void setAdded(int added) {
-        this.added = added;
-    }
-    
-    
-    
-    
+    }    
 }

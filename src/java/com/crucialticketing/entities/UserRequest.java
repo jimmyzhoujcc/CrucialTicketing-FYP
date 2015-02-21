@@ -5,26 +5,32 @@
  */
 package com.crucialticketing.entities;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  *
  * @author DanFoley
  */
 public class UserRequest {
+
     private int userRequestId;
     private User user;
-    private User requestor;
+    private List<UserRoleConRequest> userRoleConRequestList;
     private Ticket ticket;
-    
+    private User requestor;
+
     public UserRequest() {
         this.user = new User();
-        this.requestor = new User();
+        this.userRoleConRequestList = new ArrayList<>();
         this.ticket = new Ticket();
+        this.requestor = new User();
     }
-    
-    public UserRequest(User user, User requestor, Ticket ticket) {
+
+    public UserRequest(User user, Ticket ticket, User requestor) {
         this.user = user;
-        this.requestor = requestor;
         this.ticket = ticket;
+        this.requestor = requestor;
     }
 
     public int getUserRequestId() {
@@ -43,12 +49,12 @@ public class UserRequest {
         this.user = user;
     }
 
-    public User getRequestor() {
-        return requestor;
+    public List<UserRoleConRequest> getUserRoleConRequestList() {
+        return userRoleConRequestList;
     }
 
-    public void setRequestor(User requestor) {
-        this.requestor = requestor;
+    public void setUserRoleConRequestList(List<UserRoleConRequest> userRoleConRequestList) {
+        this.userRoleConRequestList = userRoleConRequestList;
     }
 
     public Ticket getTicket() {
@@ -58,6 +64,14 @@ public class UserRequest {
     public void setTicket(Ticket ticket) {
         this.ticket = ticket;
     }
-    
+
+    public User getRequestor() {
+        return requestor;
+    }
+
+    public void setRequestor(User requestor) {
+        this.requestor = requestor;
+    }
+
     
 }

@@ -14,11 +14,13 @@ import java.util.Map;
  * @author DanFoley
  */
 public interface UserDao {
-    public String insertUser(User user);
+    public int insertUser(User user);
     
     public User getUserById(int userId, boolean populateInternal);
     
     public User getUserByUsername(String username, boolean populateInternal);
+    
+    public boolean doesUserExist(int userId);
     
     public List<User> getUserList(boolean populateInternal);
     

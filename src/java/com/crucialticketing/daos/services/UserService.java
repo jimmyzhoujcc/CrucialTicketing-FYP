@@ -7,15 +7,18 @@ package com.crucialticketing.daos.services;
 
 import com.crucialticketing.daos.UserDao;
 import com.crucialticketing.entities.Secure;
-import com.crucialticketing.entities.PasswordHash;
 import com.crucialticketing.entities.User;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
+import com.mysql.jdbc.PreparedStatement;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 
 /**
  *
@@ -24,31 +27,31 @@ import org.springframework.jdbc.core.support.JdbcDaoSupport;
 public class UserService extends JdbcDaoSupport implements UserDao {
 
     @Override
-    public String insertUser(User user) {
-        PasswordHash passwordHash = new PasswordHash();
-        String generatedPassword = passwordHash.generatePassword(8);
+    public int insertUser(final User user) {
+        final String sql = "INSERT INTO user "
+                + "(username, hash, first_name, last_name, email_address, contact) "
+                + "VALUES "
+                + "(?, ?, ?, ?, ?, ?)";
 
-        try {
-            String hash = passwordHash.createHash(generatedPassword);
-            int activated = (int) (System.currentTimeMillis() / 1000);
-            String sql = "INSERT INTO user "
-                    + "(username, hash, first_name, last_name, email_address, contact) "
-                    + "VALUES "
-                    + "(?, ?, ?, ?, ?, ?)";
-            this.getJdbcTemplate().update(sql, new Object[]{
-                user.getUsername(),
-                hash,
-                user.getFirstName(),
-                user.getLastName(),
-                user.getEmailAddress(),
-                user.getContact(),
-            });
+        KeyHolder holder = new GeneratedKeyHolder();
 
-            return generatedPassword;
-        } catch (NoSuchAlgorithmException | InvalidKeySpecException | DataAccessException e) {
-        }
+        this.getJdbcTemplate().update(new PreparedStatementCreator() {
 
-        return generatedPassword;
+            @Override
+            public PreparedStatement createPreparedStatement(Connection connection)
+                    throws SQLException {
+                PreparedStatement ps = (PreparedStatement) connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+                ps.setString(1, user.getUsername());
+                ps.setString(2, user.getSecure().getHash());
+                ps.setString(3, user.getFirstName());
+                ps.setString(4, user.getLastName());
+                ps.setString(5, user.getEmailAddress());
+                ps.setString(6, user.getContact());
+                return ps;
+            }
+        }, holder);
+
+        return holder.getKey().intValue();
     }
 
     @Override
@@ -69,6 +72,15 @@ public class UserService extends JdbcDaoSupport implements UserDao {
             return new User();
         }
         return (this.rowMapper(rs, populateInternal)).get(0);
+    }
+
+    @Override
+    public boolean doesUserExist(int userId) {
+        String sql = "SELECT COUNT(user_id) AS result FROM user "
+                + "WHERE user_id=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{userId});
+        int result = Integer.valueOf(rs.get(0).get("result").toString());
+        return result != 0;
     }
 
     @Override

@@ -14,7 +14,9 @@ import java.util.Map;
  * @author DanFoley
  */
 public interface UserRequestDao {
-    public void insertUserRequest(UserRequest userRequest);
+    public int insertUserRequest(UserRequest userRequest);
+    
+    public void setReadyToProcess(int userRequestId);
     
     public List<UserRequest> getUserRequestList();
     
