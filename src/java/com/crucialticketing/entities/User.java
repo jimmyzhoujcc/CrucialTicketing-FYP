@@ -5,6 +5,8 @@
  */
 package com.crucialticketing.entities;
 
+import java.util.List;
+
 /**
  *
  * @author Daniel Foley
@@ -17,17 +19,20 @@ public class User {
     private Secure secure;
     private String emailAddress;
     private String contact;
-    
+    private List<UserRoleCon> userRoleConList;
+    private int activeFlag;
 
     public User() {
         this.secure = new Secure();
     }
 
     public User(int userId) {
+        this.secure = new Secure();
         this.userId = userId;
     }
     
     public User(int userId, String firstName, String lastName) {
+        this.secure = new Secure();
         this.userId = userId;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -88,5 +93,22 @@ public class User {
     public void setContact(String contact) {
         this.contact = contact;
     }
-   
+
+    public List<UserRoleCon> getUserRoleConList() {
+        return userRoleConList;
+    }
+
+    public void setUserRoleConList(List<UserRoleCon> userRoleConList) {
+        this.userRoleConList = userRoleConList;
+    }
+    
+    public int getActiveFlag() {
+        return activeFlag;
+    }
+
+    public void setActiveFlag(int activeFlag) {
+        this.activeFlag = activeFlag;
+    }
+
+    
 }

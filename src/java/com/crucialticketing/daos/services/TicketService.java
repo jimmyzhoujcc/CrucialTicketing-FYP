@@ -110,6 +110,15 @@ public class TicketService extends JdbcDaoSupport implements TicketDao {
     }
 
     @Override
+    public boolean doesTicketExist(int ticketId) {
+        String sql = "SELECT COUNT(ticket_id) AS result FROM ticket "
+                + "WHERE ticket_id=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{ticketId});
+        int result = Integer.valueOf(rs.get(0).get("result").toString());
+        return result != 0;
+    }
+    
+    @Override
     public List<Ticket> rowMapper(List<Map<String, Object>> resultSet, boolean popWorkflowMap, boolean popTicketLog, boolean popAttachments, boolean popChangeLog) {
         List<Ticket> ticketList = new ArrayList<>();
 

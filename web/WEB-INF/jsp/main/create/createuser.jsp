@@ -32,19 +32,19 @@
 </div>
 <br class="clearfix" />
 <br class="clearfix" />
-<form:form method="POST" action="${pageContext.request.contextPath}/home/create/user/create/" commandName="userRequest">
+<form:form method="POST" action="${pageContext.request.contextPath}/home/create/user/create/" commandName="user">
     <div class="create-form-button-container">
-        <div class="form-group"> Ticket ID
+        <!--<div class="form-group"> Ticket ID
             <input type="text" name="ticket.ticketId" class="form-control" placeholder="Ticket ID for this request" required="required" />
             <p class="help-block">Ticket ID ongoing for this request</p>
-        </div>      
+        </div>  -->    
     </div>
 
     <br class="clearfix" />
 
     <div class="create-form-button-container">
         <div class="form-group">Username:
-            <form:input type="text" path="user.username" class="form-control" placeholder="Enter desired username"  required="required" />
+            <form:input type="text" path="username" class="form-control" placeholder="Enter desired username"  required="required" />
             <p class="help-block">Used to login to this system</p>
         </div>      
     </div>
@@ -53,7 +53,7 @@
 
     <div class="create-form-button-container">
         <div class="form-group">First name
-            <form:input type="text" path="user.firstName" class="form-control" placeholder="Enter user's first name" required="required" />
+            <form:input type="text" path="firstName" class="form-control" placeholder="Enter user's first name" required="required" />
             <p class="help-block">User's first name for account setup</p>
         </div>      
     </div>
@@ -62,7 +62,7 @@
 
     <div class="create-form-button-container">
         <div class="form-group">Last name
-            <form:input type="text" path="user.lastName" class="form-control" placeholder="Enter user's last name" required="required" />
+            <form:input type="text" path="lastName" class="form-control" placeholder="Enter user's last name" required="required" />
             <p class="help-block">User's last name for account setup</p>
         </div>      
     </div>
@@ -71,7 +71,7 @@
 
     <div class="create-form-button-container">
         <div class="form-group">Email Address
-            <form:input type="text" path="user.emailAddress" class="form-control" placeholder="Enter user's email address" required="required" />
+            <form:input type="text" path="emailAddress" class="form-control" placeholder="Enter user's email address" required="required" />
             <p class="help-block">User's email address for account setup</p>
         </div>      
     </div>
@@ -80,7 +80,7 @@
 
     <div class="create-form-button-container">
         <div class="form-group">Contact Number
-            <form:input type="text" path="user.contact" class="form-control" placeholder="Enter user's contact number" required="required" />
+            <form:input type="text" path="contact" class="form-control" placeholder="Enter user's contact number" required="required" />
             <p class="help-block">User's contact number for account setup</p>
         </div>      
     </div>
@@ -127,9 +127,9 @@
             var validFromDate = (new Date(validFrom.replace(pattern, '$3/$2/$1')).getTime()/1000);
             var validToDate = (new Date(validTo.replace(pattern, '$3/$2/$1')).getTime()/1000);
 
-            content = "<input type=\"hidden\" name=\"userRoleConRequestList["+counter+"\].role.roleId\" value=\""+ roleId+"\" />";
-            content += "<input type=\"hidden\" name=\"userRoleConRequestList["+counter+"\].validFrom\" value=\"" + validFromDate + "\" />";
-            content += "<input type=\"hidden\" name=\"userRoleConRequestList["+counter+"\].validTo\" value=\"" + validToDate + "\" />";
+            content = "<input type=\"hidden\" name=\"userRoleConList["+counter+"\].role.roleId\" value=\""+ roleId+"\" />";
+            content += "<input type=\"hidden\" name=\"userRoleConList["+counter+"\].validFrom\" value=\"" + validFromDate + "\" />";
+            content += "<input type=\"hidden\" name=\"userRoleConList["+counter+"\].validTo\" value=\"" + validToDate + "\" />";
 
             newDiv = document.createElement('div');
             $(newDiv).html(content)

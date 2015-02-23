@@ -15,17 +15,35 @@ import java.util.Map;
  */
 public interface RoleDao {
     
-    public void insertRole(Role role);
-    
-    public Role getRoleById(int roleId);
+    public int insertRole(Role role);
+
+    public Role getRoleById(int RoleId);
     
     public Role getRoleByRoleName(String roleName);
+
+    public List<Role> getIncompleteRoleList();
+
+    public List<Role> getUnprocessedRoleList();
     
-    public boolean doesRoleExist(int roleId);
+    public List<Role> getOnlineRoleList();
+    
+    public List<Role> getOfflineRoleList();
+    
+    public void updateToUnprocessed(Role role);
+    
+    public void updateToOnline(Role role);
+    
+    public void updateToOffline(Role role);
+    
+    public void removeRoleEntry(Role role);
     
     public boolean doesRoleExist(String roleName);
     
-    public List<Role> getRoleList();
+    public boolean doesRoleExistInOnline(int roleId);
+    
+    public boolean doesRoleExistInOnline(String roleName);
+    
+    public boolean doesRoleExistInOnlineOrOffline(String roleName);
     
     public List<Role> rowMapper(List<Map<String, Object>> resultSet);
 }

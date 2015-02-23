@@ -16,7 +16,9 @@ import org.springframework.stereotype.Component;
 public class Secure {
     private String hash;
     
-    public Secure() {}
+    public Secure() {
+        this.hash = "";
+    }
 
     public Secure(String hash) {
         this.hash = hash;

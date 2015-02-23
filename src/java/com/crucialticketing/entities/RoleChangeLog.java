@@ -12,20 +12,25 @@ package com.crucialticketing.entities;
 public class RoleChangeLog {
 
     private int roleChangeLogId;
-    private User user;
-    private int stamp;
-    private int flag;
+    private Role role;
+    private int activeFlag;
     private Ticket ticket;
+    private User requestor;
+    private int stamp;
+    
 
     public RoleChangeLog() {
+        this.role = new Role();
+        this.ticket = new Ticket();
+        this.requestor = new User();
     }
 
-    public RoleChangeLog(int roleChangeLogId, User user, int stamp, int flag, Ticket ticket) {
-        this.roleChangeLogId = roleChangeLogId;
-        this.user = user;
-        this.stamp = stamp;
-        this.flag = flag;
+    public RoleChangeLog(Role role, int activeFlag, Ticket ticket, User requestor, int stamp) {
+        this.role = role;
+        this.activeFlag = activeFlag;
         this.ticket = ticket;
+        this.requestor = requestor;
+        this.stamp = stamp;
     }
 
     public int getRoleChangeLogId() {
@@ -36,12 +41,36 @@ public class RoleChangeLog {
         this.roleChangeLogId = roleChangeLogId;
     }
 
-    public User getUser() {
-        return user;
+    public Role getRole() {
+        return role;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    public int getActiveFlag() {
+        return activeFlag;
+    }
+
+    public void setActiveFlag(int activeFlag) {
+        this.activeFlag = activeFlag;
+    }
+
+    public Ticket getTicket() {
+        return ticket;
+    }
+
+    public void setTicket(Ticket ticket) {
+        this.ticket = ticket;
+    }
+
+    public User getRequestor() {
+        return requestor;
+    }
+
+    public void setRequestor(User requestor) {
+        this.requestor = requestor;
     }
 
     public int getStamp() {
@@ -52,19 +81,6 @@ public class RoleChangeLog {
         this.stamp = stamp;
     }
 
-    public int getFlag() {
-        return flag;
-    }
-
-    public void setFlag(int flag) {
-        this.flag = flag;
-    }
-
-    public Ticket getTicket() {
-        return ticket;
-    }
-
-    public void setTicket(Ticket ticket) {
-        this.ticket = ticket;
-    }
+    
+    
 }

@@ -43,8 +43,8 @@
     <bean id="changeLogService" class="com.crucialticketing.daos.services.ChangeLogService">
         <property name="dataSource" ref="dataSource" />
     </bean>
-
-    <bean id="queueRequestService" class="com.crucialticketing.daos.services.QueueRequestService">
+    
+    <bean id="queueChangeLogService" class="com.crucialticketing.daos.services.QueueChangeLogService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     
@@ -53,10 +53,6 @@
     </bean>
     
     <bean id="roleChangeLogService" class="com.crucialticketing.daos.services.RoleChangeLogService">
-        <property name="dataSource" ref="dataSource" />
-    </bean>
-    
-    <bean id="roleRequestService" class="com.crucialticketing.daos.services.RoleRequestService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     
@@ -88,15 +84,11 @@
         <property name="dataSource" ref="dataSource" />
     </bean>
     
+    <bean id="userChangeLogService" class="com.crucialticketing.daos.services.UserChangeLogService">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    
     <bean id="userQueueConService" class="com.crucialticketing.daos.services.UserQueueConService">
-        <property name="dataSource" ref="dataSource" />
-    </bean>
-    
-    <bean id="userRequestService" class="com.crucialticketing.daos.services.UserRequestService">
-        <property name="dataSource" ref="dataSource" />
-    </bean>
-    
-    <bean id="userRoleConRequestService" class="com.crucialticketing.daos.services.UserRoleConRequestService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     
@@ -133,7 +125,8 @@
     <task:scheduled-tasks  scheduler="myScheduler">
         <task:scheduled ref="ticketAccessJob" method="executeTicketAccessJob" cron="*/2 * * * * *" />  
         <task:scheduled ref="creationJob" method="executeUserCreationJob" cron="*/2 * * * * *" /> 
-        <task:scheduled ref="creationJob" method="executeRoleCreationJob" cron="*/2 * * * * *" />   
+        <task:scheduled ref="creationJob" method="executeRoleCreationJob" cron="*/2 * * * * *" />  
+        <task:scheduled ref="creationJob" method="executeQueueCreationJob" cron="*/2 * * * * *" />   
     </task:scheduled-tasks>  
     <task:scheduler id="myScheduler" pool-size="1"/>
 

@@ -15,17 +15,33 @@ import java.util.Map;
  */
 public interface QueueDao {
     
-    public int insertQueue(String queueName);
+    public int insertQueue(Queue queue);
     
     public Queue getQueueById(int queueId);
     
-    public Queue getQueueByQueueName(String queueName);
+    public List<Queue> getIncompleteQueueList();
     
-    public List<Queue> getQueueList();
+    public List<Queue> getUnprocessedQueueList();
     
-    public boolean doesQueueExist(int queueId);
+    public List<Queue> getOnlineQueueList();
+    
+    public List<Queue> getOfflineQueueList(); 
+    
+    public void updateToUnprocessed(Queue queue);
+    
+    public void updateToOnline(Queue queue);
+    
+    public void updateToOffline(Queue queue);
     
     public boolean doesQueueExist(String queueName);
+    
+    public boolean doesQueueExistInOnline(Queue queue);
+    
+    public boolean doesQueueExistInOnline(String queueName);
+    
+    public boolean doesQueueExistInOnlineOrOffline(String queueName);
+  
+    public void removeQueueEntry(Queue queue);
     
     public List<Queue> rowMapper(List<Map<String, Object>> resultSet);
 }

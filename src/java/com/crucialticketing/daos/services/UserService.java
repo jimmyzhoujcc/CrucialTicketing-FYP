@@ -6,6 +6,7 @@
 package com.crucialticketing.daos.services;
 
 import com.crucialticketing.daos.UserDao;
+import com.crucialticketing.entities.ActiveFlag;
 import com.crucialticketing.entities.Secure;
 import com.crucialticketing.entities.User;
 import com.mysql.jdbc.PreparedStatement;
@@ -15,6 +16,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -26,12 +28,18 @@ import org.springframework.jdbc.support.KeyHolder;
  */
 public class UserService extends JdbcDaoSupport implements UserDao {
 
+    @Autowired
+    UserRoleConService userRoleConService;
+    
+    @Autowired
+    UserChangeLogService userChangeLogService;
+    
     @Override
     public int insertUser(final User user) {
         final String sql = "INSERT INTO user "
-                + "(username, hash, first_name, last_name, email_address, contact) "
+                + "(username, hash, first_name, last_name, email_address, contact, active_flag) "
                 + "VALUES "
-                + "(?, ?, ?, ?, ?, ?)";
+                + "(?, ?, ?, ?, ?, ?, ?)";
 
         KeyHolder holder = new GeneratedKeyHolder();
 
@@ -47,6 +55,7 @@ public class UserService extends JdbcDaoSupport implements UserDao {
                 ps.setString(4, user.getLastName());
                 ps.setString(5, user.getEmailAddress());
                 ps.setString(6, user.getContact());
+                ps.setInt(7, ActiveFlag.INCOMPLETE.getActiveFlag());
                 return ps;
             }
         }, holder);
@@ -75,24 +84,106 @@ public class UserService extends JdbcDaoSupport implements UserDao {
     }
 
     @Override
-    public boolean doesUserExist(int userId) {
-        String sql = "SELECT COUNT(user_id) AS result FROM user "
-                + "WHERE user_id=?";
-        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{userId});
-        int result = Integer.valueOf(rs.get(0).get("result").toString());
-        return result != 0;
+    public List<User> getIncompleteUserList() {
+        String sql = "SELECT * FROM user WHERE active_flag=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{ActiveFlag.INCOMPLETE.getActiveFlag()});
+        if (rs.isEmpty()) {
+            return new ArrayList<>();
+        }
+        List<User> userList = this.rowMapper(rs, false);
+        return userList;
     }
 
     @Override
-    public List<User> getUserList(boolean populateInternal) {
-        String sql = "SELECT * FROM user";
-        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql);
+    public List<User> getUnprocessedUserList() {
+        String sql = "SELECT * FROM user WHERE active_flag=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{ActiveFlag.UNPROCESSED.getActiveFlag()});
+        if (rs.isEmpty()) {
+            return new ArrayList<>();
+        }
+        List<User> userList = this.rowMapper(rs, false);
+        return userList;
+    }
+
+    @Override
+    public List<User> getOnlineUserList(boolean populateInternal) {
+        String sql = "SELECT * FROM user WHERE active_flag=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{ActiveFlag.ONLINE.getActiveFlag()});
         if (rs.isEmpty()) {
             return new ArrayList<>();
         }
         List<User> userList = this.rowMapper(rs, populateInternal);
-        userList.remove(0);
         return userList;
+    }
+
+    @Override
+    public List<User> getOfflineUserList(boolean populateInternal) {
+        String sql = "SELECT * FROM user WHERE active_flag=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{ActiveFlag.OFFLINE.getActiveFlag()});
+        if (rs.isEmpty()) {
+            return new ArrayList<>();
+        }
+        List<User> userList = this.rowMapper(rs, populateInternal);
+        return userList;
+    }
+
+    @Override
+    public void updateToUnprocessed(User user) {
+        String sql = "UPDATE user SET active_flag=? WHERE user_id=?";
+        this.getJdbcTemplate().update(sql, new Object[]{ActiveFlag.UNPROCESSED.getActiveFlag(), user.getUserId()});
+    }
+
+    @Override
+    public void updateToOnline(User user) {
+        String sql = "UPDATE user SET active_flag=? WHERE user_id=?";
+        this.getJdbcTemplate().update(sql, new Object[]{ActiveFlag.ONLINE.getActiveFlag(), user.getUserId()});
+    }
+
+    @Override
+    public void updateToOffline(User user) {
+        String sql = "UPDATE user SET active_flag=? WHERE user_id=?";
+        this.getJdbcTemplate().update(sql, new Object[]{ActiveFlag.OFFLINE.getActiveFlag(), user.getUserId()});
+    }
+
+    @Override
+    public void updateHash(User user, String hash) {
+        String sql = "UPDATE user SET hash=? WHERE user_id=?";
+        this.getJdbcTemplate().update(sql, new Object[]{hash, user.getUserId()});
+    }
+    
+    @Override
+    public void removeUserEntry(User user) {
+        String sql = "DELETE FROM user WHERE user_id=?";
+        this.getJdbcTemplate().update(sql, new Object[]{user.getUserId()});
+        userRoleConService.removeAllUserRoleConEntries(user);
+        userChangeLogService.removeAllUserChangeLogEntries(user);
+    }
+
+    @Override
+    public boolean doesUserExist(String username) {
+        String sql = "SELECT COUNT(user_id) AS result FROM user "
+                + "WHERE username=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{username});
+        int result = Integer.valueOf(rs.get(0).get("result").toString());
+        return result != 0;
+    }
+    
+    @Override
+    public boolean doesUserExistInOnline(String username) {
+        String sql = "SELECT COUNT(user_id) AS result FROM user "
+                + "WHERE username=? AND active_flag=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{username, ActiveFlag.ONLINE.getActiveFlag()});
+        int result = Integer.valueOf(rs.get(0).get("result").toString());
+        return result != 0;
+    }
+    
+    @Override
+    public boolean doesUserExistInOnlineOrOffline(String username) {
+        String sql = "SELECT COUNT(user_id) AS result FROM user "
+                + "WHERE username=? AND active_flag>?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{username, ActiveFlag.UNPROCESSED.getActiveFlag()});
+        int result = Integer.valueOf(rs.get(0).get("result").toString());
+        return result != 0;
     }
 
     @Override
@@ -111,6 +202,10 @@ public class UserService extends JdbcDaoSupport implements UserDao {
                         (String) row.get("hash")));
             }
 
+            user.setEmailAddress((String) row.get("email_address"));
+            user.setContact((String) row.get("contact"));
+            
+            user.setActiveFlag((int)row.get("active_flag"));
             userList.add(user);
         }
         return userList;

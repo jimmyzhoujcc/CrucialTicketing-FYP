@@ -16,7 +16,10 @@ public class UserRoleCon {
     private int validFrom;
     private int validTo;
 
-    public UserRoleCon() {}
+    public UserRoleCon() {
+        this.user = new User();
+        this.role = new Role();
+    }
 
     public UserRoleCon(int userRoleConId, User user, Role role, int validFrom, int validTo) {
         this.userRoleConId = userRoleConId;

@@ -26,5 +26,7 @@ public interface TicketDao {
     
     public void updateApplicationControl(int ticketId, int applicationControlId);
     
+    public boolean doesTicketExist(int ticketId);
+    
     public List<Ticket> rowMapper(List<Map<String, Object>> resultSet, boolean popWorkflowMap, boolean popTicketLog, boolean popAttachments, boolean popChangeLog);
 }

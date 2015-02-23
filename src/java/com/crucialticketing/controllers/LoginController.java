@@ -11,6 +11,7 @@ import com.crucialticketing.entities.PasswordHash;
 import com.crucialticketing.entities.User;
 import com.crucialticketing.daos.services.UserRoleConService;
 import com.crucialticketing.daos.services.UserService;
+import com.crucialticketing.entities.Role;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import javax.servlet.http.HttpServletRequest;
@@ -52,32 +53,43 @@ public class LoginController {
         try {
             request.getSession().removeAttribute("alert");
 
+            if (!userService.doesUserExistInOnline(username)) {
+                // Doesnt exist as a active user
+                map.addAttribute("alert", "User is not an activated user or does not exist");
+                return "/login/login";
+            }
+
             User user = userService.getUserByUsername(username, true);
 
             PasswordHash passwordHash = new PasswordHash();
 
-            if (passwordHash.validatePassword(password, user.getSecure().getHash())) {
-
-                if (!userRoleConService.doesConExist(user.getUserId(),
-                        roleService.getRoleByRoleName("END_USER").getRoleId())) {
-                    map.addAttribute("alert", "User does not have the correct privledges to login");
-                    return "/login/login";
-                }
-
-                request.getSession().setAttribute("user", user);
-                request.getSession().setAttribute("active", true);
-
-                map.addAttribute("page", "menu/main.jsp");
-                return "mainview";
+            if (!passwordHash.validatePassword(password, user.getSecure().getHash())) {
+                map.addAttribute("alert", "Invalid username or password");
+                return "/login/login";
             }
 
-            map.addAttribute("alert", "Invalid username or password");
-            return "/login/login";
-        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-        }
+            if (!roleService.doesRoleExistInOnline("END_USER")) {
+                map.addAttribute("alert", "Unable to complete your login request");
+                return "/login/login";
+            }
 
-        map.addAttribute("alert", "System is current experiencing technical difficulties");
-        return "/login/login";
+            Role role = roleService.getRoleByRoleName("END_USER");
+
+            if (!userRoleConService.doesUserRoleConExistInOnline(user, role)) {
+                map.addAttribute("alert", "User does not have the correct privledges to login");
+                return "/login/login";
+            }
+
+            request.getSession().setAttribute("user", user);
+            request.getSession().setAttribute("active", true);
+
+            map.addAttribute("page", "menu/main.jsp");
+            return "mainview";
+            
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            map.addAttribute("alert", "Unable to complete your login request");
+            return "/login/login";
+        }
     }
 
     @RequestMapping(value = "/logout/",
@@ -87,5 +99,4 @@ public class LoginController {
         map.addAttribute("login", new Secure());
         return "/login/login";
     }
-
 }

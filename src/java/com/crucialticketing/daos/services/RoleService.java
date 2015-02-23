@@ -7,10 +7,19 @@ package com.crucialticketing.daos.services;
 
 import com.crucialticketing.entities.Role;
 import com.crucialticketing.daos.RoleDao;
+import com.crucialticketing.entities.ActiveFlag;
+import com.mysql.jdbc.PreparedStatement;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 
 /**
  *
@@ -18,14 +27,32 @@ import org.springframework.jdbc.core.support.JdbcDaoSupport;
  */
 public class RoleService extends JdbcDaoSupport implements RoleDao {
     
+    @Autowired
+    RoleChangeLogService roleChangeLogService;
+    
     @Override
-    public void insertRole(Role role) {
-        String sql = "INSERT INTO role "
-                    + "(role_name, role_description) "
+    public int insertRole(final Role role) {
+        final String sql = "INSERT INTO role "
+                    + "(role_name, role_description, active_flag) "
                     + "VALUES "
-                    + "(?, ?)";
-            this.getJdbcTemplate().update(sql, new Object[]{
-            role.getRoleName(), role.getRoleDescription()});
+                    + "(?, ?, ?)";
+            
+            KeyHolder holder = new GeneratedKeyHolder();
+
+        this.getJdbcTemplate().update(new PreparedStatementCreator() {
+
+            @Override
+            public PreparedStatement createPreparedStatement(Connection connection)
+                    throws SQLException {
+                PreparedStatement ps = (PreparedStatement) connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+                ps.setString(1,  role.getRoleName());
+                ps.setString(2, role.getRoleDescription());
+                ps.setInt(3, ActiveFlag.INCOMPLETE.getActiveFlag());
+                return ps;
+            }
+        }, holder);
+
+        return holder.getKey().intValue();
     }
     
     @Override
@@ -49,9 +76,9 @@ public class RoleService extends JdbcDaoSupport implements RoleDao {
     }
     
     @Override
-    public List<Role> getRoleList() {
-        String sql = "SELECT * FROM role";
-        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql);
+    public List<Role> getIncompleteRoleList() {
+        String sql = "SELECT * FROM role WHERE active_flag=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{ActiveFlag.INCOMPLETE.getActiveFlag()});
         if (rs.isEmpty()) {
             return new ArrayList<>();
         }
@@ -59,13 +86,94 @@ public class RoleService extends JdbcDaoSupport implements RoleDao {
     }
 
     @Override
-    public boolean doesRoleExist(int roleId) {
-        return this.getRoleById(roleId).getRoleId() != 0;
+    public List<Role> getUnprocessedRoleList() {
+        String sql = "SELECT * FROM role WHERE active_flag=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{ActiveFlag.UNPROCESSED.getActiveFlag()});
+        if (rs.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return this.rowMapper(rs);
+    }
+
+    @Override
+    public List<Role> getOnlineRoleList() {
+        String sql = "SELECT * FROM role WHERE active_flag=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{ActiveFlag.ONLINE.getActiveFlag()});
+        if (rs.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return this.rowMapper(rs);
+    }
+
+    @Override
+    public List<Role> getOfflineRoleList() {
+        String sql = "SELECT * FROM role WHERE active_flag=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{ActiveFlag.OFFLINE.getActiveFlag()});
+        if (rs.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return this.rowMapper(rs);
+    }
+
+    @Override
+    public void updateToUnprocessed(Role role) {
+        String sql = "UPDATE role SET active_flag=? WHERE role_id=?";
+        this.getJdbcTemplate().update(sql, new Object[]{ActiveFlag.UNPROCESSED.getActiveFlag(), role.getRoleId()});
+    }
+
+    @Override
+    public void updateToOnline(Role role) {
+        String sql = "UPDATE role SET active_flag=? WHERE role_id=?";
+        this.getJdbcTemplate().update(sql, new Object[]{ActiveFlag.ONLINE.getActiveFlag(), role.getRoleId()});
+    }
+
+    @Override
+    public void updateToOffline(Role role) {
+        String sql = "UPDATE role SET active_flag=? WHERE role_id=?";
+        this.getJdbcTemplate().update(sql, new Object[]{ActiveFlag.OFFLINE.getActiveFlag(), role.getRoleId()});
+    }
+
+    @Override
+    public void removeRoleEntry(Role role) {
+        String sql = "DELETE FROM role WHERE role_id=?";
+        this.getJdbcTemplate().update(sql, new Object[]{role.getRoleId()});
+        roleChangeLogService.removeAllRoleChangeLogEntries(role);
+    }
+
+    @Override
+    public boolean doesRoleExist(String roleName) {
+        String sql = "SELECT COUNT(role_id) AS result FROM role "
+                + "WHERE role_name=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{roleName});
+        int result = Integer.valueOf(rs.get(0).get("result").toString());
+        return result != 0;
+    }
+
+    @Override
+    public boolean doesRoleExistInOnline(int roleId) {
+        String sql = "SELECT COUNT(role_id) AS result FROM role "
+                + "WHERE role_id=? AND active_flag=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{roleId, ActiveFlag.ONLINE.getActiveFlag()});
+        int result = Integer.valueOf(rs.get(0).get("result").toString());
+        return result != 0;
     }
     
     @Override
-    public boolean doesRoleExist(String roleName) {
-        return this.getRoleByRoleName(roleName).getRoleId() != 0;
+    public boolean doesRoleExistInOnline(String roleName) {
+        String sql = "SELECT COUNT(role_id) AS result FROM role "
+                + "WHERE role_name=? AND active_flag=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{roleName, ActiveFlag.ONLINE.getActiveFlag()});
+        int result = Integer.valueOf(rs.get(0).get("result").toString());
+        return result != 0;
+    }
+    
+    @Override
+    public boolean doesRoleExistInOnlineOrOffline(String roleName) {
+        String sql = "SELECT COUNT(role_id) AS result FROM role "
+                + "WHERE role_name=? AND active_flag>?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{roleName, ActiveFlag.UNPROCESSED.getActiveFlag()});
+        int result = Integer.valueOf(rs.get(0).get("result").toString());
+        return result != 0;
     }
     
     @Override
@@ -77,7 +185,7 @@ public class RoleService extends JdbcDaoSupport implements RoleDao {
 
             role.setRoleId((int) row.get("role_id"));
             role.setRoleName((String) row.get("role_name"));
-
+            role.setActiveFlag((int)row.get("active_flag"));
             roleList.add(role);
         }
         return roleList;

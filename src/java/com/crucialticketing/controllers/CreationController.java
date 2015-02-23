@@ -5,22 +5,26 @@
  */
 package com.crucialticketing.controllers;
 
-import com.crucialticketing.daos.services.QueueRequestService;
-import com.crucialticketing.daos.services.RoleRequestService;
+import com.crucialticketing.daos.services.QueueChangeLogService;
+import com.crucialticketing.daos.services.QueueService;
+import com.crucialticketing.daos.services.RoleChangeLogService;
 import com.crucialticketing.entities.User;
-import com.crucialticketing.entities.UserRequest;
 import com.crucialticketing.daos.services.RoleService;
+import com.crucialticketing.daos.services.TicketService;
+import com.crucialticketing.daos.services.UserChangeLogService;
 import com.crucialticketing.daos.services.UserQueueConService;
-import com.crucialticketing.daos.services.UserRequestService;
-import com.crucialticketing.daos.services.UserRoleConRequestService;
 import com.crucialticketing.daos.services.UserRoleConService;
 import com.crucialticketing.daos.services.UserService;
+import com.crucialticketing.entities.ActiveFlag;
+import com.crucialticketing.entities.QueueChangeLog;
 import com.crucialticketing.entities.QueueRequest;
 import com.crucialticketing.entities.Role;
-import com.crucialticketing.entities.RoleRequest;
+import com.crucialticketing.entities.RoleChangeLog;
 import com.crucialticketing.entities.Ticket;
+import static com.crucialticketing.entities.Timestamp.getTimestamp;
+import com.crucialticketing.entities.UserChangeLog;
 import com.crucialticketing.entities.UserQueueCon;
-import com.crucialticketing.entities.UserRoleConRequest;
+import com.crucialticketing.entities.UserRoleCon;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -39,62 +43,77 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class CreationController {
 
     @Autowired
+    TicketService ticketService;
+    
+    @Autowired
     UserService userService;
+
+    @Autowired
+    UserChangeLogService userChangeLogService;
 
     @Autowired
     RoleService roleService;
 
     @Autowired
-    UserRequestService userRequestService;
+    RoleChangeLogService roleChangeLogService;
 
     @Autowired
     UserRoleConService userRoleConService;
-    
-    //
-    
-    @Autowired
-    RoleRequestService roleRequestService;
 
     //
-    
     @Autowired
-    QueueRequestService queueRequestService;
-    
+    QueueService queueService;
+
     @Autowired
     UserQueueConService userQueueConService;
-    
 
     @Autowired
-    UserRoleConRequestService userRoleConRequestService;
+    QueueChangeLogService queueChangeLogService;
 
     @RequestMapping(value = "/user/", method = RequestMethod.GET)
     public String createUserForm(ModelMap map) {
-        map.addAttribute("roleList", roleService.getRoleList());
-        map.addAttribute("userRequest", new UserRequest());
+        map.addAttribute("roleList", roleService.getOnlineRoleList());
+        map.addAttribute("user", new User());
         map.addAttribute("page", "main/create/createuser.jsp");
         return "mainview";
     }
 
     @RequestMapping(value = "/user/create/", method = RequestMethod.POST)
     public String createUser(HttpServletRequest request,
-            @ModelAttribute("userRequest") UserRequest userForCreation,
+            @ModelAttribute("user") User userForCreation,
             @RequestParam(value = "ticketId", required = false) String ticketId,
             ModelMap map) {
 
-        // Check if user has correct role to do this
+        // Gets user off of the session
         User user = (User) request.getSession().getAttribute("user");
 
-        if (!userRoleConService.doesConExist(user.getUserId(),
-                roleService.getRoleByRoleName("MAINT_USER_CREATION").getRoleId())) {
+        // Checks the role needed for this exists and is not deactivated
+        if (!roleService.doesRoleExistInOnline("MAINT_USER_CREATION")) {
             map.addAttribute("user", userForCreation);
-            map.addAttribute("alert", "You do not have the correct role to complete this operation");
+            map.addAttribute("alert", "Unable to complete your service request");
             map.addAttribute("page", "main/create/createuser.jsp");
             return "mainview";
         }
 
+        // Checks if the user has the correct role and it is active
+        if (!userRoleConService.doesUserRoleConExistInOnline(user,
+                roleService.getRoleByRoleName("MAINT_USER_CREATION"))) {
+            map.addAttribute("user", userForCreation);
+            map.addAttribute("alert", "You do not have the required role privledges to complete this operation");
+            map.addAttribute("page", "main/create/createuser.jsp");
+            return "mainview";
+        }
+
+        // Checks if ticket is valid
+        if (!ticketService.doesTicketExist(Integer.valueOf(ticketId))) {
+            map.addAttribute("user", userForCreation);
+            map.addAttribute("alert", "This ticket does not exist");
+            map.addAttribute("page", "main/create/createuser.jsp");
+            return "mainview";
+        }
+        
         // check if username is taken
-        User verifyUser = userService.getUserByUsername(userForCreation.getUser().getUsername(), false);
-        if (verifyUser.getUserId() != 0) {
+        if (userService.doesUserExist(userForCreation.getUsername())) {
             map.addAttribute("user", userForCreation);
             map.addAttribute("alert", "A user already exists with that username");
             map.addAttribute("page", "main/create/createuser.jsp");
@@ -102,31 +121,41 @@ public class CreationController {
         }
 
         // If roles have been selected, checks if they are valid
-        for (int i = 0, length = userForCreation.getUserRoleConRequestList().size(); i < length; i++) {
-            UserRoleConRequest userRoleConRequest = userForCreation.getUserRoleConRequestList().get(i);
+        for (int i = 0, length = userForCreation.getUserRoleConList().size(); i < length; i++) {
+            UserRoleCon userRoleCon = userForCreation.getUserRoleConList().get(i);
 
-            if (!roleService.doesRoleExist(userRoleConRequest.getRole().getRoleId())) {
-                userForCreation.getUserRoleConRequestList().remove(userRoleConRequest);
+            if (!roleService.doesRoleExistInOnline(userRoleCon.getRole().getRoleId())) {
+                userForCreation.getUserRoleConList().remove(userRoleCon);
                 i--;
                 length--;
             }
         }
 
-        // Inserts user and gets temp ID to store roles against
-        int tempUserId = userRequestService.insertUserRequest(new UserRequest(userForCreation.getUser(), userForCreation.getTicket(), user));
+        // Inserts user and gets ID to store roles against
+        int userId = userService.insertUser(userForCreation);
+        userForCreation.setUserId(userId);
 
-        for (UserRoleConRequest userRoleConRequest : userForCreation.getUserRoleConRequestList()) {
-            userRoleConRequest.getUser().setUserId(tempUserId);
-            userRoleConRequestService.insertUserRoleConRequest(
-                    userRoleConRequest.getRole().getRoleId(),
-                    userRoleConRequest.getUser().getUserId(),
-                    userRoleConRequest.getValidFrom(),
-                    userRoleConRequest.getValidTo(),
-                    userRoleConRequest.getTicket().getTicketId(),
-                    userRoleConRequest.getRequestor().getUserId());
+        for (UserRoleCon userRoleCon : userForCreation.getUserRoleConList()) {
+            userRoleCon.getUser().setUserId(userId);
+            int userRoleConId = userRoleConService.insertUserRoleCon(userRoleCon, true);
+            userRoleCon.setUserRoleConId(userRoleConId);
+            userRoleConService.updateToUnprocessed(userRoleCon);
         }
 
-        userRequestService.setReadyToProcess(tempUserId);
+        userChangeLogService.insertQueueChangeLog(
+                new UserChangeLog(
+                        userForCreation,
+                        user.getSecure().getHash(),
+                        user.getEmailAddress(),
+                        user.getContact(), 
+                        new Ticket(Integer.valueOf(ticketId)), 
+                        ActiveFlag.UNPROCESSED.getActiveFlag(),
+                        user,
+                        getTimestamp()
+                )
+        );
+
+        userService.updateToUnprocessed(userForCreation);
 
         map.addAttribute("success", "Request submission received");
         map.addAttribute("page", "menu/create.jsp");
@@ -150,22 +179,53 @@ public class CreationController {
         // Check if user has correct role to do this
         User user = (User) request.getSession().getAttribute("user");
 
-        if (!userRoleConService.doesConExist(user.getUserId(),
-                roleService.getRoleByRoleName("MAINT_ROLE_CREATION").getRoleId())) {
+        // Checks if role is active
+        if (!roleService.doesRoleExistInOnline("MAINT_ROLE_CREATION")) {
+            map.addAttribute("role", roleForCreation);
+            map.addAttribute("alert", "Unable to complete your service request");
+            map.addAttribute("page", "main/create/createrole.jsp");
+            return "mainview";
+        }
+
+        // Checks if the user has this role
+        if (!userRoleConService.doesUserRoleConExistInOnline(user,
+                roleService.getRoleByRoleName("MAINT_ROLE_CREATION"))) {
             map.addAttribute("role", roleForCreation);
             map.addAttribute("alert", "You do not have the correct role to complete this operation");
             map.addAttribute("page", "main/create/createrole.jsp");
             return "mainview";
         }
+        
+        // Checks if ticket is valid
+        if (!ticketService.doesTicketExist(Integer.valueOf(ticketId))) {
+            map.addAttribute("role", roleForCreation);
+            map.addAttribute("alert", "This ticket does not exist");
+            map.addAttribute("page", "main/create/createrole.jsp");
+            return "mainview";
+        }
 
-        if (roleService.doesRoleExist(roleForCreation.getRoleName())) {
+        // Checks if role exists already
+        if (roleService.doesRoleExistInOnlineOrOffline(roleForCreation.getRoleName())) {
             map.addAttribute("role", roleForCreation);
             map.addAttribute("alert", "A role with this name already exists");
             map.addAttribute("page", "main/create/createrole.jsp");
             return "mainview";
         }
 
-        roleRequestService.insertRoleRequest(new RoleRequest(roleForCreation, user, new Ticket(Integer.valueOf(ticketId))));
+        int roleId = roleService.insertRole(roleForCreation);
+        roleForCreation.setRoleId(roleId);
+        
+        roleChangeLogService.insertRoleChange(
+                new RoleChangeLog(
+                        roleForCreation,
+                        ActiveFlag.UNPROCESSED.getActiveFlag(),
+                        new Ticket(Integer.valueOf(ticketId)),
+                        user,
+                        getTimestamp()
+                )
+        );
+        
+        roleService.updateToUnprocessed(roleForCreation);
 
         map.addAttribute("success", "Request submission received");
         map.addAttribute("page", "menu/create.jsp");
@@ -175,7 +235,7 @@ public class CreationController {
 
     @RequestMapping(value = "/queue/", method = RequestMethod.GET)
     public String createQueueForm(ModelMap map) {
-        map.addAttribute("userList", userService.getUserList(false));
+        map.addAttribute("userList", userService.getOnlineUserList(false));
         map.addAttribute("queueRequest", new QueueRequest());
         map.addAttribute("page", "main/create/createqueue.jsp");
         return "mainview";
@@ -196,7 +256,15 @@ public class CreationController {
             map.addAttribute("page", "main/create/createqueue.jsp");
             return "mainview";
         }
-        
+
+        // Check if queue name already exists
+        if (queueService.doesQueueExistFromAll(queueRequest.getQueue().getQueueName())) {
+            map.addAttribute("queueRequest", queueRequest);
+            map.addAttribute("alert", "There is an entry already matching this queue name");
+            map.addAttribute("page", "main/create/createqueue.jsp");
+            return "mainview";
+        }
+
         // If users have been selected, checks if they are valid
         for (int i = 0, length = queueRequest.getUserQueueConList().size(); i < length; i++) {
             UserQueueCon userQueueCon = queueRequest.getUserQueueConList().get(i);
@@ -207,21 +275,30 @@ public class CreationController {
                 length--;
             }
         }
-        
+
         // Inserts queue into queue request
-        int queueRequestId = queueRequestService.insertQueueRequest(queueRequest);
-        
+        int queueId = queueService.insertQueue(queueRequest.getQueue());
+        queueRequest.getQueue().setQueueId(queueId);
+
         // Inserts any user connection
         for (UserQueueCon userQueueCon : queueRequest.getUserQueueConList()) {
-            userQueueCon.getQueue().setQueueId(queueRequestId);
-            userQueueConService.insertUserQueueCon(userQueueCon);
+            userQueueCon.getQueue().setQueueId(queueId);
+            int userQueueConId = userQueueConService.insertUserQueueCon(userQueueCon, true);
+            userQueueCon.setUserQueueConId(userQueueConId);
+            userQueueConService.updateToUnprocessed(userQueueCon);
         }
-        
+
+        queueService.updateToUnprocessed(queueRequest.getQueue());
+
+        queueChangeLogService.insertQueueChangeLog(
+                new QueueChangeLog(queueRequest.getQueue(), user)
+        );
         // Success
         map.addAttribute("success", "Request submission received");
         map.addAttribute("page", "menu/create.jsp");
 
-        return "mainview"; 
+        return "mainview";
     }
+ 
 
 }

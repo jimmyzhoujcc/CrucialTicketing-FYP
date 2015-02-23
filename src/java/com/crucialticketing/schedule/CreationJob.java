@@ -5,17 +5,27 @@
  */
 package com.crucialticketing.schedule;
 
-import com.crucialticketing.daos.services.RoleRequestService;
+import com.crucialticketing.daos.services.QueueChangeLogService;
+import com.crucialticketing.daos.services.QueueService;
+import com.crucialticketing.daos.services.RoleChangeLogService;
 import com.crucialticketing.daos.services.RoleService;
-import com.crucialticketing.entities.UserRequest;
 import com.crucialticketing.daos.services.UserAlertService;
-import com.crucialticketing.daos.services.UserRequestService;
-import com.crucialticketing.daos.services.UserRoleConRequestService;
+import com.crucialticketing.daos.services.UserChangeLogService;
+import com.crucialticketing.daos.services.UserQueueConService;
 import com.crucialticketing.daos.services.UserRoleConService;
 import com.crucialticketing.daos.services.UserService;
+import com.crucialticketing.entities.ActiveFlag;
 import com.crucialticketing.entities.PasswordHash;
-import com.crucialticketing.entities.RoleRequest;
-import com.crucialticketing.entities.UserRoleConRequest;
+import com.crucialticketing.entities.Queue;
+import com.crucialticketing.entities.QueueChangeLog;
+import com.crucialticketing.entities.Role;
+import com.crucialticketing.entities.RoleChangeLog;
+import com.crucialticketing.entities.Ticket;
+import static com.crucialticketing.entities.Timestamp.getTimestamp;
+import com.crucialticketing.entities.User;
+import com.crucialticketing.entities.UserChangeLog;
+import com.crucialticketing.entities.UserQueueCon;
+import com.crucialticketing.entities.UserRoleCon;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
@@ -31,36 +41,43 @@ import org.springframework.stereotype.Component;
 public class CreationJob {
 
     @Autowired
-    UserRequestService userRequestService;
-
-    @Autowired
-    RoleRequestService roleRequestService;
-
-    @Autowired
-    UserRoleConRequestService userRoleConRequestService;
-    
-    @Autowired
     UserService userService;
+
+    @Autowired
+    UserChangeLogService userChangeLogService;
 
     @Autowired
     RoleService roleService;
 
     @Autowired
+    RoleChangeLogService roleChangeLogService;
+
+    @Autowired
+    QueueService queueService;
+
+    @Autowired
     UserRoleConService userRoleConService;
-    
+
     @Autowired
     UserAlertService userAlertService;
+
+    @Autowired
+    QueueChangeLogService queueChangeLogService;
+
+    @Autowired
+    UserQueueConService userQueueConService;
 
     public void executeUserCreationJob() {
         ArrayList<String> processedList = new ArrayList<>();
         boolean found = false;
 
-        List<UserRequest> userRequestList = userRequestService.getUserRequestList();
+        List<User> newUserList = userService.getUnprocessedUserList();
 
-        for (UserRequest userRequest : userRequestList) {
+        for (User user : newUserList) {
             for (int i = 0; i < processedList.size(); i++) {
-                if (userRequest.getUser().getUsername().equals(processedList.get(i))) {
-                    userRequestService.removeRequest(userRequest.getUserRequestId());
+                if (user.getUsername().equals(processedList.get(i))) {
+                    userService.removeUserEntry(user);
+                    // Change log entry
                     i = processedList.size();
                     found = true;
                 }
@@ -69,8 +86,12 @@ public class CreationJob {
             // If the user is not found in the already processed list
             if (!found) {
 
+                // Gets change log entry 
+                List<UserChangeLog> userChangeLogList = userChangeLogService.getUserChangeLogList(user);
+
                 // Checks if the username exists in the db
-                if (userService.getUserByUsername(userRequest.getUser().getUsername(), false).getUserId() == 0) {
+                if (!userService.doesUserExistInOnlineOrOffline(user.getUsername())) {
+
                     // Generates password for new user
                     PasswordHash passwordHash = new PasswordHash();
                     String generatedPassword = passwordHash.generatePassword(8);
@@ -78,47 +99,58 @@ public class CreationJob {
                     try {
                         // Generates new hash for user
                         String hash = passwordHash.createHash(generatedPassword);
-                        userRequest.getUser().getSecure().setHash(hash);
 
-                        // Inserts user and gets the new unique user ID for the user
-                        int userId = userService.insertUser(userRequest.getUser());
-                        
-                        // Gets the roles requested by using the unique temp user ID from user request
-                        List<UserRoleConRequest> userRoleConRequestList = userRoleConRequestService
-                                .getUserRoleConnectionRequestList(userRequest.getUser().getUserId());
-                        
-                        // Loops each roles and inserts into live role list while deleting request record
-                        for (UserRoleConRequest userRoleConRequest : userRoleConRequestList) {
-                            userRoleConService.insertUserRoleCon(
-                                    userId, 
-                                    userRoleConRequest.getRole().getRoleId(), 
-                                    userRoleConRequest.getValidFrom(), 
-                                    userRoleConRequest.getValidTo());
-                            userRoleConRequestService.removeUserRoleConRequest(userRoleConRequest.getUserRoleConRequestId());
+                        // Adds hash to user
+                        userService.updateHash(user, hash);
+                        user.getSecure().setHash(hash);
+
+                        // Gets the roles requested with this new user
+                        List<UserRoleCon> newUserRoleConList = userRoleConService.getUnprocessedUserRoleConListByUserId(user, true);
+
+                        // Loops each role and checks if the same entry exists already
+                        for (UserRoleCon userRoleCon : newUserRoleConList) {
+                            if (userRoleConService.doesUserRoleConExistInOnline(user, userRoleCon.getRole())) {
+                                userRoleConService.removeUserRoleConEntry(userRoleCon);
+                            } else {
+                                userRoleConService.updateToOnline(userRoleCon);
+                            }
                         }
-                        
+
                         // Adds user to processed list to skip any further requests for this username
-                        processedList.add(userRequest.getUser().getUsername());
-                        
-                        // Removes user request
-                        userRequestService.removeRequest(userRequest.getUserRequestId());
-                        
+                        processedList.add(user.getUsername());
+
+                        // Updates user activation flag
+                        userService.updateToOnline(user);
+
+                        userChangeLogService.insertQueueChangeLog(
+                                new UserChangeLog(
+                                        user,
+                                        user.getSecure().getHash(),
+                                        user.getEmailAddress(),
+                                        user.getContact(),
+                                        userChangeLogList.get(0).getTicket(),
+                                        ActiveFlag.ONLINE.getActiveFlag(),
+                                        userChangeLogList.get(0).getRequestor(),
+                                        getTimestamp()
+                                ));
+
                         // Adds alert to requestors notification list
-                        userAlertService.insertUserAlert(userRequest.getRequestor().getUserId(),
+                        userAlertService.insertUserAlert(userChangeLogList.get(0).getRequestor().getUserId(),
                                 "A user account has been setup with the following information: Username ("
-                                + userRequest.getUser().getUsername() + ") Password (" + generatedPassword + ")");
+                                + user.getUsername() + ") Password (" + generatedPassword + ")");
 
                     } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-                        processedList.add(userRequest.getUser().getUsername());
-                        userRequestService.removeRequest(userRequest.getUserRequestId());
-                        userAlertService.insertUserAlert(userRequest.getRequestor().getUserId(),
+                        processedList.add(user.getUsername());
+
+                        userService.removeUserEntry(user);
+                        userAlertService.insertUserAlert(userChangeLogList.get(0).getRequestor().getUserId(),
                                 "This request could not be completed at this time. To avoid any "
                                 + "further issues the request has been deleted");
                     }
                 } else {
-                    processedList.add(userRequest.getUser().getUsername());
-                    //userRequestService.removeRequest(userRequest.getUserRequestId());
-                    userAlertService.insertUserAlert(userRequest.getRequestor().getUserId(),
+                    processedList.add(user.getUsername());
+                    userService.removeUserEntry(user);
+                    userAlertService.insertUserAlert(userChangeLogList.get(0).getRequestor().getUserId(),
                             "A user account was setup with the same username before your request could be completed");
                 }
             }
@@ -130,34 +162,94 @@ public class CreationJob {
         ArrayList<String> processedList = new ArrayList<>();
         boolean found = false;
 
-        List<RoleRequest> roleRequestList = roleRequestService.getRoleRequestList();
+        List<Role> newRoleList = roleService.getUnprocessedRoleList();
 
-        for (RoleRequest roleRequest : roleRequestList) {
+        for (Role newRole : newRoleList) {
             for (int i = 0; i < processedList.size(); i++) {
-                if (roleRequest.getRole().getRoleName().equals(processedList.get(i))) {
-                    roleRequestService.removeRequest(roleRequest.getRoleRequestId());
+                if (newRole.getRoleName().equals(processedList.get(i))) {
+                    roleService.removeRoleEntry(newRole);
                     i = processedList.size();
                     found = true;
                 }
             }
 
             if (!found) {
+                List<RoleChangeLog> roleChangeLogList = roleChangeLogService.getChangeLogByRoleId(newRole);
 
-                if (!roleService.doesRoleExist(roleRequest.getRole().getRoleName())) {
-                    roleService.insertRole(roleRequest.getRole());
-                    processedList.add(roleRequest.getRole().getRoleName());
-                    roleRequestService.removeRequest(roleRequest.getRoleRequestId());
-                    userAlertService.insertUserAlert(roleRequest.getRequestor().getUserId(),
+                if (!roleService.doesRoleExistInOnlineOrOffline(newRole.getRoleName())) {
+                    roleService.updateToOnline(newRole);
+                    processedList.add(newRole.getRoleName());
+
+                    userAlertService.insertUserAlert(roleChangeLogList.get(0).getRequestor().getUserId(),
                             "A role has been setup with the following information: role Name ("
-                            + roleRequest.getRole().getRoleName() + ") Role Description (" + roleRequest.getRole().getRoleDescription() + ")");
+                            + newRole.getRoleName() + ") Role Description (" + newRole.getRoleDescription() + ")");
+
+                    roleChangeLogService.insertRoleChange(
+                            new RoleChangeLog(
+                                    newRole,
+                                    ActiveFlag.ONLINE.getActiveFlag(),
+                                    roleChangeLogList.get(0).getTicket(),
+                                    roleChangeLogList.get(0).getRequestor(),
+                                    getTimestamp()
+                            )
+                    );
                 } else {
-                    processedList.add(roleRequest.getRole().getRoleName());
-                    userRequestService.removeRequest(roleRequest.getRoleRequestId());
-                    userAlertService.insertUserAlert(roleRequest.getRequestor().getUserId(),
+                    processedList.add(newRole.getRoleName());
+                    roleService.removeRoleEntry(newRole);
+                    userAlertService.insertUserAlert(roleChangeLogList.get(0).getRequestor().getUserId(),
                             "A role was setup with the same role name before your request could be completed");
                 }
             }
         }
+    }
+
+    public void executeQueueCreationJob() {
+        ArrayList<String> processedList = new ArrayList<>();
+        boolean found = false;
+
+        List<Queue> queueList = queueService.getUnprocessedQueueList();
+
+        for (Queue queue : queueList) {
+            for (int i = 0; i < processedList.size(); i++) {
+                if (queue.getQueueName().equals(processedList.get(i))) {
+                    queueService.removeQueueEntry(queue);
+                    i = processedList.size();
+                    found = true;
+                }
+            }
+
+            if (!found) {
+                List<QueueChangeLog> queueChangeLog = queueChangeLogService.getQueueChangeLogList(queue);
+
+                if (!queueService.doesQueueExistPostUnprocessed(queue.getQueueName())) {
+                    updateUserQueueConToOnline(queue);
+                    queueService.updateToOnline(queue);
+                    userAlertService.insertUserAlert(queueChangeLog.get(0).getRequestor().getUserId(),
+                            "A queue has been setup with the following information: Queue Name ("
+                            + queue.getQueueName() + ")");
+                } else {
+                    processedList.add(queue.getQueueName());
+                    queueService.removeQueueEntry(queue);
+                    userAlertService.insertUserAlert(queueChangeLog.get(0).getRequestor().getUserId(),
+                            "A role was setup with the same role name before your request could be completed");
+                }
+            }
+        }
+    }
+
+    private void updateUserQueueConToOnline(Queue queue) {
+        List<UserQueueCon> userQueueConList = userQueueConService.getUnprocessedUserQueueConListByQueueId(queue, true);
+
+        for (UserQueueCon userQueueCon : userQueueConList) {
+            if (!userQueueConService.doesUserQueueConExistPostUnprocessed(userQueueCon.getUser().getUserId(), queue.getQueueId())) {
+                userQueueConService.updateToOnline(userQueueCon);
+                // Change log entry
+            } else {
+                userQueueConService.removeQueueEntry(userQueueCon);
+                // Change log entry
+            }
+        }
+
     }
 
 }

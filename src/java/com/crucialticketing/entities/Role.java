@@ -16,18 +16,28 @@ public class Role {
     private String roleName;
     private String roleDescription;
     private List<RoleChangeLog> roleChangeLog;
+    private int activeFlag;
     
     public Role() {}
 
-    public int getRoleId() {
-        return roleId;
-    }
-
-    public Role(int roleId, String roleName, String roleDescription, List<RoleChangeLog> roleChangeLog) {
+    public Role(int roleId, String roleName, String roleDescription, List<RoleChangeLog> roleChangeLog, int activeFlag) {
         this.roleId = roleId;
         this.roleName = roleName;
         this.roleDescription = roleDescription;
         this.roleChangeLog = roleChangeLog;
+        this.activeFlag = activeFlag;
+    }
+
+   
+    
+    public Role(String roleName, String roleDescription, List<RoleChangeLog> roleChangeLog) {
+        this.roleName = roleName;
+        this.roleDescription = roleDescription;
+        this.roleChangeLog = roleChangeLog;
+    }
+
+    public int getRoleId() {
+        return roleId;
     }
 
     public void setRoleId(int roleId) {
@@ -54,7 +64,18 @@ public class Role {
         return roleChangeLog;
     }
 
-    public void addRoleChange(int roleChangeId, User user, int stamp, int flag, Ticket ticket) {
-        this.roleChangeLog.add(new RoleChangeLog(roleChangeId, user, stamp, flag, ticket));
+    public void setRoleChangeLog(List<RoleChangeLog> roleChangeLog) {
+        this.roleChangeLog = roleChangeLog;
     }
+
+    public int getActiveFlag() {
+        return activeFlag;
+    }
+
+    public void setActiveFlag(int activeFlag) {
+        this.activeFlag = activeFlag;
+    }
+    
+    
+    
 }

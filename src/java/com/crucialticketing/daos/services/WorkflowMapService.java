@@ -51,7 +51,7 @@ public class WorkflowMapService extends JdbcDaoSupport implements WorkflowMapDao
             if (!workflowMap.doesStepExist((int) row.get("from_workflow_status_id"))) {
                 workflowMap.addStep(
                         workflowStatusService.getWorkflowStatusById((int) row.get("from_workflow_status_id")),
-                        new Role(-1, null, null, null),
+                        new Role(-1, null, null, null, -1),
                         new Queue(-1, null),
                         0);
             }
