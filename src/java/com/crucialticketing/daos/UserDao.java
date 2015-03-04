@@ -5,6 +5,7 @@
  */
 package com.crucialticketing.daos;
 
+import com.crucialticketing.entities.Ticket;
 import com.crucialticketing.entities.User;
 import java.util.List;
 import java.util.Map;
@@ -15,11 +16,19 @@ import java.util.Map;
  */
 public interface UserDao {
     
-    public int insertUser(final User user);
+    public int insertUser(final User user, Ticket ticket, User requestor);
     
     public User getUserById(int userId, boolean populateInternal);
     
     public User getUserByUsername(String username, boolean populateInternal);
+        
+    public boolean doesUserExist(String username);
+    
+    public boolean doesUserExistInOnline(int userId);
+    
+    public boolean doesUserExistInOnline(String username);
+    
+    public boolean doesUserExistInOnlineOrOffline(String username);
     
     public List<User> getIncompleteUserList();
     
@@ -29,21 +38,13 @@ public interface UserDao {
     
     public List<User> getOfflineUserList(boolean populateInternal);
     
-    public void updateToUnprocessed(User user);
+    public void updateToUnprocessed(User user, Ticket ticket, User requestor);
     
-    public void updateToOnline(User user);
+    public void updateToOnline(User user, Ticket ticket, User requestor);
     
-    public void updateToOffline(User user);
+    public void updateToOffline(User user, Ticket ticket, User requestor);
     
     public void updateHash(User user, String hash);
-    
-    public void removeUserEntry(User user);
-    
-    public boolean doesUserExist(String username);
-    
-    public boolean doesUserExistInOnline(String username);
-    
-    public boolean doesUserExistInOnlineOrOffline(String username);
     
     public List<User> rowMapper(List<Map<String, Object>> resultSet, boolean populateInternal);
 }

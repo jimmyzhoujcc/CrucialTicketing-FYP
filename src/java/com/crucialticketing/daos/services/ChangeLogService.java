@@ -12,7 +12,7 @@ import com.crucialticketing.entities.Ticket;
 import com.crucialticketing.entities.User;
 import com.crucialticketing.entities.WorkflowStatus;
 import com.crucialticketing.daos.ChangeLogDao;
-import static com.crucialticketing.entities.Timestamp.getTimestamp;
+import static com.crucialticketing.util.Timestamp.getTimestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

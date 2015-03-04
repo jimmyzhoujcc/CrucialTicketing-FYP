@@ -16,7 +16,7 @@ import java.util.Map;
  */
 public interface UserChangeLogDao {
 
-    public void insertQueueChangeLog(UserChangeLog userChangeLog);
+    public void insertUserChangeLog(UserChangeLog userChangeLog);
 
     public List<UserChangeLog> getUserChangeLogList();
 

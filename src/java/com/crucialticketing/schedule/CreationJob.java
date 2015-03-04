@@ -21,7 +21,7 @@ import com.crucialticketing.entities.QueueChangeLog;
 import com.crucialticketing.entities.Role;
 import com.crucialticketing.entities.RoleChangeLog;
 import com.crucialticketing.entities.Ticket;
-import static com.crucialticketing.entities.Timestamp.getTimestamp;
+import static com.crucialticketing.util.Timestamp.getTimestamp;
 import com.crucialticketing.entities.User;
 import com.crucialticketing.entities.UserChangeLog;
 import com.crucialticketing.entities.UserQueueCon;

@@ -6,6 +6,7 @@
 package com.crucialticketing.daos;
 
 import com.crucialticketing.entities.Queue;
+import com.crucialticketing.entities.User;
 import com.crucialticketing.entities.UserQueueCon;
 import java.util.List;
 import java.util.Map;
@@ -35,8 +36,8 @@ public interface UserQueueConDao {
     
     public void removeUserQueueConEntry(UserQueueCon userQueueCon);
     
-    public void removeAllUserQueueConEntries(Queue queue);
-  
+    public void removeAllUserQueueConEntries(User user);
+    
     public List<UserQueueCon> getUserListByQueueId(int queueId);
     
     public List<UserQueueCon> getQueueListByUserId(int userId);

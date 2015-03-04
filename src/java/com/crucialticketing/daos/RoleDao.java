@@ -6,6 +6,8 @@
 package com.crucialticketing.daos;
 
 import com.crucialticketing.entities.Role;
+import com.crucialticketing.entities.Ticket;
+import com.crucialticketing.entities.User;
 import java.util.List;
 import java.util.Map;
 
@@ -15,11 +17,19 @@ import java.util.Map;
  */
 public interface RoleDao {
     
-    public int insertRole(Role role);
+    public int insertRole(Role role, Ticket ticket, User requestor);
 
     public Role getRoleById(int RoleId);
     
     public Role getRoleByRoleName(String roleName);
+    
+    public boolean doesRoleExist(String roleName);
+    
+    public boolean doesRoleExistInOnline(int roleId);
+    
+    public boolean doesRoleExistInOnline(String roleName);
+    
+    public boolean doesRoleExistInOnlineOrOffline(String roleName);
 
     public List<Role> getIncompleteRoleList();
 
@@ -29,21 +39,11 @@ public interface RoleDao {
     
     public List<Role> getOfflineRoleList();
     
-    public void updateToUnprocessed(Role role);
+    public void updateToUnprocessed(int roleId, Ticket ticket, User requestor);
     
-    public void updateToOnline(Role role);
+    public void updateToOnline(int roleId, Ticket ticket, User requestor);
     
-    public void updateToOffline(Role role);
-    
-    public void removeRoleEntry(Role role);
-    
-    public boolean doesRoleExist(String roleName);
-    
-    public boolean doesRoleExistInOnline(int roleId);
-    
-    public boolean doesRoleExistInOnline(String roleName);
-    
-    public boolean doesRoleExistInOnlineOrOffline(String roleName);
+    public void updateToOffline(int roleId, Ticket ticket, User requestor);
     
     public List<Role> rowMapper(List<Map<String, Object>> resultSet);
 }

@@ -9,14 +9,60 @@ import java.util.ArrayList;
 import java.util.List;
 import com.crucialticketing.entities.Application;
 import com.crucialticketing.daos.ApplicationDao;
+import com.crucialticketing.entities.ActiveFlag;
+import com.crucialticketing.entities.ApplicationChangeLog;
+import com.crucialticketing.entities.Ticket;
+import static com.crucialticketing.util.Timestamp.getTimestamp;
+import com.crucialticketing.entities.User;
+import com.mysql.jdbc.PreparedStatement;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 
 /**
  *
  * @author Daniel Foley
  */
 public class ApplicationService extends JdbcDaoSupport implements ApplicationDao {
+
+    @Autowired
+    ApplicationChangeLogService applicationChangeLogService;
+    
+    @Override
+    public int insertApplication(final Application application, Ticket ticket, User requestor) {
+        final String sql = "INSERT INTO application "
+                + "(application_name) "
+                + "VALUES "
+                + "(?)";
+
+        KeyHolder holder = new GeneratedKeyHolder();
+
+        this.getJdbcTemplate().update(new PreparedStatementCreator() {
+
+            @Override
+            public PreparedStatement createPreparedStatement(Connection connection)
+                    throws SQLException {
+                PreparedStatement ps = (PreparedStatement) connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+                ps.setString(1, application.getApplicationName());
+                ps.setInt(7, ActiveFlag.INCOMPLETE.getActiveFlag());
+                return ps;
+            }
+        }, holder);
+
+        int insertedApplicationId = holder.getKey().intValue();
+        
+        applicationChangeLogService.insertApplicationChangeLog(
+          new ApplicationChangeLog(application, ticket, requestor, getTimestamp(), ActiveFlag.INCOMPLETE)
+        );
+        
+        return insertedApplicationId;
+    }
 
     @Override
     public Application getApplicationById(int applicationId) {
@@ -29,18 +75,120 @@ public class ApplicationService extends JdbcDaoSupport implements ApplicationDao
     }
 
     @Override
-    public List<Application> getApplicationList() {
-        String sql = "SELECT * FROM application";
-        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql);
+    public List<Application> getIncompleteApplicationList() {
+        String sql = "SELECT * FROM application WHERE active_flag=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(
+                sql, new Object[]{ActiveFlag.INCOMPLETE.getActiveFlag()});
         if (rs.isEmpty()) {
             return new ArrayList<>();
         }
         return this.rowMapper(rs);
     }
-    
+
     @Override
-    public boolean doesApplicationExist(int applicationId) {
-        return this.getApplicationById(applicationId).getApplicationId() != 0;
+    public List<Application> getUnprocessedApplicationList() {
+        String sql = "SELECT * FROM application WHERE active_flag=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(
+                sql, new Object[]{ActiveFlag.UNPROCESSED.getActiveFlag()});
+        if (rs.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return this.rowMapper(rs);
+    }
+
+    @Override
+    public List<Application> getOnlineApplicationList() {
+        String sql = "SELECT * FROM application WHERE active_flag=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(
+                sql, new Object[]{ActiveFlag.ONLINE.getActiveFlag()});
+        if (rs.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return this.rowMapper(rs);
+    }
+
+    @Override
+    public List<Application> getOfflineApplicationList() {
+        String sql = "SELECT * FROM application WHERE active_flag=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(
+                sql, new Object[]{ActiveFlag.OFFLINE.getActiveFlag()});
+        if (rs.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return this.rowMapper(rs);
+    }
+
+    @Override
+    public void updateToUnprocessed(int applicationId, Ticket ticket, User requestor) {
+        String sql = "UPDATE application SET active_flag=? WHERE application_id=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(
+                sql, new Object[]{ActiveFlag.UNPROCESSED.getActiveFlag(), applicationId});
+        
+        applicationChangeLogService.insertApplicationChangeLog(
+          new ApplicationChangeLog(this.getApplicationById(applicationId), ticket, requestor, getTimestamp(), ActiveFlag.UNPROCESSED)
+        );
+    }
+
+    @Override
+    public void updateToOnline(int applicationId, Ticket ticket, User requestor) {
+        String sql = "UPDATE application SET active_flag=? WHERE application_id=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(
+                sql, new Object[]{ActiveFlag.ONLINE.getActiveFlag(), applicationId});
+        
+        applicationChangeLogService.insertApplicationChangeLog(
+          new ApplicationChangeLog(this.getApplicationById(applicationId), ticket, requestor, getTimestamp(), ActiveFlag.ONLINE)
+        );
+    }
+
+    @Override
+    public void updateToOffline(int applicationId, Ticket ticket, User requestor) {
+        String sql = "UPDATE application SET active_flag=? WHERE application_id=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(
+                sql, new Object[]{ActiveFlag.OFFLINE.getActiveFlag(), applicationId});
+        
+        applicationChangeLogService.insertApplicationChangeLog(
+          new ApplicationChangeLog(this.getApplicationById(applicationId), ticket, requestor, getTimestamp(), ActiveFlag.OFFLINE)
+        );
+    }
+
+    @Override
+    public boolean doesApplicationExist(String applicationName) {
+        String sql = "SELECT COUNT(application_id) AS result FROM application "
+                + "WHERE application_name=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(
+                sql, new Object[]{applicationName});
+        int result = Integer.valueOf(rs.get(0).get("result").toString());
+        return result != 0;
+    }
+
+    @Override
+    public boolean doesApplicationExistInOnline(int applicationId) {
+        String sql = "SELECT COUNT(application_id) AS result FROM application "
+                + "WHERE application_id=? AND active_flag=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(
+                sql, new Object[]{applicationId, ActiveFlag.ONLINE.getActiveFlag()});
+        int result = Integer.valueOf(rs.get(0).get("result").toString());
+        return result != 0;
+    }
+
+    @Override
+    public boolean doesApplicationExistInOnline(String applicationName) {
+        String sql = "SELECT COUNT(application_id) AS result FROM application "
+                + "WHERE application_id=? AND active_flag=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(
+                sql, new Object[]{applicationName, ActiveFlag.ONLINE.getActiveFlag()});
+        int result = Integer.valueOf(rs.get(0).get("result").toString());
+        return result != 0;
+    }
+
+    @Override
+    public boolean doesApplicationExistInOnlineOrOffline(String applicationName) {
+        String sql = "SELECT COUNT(application_id) AS result FROM application "
+                + "WHERE application_id=? AND active_flag>?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(
+                sql, new Object[]{applicationName, ActiveFlag.UNPROCESSED.getActiveFlag()});
+        int result = Integer.valueOf(rs.get(0).get("result").toString());
+        return result != 0;
     }
 
     @Override
@@ -52,6 +200,8 @@ public class ApplicationService extends JdbcDaoSupport implements ApplicationDao
 
             application.setApplicationId((int) row.get("application_id"));
             application.setApplicationName((String) row.get("application_name"));
+
+            application.setActiveFlag(ActiveFlag.values()[((int) row.get("active_flag")) + 2]); // +2 offset for array
 
             applicationList.add(application);
         }

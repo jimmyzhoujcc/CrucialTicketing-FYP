@@ -16,12 +16,13 @@ import com.crucialticketing.daos.services.UserQueueConService;
 import com.crucialticketing.daos.services.UserRoleConService;
 import com.crucialticketing.daos.services.UserService;
 import com.crucialticketing.entities.ActiveFlag;
+import com.crucialticketing.entities.Queue;
 import com.crucialticketing.entities.QueueChangeLog;
 import com.crucialticketing.entities.QueueRequest;
 import com.crucialticketing.entities.Role;
 import com.crucialticketing.entities.RoleChangeLog;
 import com.crucialticketing.entities.Ticket;
-import static com.crucialticketing.entities.Timestamp.getTimestamp;
+import static com.crucialticketing.util.Timestamp.getTimestamp;
 import com.crucialticketing.entities.UserChangeLog;
 import com.crucialticketing.entities.UserQueueCon;
 import com.crucialticketing.entities.UserRoleCon;
@@ -44,7 +45,7 @@ public class CreationController {
 
     @Autowired
     TicketService ticketService;
-    
+
     @Autowired
     UserService userService;
 
@@ -111,7 +112,7 @@ public class CreationController {
             map.addAttribute("page", "main/create/createuser.jsp");
             return "mainview";
         }
-        
+
         // check if username is taken
         if (userService.doesUserExist(userForCreation.getUsername())) {
             map.addAttribute("user", userForCreation);
@@ -147,8 +148,8 @@ public class CreationController {
                         userForCreation,
                         user.getSecure().getHash(),
                         user.getEmailAddress(),
-                        user.getContact(), 
-                        new Ticket(Integer.valueOf(ticketId)), 
+                        user.getContact(),
+                        new Ticket(Integer.valueOf(ticketId)),
                         ActiveFlag.UNPROCESSED.getActiveFlag(),
                         user,
                         getTimestamp()
@@ -195,7 +196,7 @@ public class CreationController {
             map.addAttribute("page", "main/create/createrole.jsp");
             return "mainview";
         }
-        
+
         // Checks if ticket is valid
         if (!ticketService.doesTicketExist(Integer.valueOf(ticketId))) {
             map.addAttribute("role", roleForCreation);
@@ -214,7 +215,7 @@ public class CreationController {
 
         int roleId = roleService.insertRole(roleForCreation);
         roleForCreation.setRoleId(roleId);
-        
+
         roleChangeLogService.insertRoleChange(
                 new RoleChangeLog(
                         roleForCreation,
@@ -224,7 +225,7 @@ public class CreationController {
                         getTimestamp()
                 )
         );
-        
+
         roleService.updateToUnprocessed(roleForCreation);
 
         map.addAttribute("success", "Request submission received");
@@ -236,69 +237,71 @@ public class CreationController {
     @RequestMapping(value = "/queue/", method = RequestMethod.GET)
     public String createQueueForm(ModelMap map) {
         map.addAttribute("userList", userService.getOnlineUserList(false));
-        map.addAttribute("queueRequest", new QueueRequest());
+        map.addAttribute("queue", new Queue());
         map.addAttribute("page", "main/create/createqueue.jsp");
         return "mainview";
     }
 
     @RequestMapping(value = "/queue/create/", method = RequestMethod.POST)
     public String createQueue(HttpServletRequest request,
-            @ModelAttribute("queueRequest") QueueRequest queueRequest,
+            @ModelAttribute("queue") Queue queue,
+            @RequestParam(value = "ticketId", required = false) String ticketId,
             ModelMap map) {
 
         // Check if user has correct role to do this
         User user = (User) request.getSession().getAttribute("user");
 
-        if (!userRoleConService.doesConExist(user.getUserId(),
-                roleService.getRoleByRoleName("MAINT_QUEUE_CREATION").getRoleId())) {
-            map.addAttribute("queueRequest", queueRequest);
+        if (!userRoleConService.doesUserRoleConExistInOnline(user,
+                roleService.getRoleByRoleName("MAINT_QUEUE_CREATION"))) {
+            map.addAttribute("queueRequest", queue);
             map.addAttribute("alert", "You do not have the correct role to complete this operation");
             map.addAttribute("page", "main/create/createqueue.jsp");
             return "mainview";
         }
 
         // Check if queue name already exists
-        if (queueService.doesQueueExistFromAll(queueRequest.getQueue().getQueueName())) {
-            map.addAttribute("queueRequest", queueRequest);
+        if (queueService.doesQueueExist(queue.getQueueName())) {
+            map.addAttribute("queueRequest", queue);
             map.addAttribute("alert", "There is an entry already matching this queue name");
             map.addAttribute("page", "main/create/createqueue.jsp");
             return "mainview";
         }
 
         // If users have been selected, checks if they are valid
-        for (int i = 0, length = queueRequest.getUserQueueConList().size(); i < length; i++) {
-            UserQueueCon userQueueCon = queueRequest.getUserQueueConList().get(i);
+        for (int i = 0, length = queue.getUserList().size(); i < length; i++) {
+            UserQueueCon userQueueCon = queue.getUserList().get(i);
 
-            if (!userService.doesUserExist(userQueueCon.getUser().getUserId())) {
-                queueRequest.getUserQueueConList().remove(userQueueCon);
+            if (!userService.doesUserExistInOnline(userQueueCon.getUser())) {
+                queue.getUserList().remove(userQueueCon);
                 i--;
                 length--;
             }
         }
 
         // Inserts queue into queue request
-        int queueId = queueService.insertQueue(queueRequest.getQueue());
-        queueRequest.getQueue().setQueueId(queueId);
+        int queueId = queueService.insertQueue(queue);
+        queue.setQueueId(queueId);
 
         // Inserts any user connection
-        for (UserQueueCon userQueueCon : queueRequest.getUserQueueConList()) {
+        for (UserQueueCon userQueueCon : queue.getUserList()) {
             userQueueCon.getQueue().setQueueId(queueId);
             int userQueueConId = userQueueConService.insertUserQueueCon(userQueueCon, true);
             userQueueCon.setUserQueueConId(userQueueConId);
             userQueueConService.updateToUnprocessed(userQueueCon);
         }
 
-        queueService.updateToUnprocessed(queueRequest.getQueue());
-
-        queueChangeLogService.insertQueueChangeLog(
-                new QueueChangeLog(queueRequest.getQueue(), user)
+        queueChangeLogService.insertQueueChangeLog(new QueueChangeLog(queue,
+                new Ticket(Integer.valueOf(ticketId)),
+                user)
         );
+
+        queueService.updateToUnprocessed(queue);
+
         // Success
         map.addAttribute("success", "Request submission received");
         map.addAttribute("page", "menu/create.jsp");
 
         return "mainview";
     }
- 
 
 }

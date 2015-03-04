@@ -178,7 +178,7 @@ public class UserRoleConService extends JdbcDaoSupport implements UserRoleConDao
     public boolean doesUserRoleConExistInOnline(User user, Role role) {
         String sql = "SELECT COUNT(user_role_con_id) AS result FROM user_role_con "
                 + "WHERE user_id=? AND role_id=? AND active_flag=?";
-        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{user.getUserId(), role.getRoleId(), ActiveFlag.ONLINE});
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{user.getUserId(), role.getRoleId(), ActiveFlag.ONLINE.getActiveFlag()});
         int result = Integer.valueOf(rs.get(0).get("result").toString());
 
         return result != 0;

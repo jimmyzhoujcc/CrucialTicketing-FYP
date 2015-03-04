@@ -8,7 +8,10 @@ package com.crucialticketing.daos.services;
 import com.crucialticketing.daos.UserDao;
 import com.crucialticketing.entities.ActiveFlag;
 import com.crucialticketing.entities.Secure;
+import com.crucialticketing.entities.Ticket;
+import static com.crucialticketing.util.Timestamp.getTimestamp;
 import com.crucialticketing.entities.User;
+import com.crucialticketing.entities.UserChangeLog;
 import com.mysql.jdbc.PreparedStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -35,7 +38,7 @@ public class UserService extends JdbcDaoSupport implements UserDao {
     UserChangeLogService userChangeLogService;
     
     @Override
-    public int insertUser(final User user) {
+    public int insertUser(final User user, Ticket ticket, User requestor) {
         final String sql = "INSERT INTO user "
                 + "(username, hash, first_name, last_name, email_address, contact, active_flag) "
                 + "VALUES "
@@ -60,7 +63,14 @@ public class UserService extends JdbcDaoSupport implements UserDao {
             }
         }, holder);
 
-        return holder.getKey().intValue();
+        int insertedUserId = holder.getKey().intValue();
+        
+        userChangeLogService.insertUserChangeLog(
+          new UserChangeLog(user, user.getSecure().getHash(), user.getEmailAddress(), 
+                  user.getContact(), ticket, requestor, getTimestamp(), ActiveFlag.INCOMPLETE)
+        );
+        
+        return insertedUserId;
     }
 
     @Override
@@ -83,6 +93,43 @@ public class UserService extends JdbcDaoSupport implements UserDao {
         return (this.rowMapper(rs, populateInternal)).get(0);
     }
 
+    @Override
+    public boolean doesUserExist(String username) {
+        String sql = "SELECT COUNT(user_id) AS result FROM user "
+                + "WHERE username=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{username});
+        int result = Integer.valueOf(rs.get(0).get("result").toString());
+        return result != 0;
+    }
+    
+    @Override
+    public boolean doesUserExistInOnline(int userId) {
+        String sql = "SELECT COUNT(user_id) AS result FROM user "
+                + "WHERE user_id=? AND active_flag=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(
+                sql, new Object[]{userId, ActiveFlag.ONLINE.getActiveFlag()});
+        int result = Integer.valueOf(rs.get(0).get("result").toString());
+        return result != 0;
+    }
+    
+    @Override
+    public boolean doesUserExistInOnline(String username) {
+        String sql = "SELECT COUNT(user_id) AS result FROM user "
+                + "WHERE username=? AND active_flag=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{username, ActiveFlag.ONLINE.getActiveFlag()});
+        int result = Integer.valueOf(rs.get(0).get("result").toString());
+        return result != 0;
+    }
+    
+    @Override
+    public boolean doesUserExistInOnlineOrOffline(String username) {
+        String sql = "SELECT COUNT(user_id) AS result FROM user "
+                + "WHERE username=? AND active_flag>?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{username, ActiveFlag.UNPROCESSED.getActiveFlag()});
+        int result = Integer.valueOf(rs.get(0).get("result").toString());
+        return result != 0;
+    }
+    
     @Override
     public List<User> getIncompleteUserList() {
         String sql = "SELECT * FROM user WHERE active_flag=?";
@@ -128,19 +175,19 @@ public class UserService extends JdbcDaoSupport implements UserDao {
     }
 
     @Override
-    public void updateToUnprocessed(User user) {
+    public void updateToUnprocessed(User user, Ticket ticket, User requestor) {
         String sql = "UPDATE user SET active_flag=? WHERE user_id=?";
         this.getJdbcTemplate().update(sql, new Object[]{ActiveFlag.UNPROCESSED.getActiveFlag(), user.getUserId()});
     }
 
     @Override
-    public void updateToOnline(User user) {
+    public void updateToOnline(User user, Ticket ticket, User requestor) {
         String sql = "UPDATE user SET active_flag=? WHERE user_id=?";
         this.getJdbcTemplate().update(sql, new Object[]{ActiveFlag.ONLINE.getActiveFlag(), user.getUserId()});
     }
 
     @Override
-    public void updateToOffline(User user) {
+    public void updateToOffline(User user, Ticket ticket, User requestor) {
         String sql = "UPDATE user SET active_flag=? WHERE user_id=?";
         this.getJdbcTemplate().update(sql, new Object[]{ActiveFlag.OFFLINE.getActiveFlag(), user.getUserId()});
     }
@@ -149,41 +196,6 @@ public class UserService extends JdbcDaoSupport implements UserDao {
     public void updateHash(User user, String hash) {
         String sql = "UPDATE user SET hash=? WHERE user_id=?";
         this.getJdbcTemplate().update(sql, new Object[]{hash, user.getUserId()});
-    }
-    
-    @Override
-    public void removeUserEntry(User user) {
-        String sql = "DELETE FROM user WHERE user_id=?";
-        this.getJdbcTemplate().update(sql, new Object[]{user.getUserId()});
-        userRoleConService.removeAllUserRoleConEntries(user);
-        userChangeLogService.removeAllUserChangeLogEntries(user);
-    }
-
-    @Override
-    public boolean doesUserExist(String username) {
-        String sql = "SELECT COUNT(user_id) AS result FROM user "
-                + "WHERE username=?";
-        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{username});
-        int result = Integer.valueOf(rs.get(0).get("result").toString());
-        return result != 0;
-    }
-    
-    @Override
-    public boolean doesUserExistInOnline(String username) {
-        String sql = "SELECT COUNT(user_id) AS result FROM user "
-                + "WHERE username=? AND active_flag=?";
-        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{username, ActiveFlag.ONLINE.getActiveFlag()});
-        int result = Integer.valueOf(rs.get(0).get("result").toString());
-        return result != 0;
-    }
-    
-    @Override
-    public boolean doesUserExistInOnlineOrOffline(String username) {
-        String sql = "SELECT COUNT(user_id) AS result FROM user "
-                + "WHERE username=? AND active_flag>?";
-        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{username, ActiveFlag.UNPROCESSED.getActiveFlag()});
-        int result = Integer.valueOf(rs.get(0).get("result").toString());
-        return result != 0;
     }
 
     @Override

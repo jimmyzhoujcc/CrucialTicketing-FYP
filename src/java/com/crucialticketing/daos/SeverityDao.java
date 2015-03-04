@@ -6,6 +6,8 @@
 package com.crucialticketing.daos;
 
 import com.crucialticketing.entities.Severity;
+import com.crucialticketing.entities.Ticket;
+import com.crucialticketing.entities.User;
 import java.util.List;
 import java.util.Map;
 
@@ -14,11 +16,32 @@ import java.util.Map;
  * @author DanFoley
  */
 public interface SeverityDao {
+    
+    public int insertSeverity(Severity queue, Ticket ticket, User requestor);
+
     public Severity getSeverityById(int severityId);
-    
-    public List<Severity> getSeverityList();
-    
-    public boolean doesSeverityExist(int severityId);
-    
+
+    public boolean doesSeverityExistByLevel(int severityLevel);
+
+    public boolean doesSeverityExistInOnlineById(int severityId);
+
+    public boolean doesSeverityExistInOnlineByLevel(int severityLevel);
+
+    public boolean doesSeverityExistInOnlineOrOfflineByLevel(int severityLevel);
+
+    public List<Severity> getIncompleteQueueList();
+
+    public List<Severity> getUnprocessedQueueList();
+
+    public List<Severity> getOnlineSeverityList();
+
+    public List<Severity> getOfflineSeverityList();
+
+    public void updateToUnprocessed(int severityId, Ticket ticket, User requestor);
+
+    public void updateToOnline(int severityId, Ticket ticket, User requestor);
+
+    public void updateToOffline(int severityId, Ticket ticket, User requestor);
+
     public List<Severity> rowMapper(List<Map<String, Object>> resultSet);
 }

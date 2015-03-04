@@ -5,6 +5,7 @@
  */
 package com.crucialticketing.entities;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -16,9 +17,12 @@ public class Queue {
     private String queueName;
     private List<UserQueueCon> userList;
     
-    public Queue() {}
+    public Queue() {
+        userList = new ArrayList<>();
+    }
 
     public Queue(int queueId, String queueName) {
+        userList = new ArrayList<>();
         this.queueId = queueId;
         this.queueName = queueName;
     }
@@ -38,6 +42,15 @@ public class Queue {
     public void setQueueName(String queueName) {
         this.queueName = queueName;
     }
-    
+
+    public List<UserQueueCon> getUserList() {
+        return userList;
+    }
+
+    public void setUserList(List<UserQueueCon> userList) {
+        this.userList = userList;
+    }
+
+  
     
 }

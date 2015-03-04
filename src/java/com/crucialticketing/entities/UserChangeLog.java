@@ -13,13 +13,17 @@ public class UserChangeLog {
 
     private int userChangeLogId;
     private User user;
+    
     private String hash;
     private String emailAddress;
     private String contact;
+    
     private Ticket ticket;
-    private int activeFlag;
+    
     private User requestor;
     private int stamp;
+    
+    private ActiveFlag activeFlag;
 
     public UserChangeLog() {
         this.user = new User();
@@ -27,16 +31,15 @@ public class UserChangeLog {
         this.requestor = new User();
     }
 
-    public UserChangeLog(User user, String hash, String emailAddress, String contact, 
-            Ticket ticket, int activeFlag, User requestor, int stamp) {
+    public UserChangeLog(User user, String hash, String emailAddress, String contact, Ticket ticket, User requestor, int stamp, ActiveFlag activeFlag) {
         this.user = user;
         this.hash = hash;
         this.emailAddress = emailAddress;
         this.contact = contact;
         this.ticket = ticket;
-        this.activeFlag = activeFlag;
         this.requestor = requestor;
         this.stamp = stamp;
+        this.activeFlag = activeFlag;
     }
 
     public int getUserChangeLogId() {
@@ -87,14 +90,6 @@ public class UserChangeLog {
         this.ticket = ticket;
     }
 
-    public int getActiveFlag() {
-        return activeFlag;
-    }
-
-    public void setActiveFlag(int activeFlag) {
-        this.activeFlag = activeFlag;
-    }
-
     public User getRequestor() {
         return requestor;
     }
@@ -111,5 +106,14 @@ public class UserChangeLog {
         this.stamp = stamp;
     }
 
+    public ActiveFlag getActiveFlag() {
+        return activeFlag;
+    }
+
+    public void setActiveFlag(ActiveFlag activeFlag) {
+        this.activeFlag = activeFlag;
+    }
+
     
+   
 }

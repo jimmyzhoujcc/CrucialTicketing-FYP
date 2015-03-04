@@ -7,6 +7,11 @@ package com.crucialticketing.daos.services;
 
 import com.crucialticketing.entities.Queue;
 import com.crucialticketing.daos.QueueDao;
+import com.crucialticketing.entities.ActiveFlag;
+import com.crucialticketing.entities.QueueChangeLog;
+import com.crucialticketing.entities.Ticket;
+import static com.crucialticketing.util.Timestamp.getTimestamp;
+import com.crucialticketing.entities.User;
 import com.mysql.jdbc.PreparedStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -14,6 +19,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -25,8 +31,11 @@ import org.springframework.jdbc.support.KeyHolder;
  */
 public class QueueService extends JdbcDaoSupport implements QueueDao {
 
+    @Autowired
+    QueueChangeLogService queueChangeLogService;
+ 
     @Override
-    public int insertQueue(final Queue queue) {
+    public int insertQueue(final Queue queue, Ticket ticket, User requestor) {
         final String sql = "INSERT INTO queue (queue_name, active_flag) VALUES (?, ?)";
 
         KeyHolder holder = new GeneratedKeyHolder();
@@ -43,7 +52,13 @@ public class QueueService extends JdbcDaoSupport implements QueueDao {
             }
         }, holder);
 
-        return holder.getKey().intValue();
+        int insertedQueueId = holder.getKey().intValue();
+        
+        queueChangeLogService.insertQueueChangeLog(
+          new QueueChangeLog(queue, ticket, requestor, getTimestamp(), ActiveFlag.INCOMPLETE)
+        );
+        
+        return insertedQueueId;
     }
 
     @Override
@@ -55,49 +70,18 @@ public class QueueService extends JdbcDaoSupport implements QueueDao {
         }
         return (this.rowMapper(rs)).get(0);
     }
-
+    
     @Override
-    public List<Queue> getIncompleteQueueList() {
-        String sql = "SELECT * FROM queue WHERE active_flag=-2";
-        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql);
-        if (rs.size() != 1) {
-            return new ArrayList<>();
-        }
-        return this.rowMapper(rs);
+    public boolean doesQueueExistInOnline(int queueId) {
+        String sql = "SELECT COUNT(queue_id) AS result FROM queue "
+                + "WHERE queue_id=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{queueId});
+        int result = Integer.valueOf(rs.get(0).get("result").toString());
+        return result != 0;
     }
-
+    
     @Override
-    public List<Queue> getUnprocessedQueueList() {
-        String sql = "SELECT * FROM queue WHERE active_flag=-1";
-        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql);
-        if (rs.size() != 1) {
-            return new ArrayList<>();
-        }
-        return this.rowMapper(rs);
-    }
-
-    @Override
-    public List<Queue> getOfflineQueueList() {
-        String sql = "SELECT * FROM queue WHERE active_flag=0";
-        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql);
-        if (rs.size() != 1) {
-            return new ArrayList<>();
-        }
-        return this.rowMapper(rs);
-    }
-
-    @Override
-    public List<Queue> getOnlineQueueList() {
-        String sql = "SELECT * FROM queue WHERE active_flag=1";
-        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql);
-        if (rs.size() != 1) {
-            return new ArrayList<>();
-        }
-        return this.rowMapper(rs);
-    }
-
-    @Override
-    public boolean doesQueueExistFromAll(String queueName) {
+    public boolean doesQueueExistInOnline(String queueName) {
         String sql = "SELECT COUNT(queue_id) AS result FROM queue "
                 + "WHERE queue_name=?";
         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{queueName});
@@ -106,7 +90,16 @@ public class QueueService extends JdbcDaoSupport implements QueueDao {
     }
     
     @Override
-    public boolean doesQueueExistPostUnprocessed(String queueName) {
+    public boolean doesQueueExistInOnlineOrOffline(String queueName) {
+        String sql = "SELECT COUNT(queue_id) AS result FROM queue "
+                + "WHERE queue_name=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{queueName});
+        int result = Integer.valueOf(rs.get(0).get("result").toString());
+        return result != 0;
+    }
+    
+    @Override
+    public boolean doesQueueExist(String queueName) {
         String sql = "SELECT COUNT(queue_id) AS result FROM queue "
                 + "WHERE queue_name=? AND active_flag>?";
         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{queueName, -1});
@@ -115,27 +108,73 @@ public class QueueService extends JdbcDaoSupport implements QueueDao {
     }
 
     @Override
-    public void updateToUnprocessed(Queue queue) {
+    public List<Queue> getIncompleteQueueList() {
+        String sql = "SELECT * FROM queue WHERE active_flag=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{ActiveFlag.INCOMPLETE.getActiveFlag()});
+        if (rs.size() != 1) {
+            return new ArrayList<>();
+        }
+        return this.rowMapper(rs);
+    }
+
+    @Override
+    public List<Queue> getUnprocessedQueueList() {
+        String sql = "SELECT * FROM queue WHERE active_flag=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{ActiveFlag.UNPROCESSED.getActiveFlag()});
+        if (rs.size() != 1) {
+            return new ArrayList<>();
+        }
+        return this.rowMapper(rs);
+    }
+
+    @Override
+    public List<Queue> getOfflineQueueList() {
+        String sql = "SELECT * FROM queue WHERE active_flag=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{ActiveFlag.OFFLINE.getActiveFlag()});
+        if (rs.size() != 1) {
+            return new ArrayList<>();
+        }
+        return this.rowMapper(rs);
+    }
+
+    @Override
+    public List<Queue> getOnlineQueueList() {
+        String sql = "SELECT * FROM queue WHERE active_flag=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{ActiveFlag.ONLINE.getActiveFlag()});
+        if (rs.size() != 1) {
+            return new ArrayList<>();
+        }
+        return this.rowMapper(rs);
+    }
+
+    @Override
+    public void updateToUnprocessed(int queueId, Ticket ticket, User requestor) {
         String sql = "UPDATE queue SET active_flag=-1 WHERE queue_id=?";
-        this.getJdbcTemplate().update(sql, new Object[]{queue.getQueueId()});
+        this.getJdbcTemplate().update(sql, new Object[]{queueId});
+        
+        queueChangeLogService.insertQueueChangeLog(
+          new QueueChangeLog(this.getQueueById(queueId), ticket, requestor, getTimestamp(), ActiveFlag.UNPROCESSED)
+        );
     }
     
     @Override
-    public void updateToOnline(Queue queue) {
+    public void updateToOnline(int queueId, Ticket ticket, User requestor) {
         String sql = "UPDATE queue SET active_flag=1 WHERE queue_id=?";
-        this.getJdbcTemplate().update(sql, new Object[]{queue.getQueueId()});
+        this.getJdbcTemplate().update(sql, new Object[]{queueId});
+        
+        queueChangeLogService.insertQueueChangeLog(
+          new QueueChangeLog(this.getQueueById(queueId), ticket, requestor, getTimestamp(), ActiveFlag.ONLINE)
+        );
     }
     
     @Override
-    public void updateToOffline(Queue queue) {
+    public void updateToOffline(int queueId, Ticket ticket, User requestor) {
         String sql = "UPDATE queue SET active_flag=0 WHERE queue_id=?";
-        this.getJdbcTemplate().update(sql, new Object[]{queue.getQueueId()});
-    }
-    
-    @Override
-    public void removeQueueEntry(Queue queue) {
-        String sql = "DELETE FROM queue WHERE queue_id=?";
-        this.getJdbcTemplate().update(sql, new Object[]{queue.getQueueId()});
+        this.getJdbcTemplate().update(sql, new Object[]{queueId});
+        
+        queueChangeLogService.insertQueueChangeLog(
+          new QueueChangeLog(this.getQueueById(queueId), ticket, requestor, getTimestamp(), ActiveFlag.OFFLINE)
+        );
     }
 
     @Override

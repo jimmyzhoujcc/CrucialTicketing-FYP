@@ -7,7 +7,7 @@ package com.crucialticketing.daos.services;
 
 import com.crucialticketing.entities.TicketLockRequest;
 import com.crucialticketing.daos.TicketLockRequestDao;
-import static com.crucialticketing.entities.Timestamp.getTimestamp;
+import static com.crucialticketing.util.Timestamp.getTimestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

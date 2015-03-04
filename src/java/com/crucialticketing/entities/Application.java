@@ -12,6 +12,7 @@ package com.crucialticketing.entities;
 public class Application {
     private int applicationId;
     private String applicationName;
+    private ActiveFlag activeFlag;
 
     public Application() {
     }
@@ -36,4 +37,14 @@ public class Application {
     public void setApplicationName(String applicationName) {
         this.applicationName = applicationName;
     }
+
+    public ActiveFlag getActiveFlag() {
+        return activeFlag;
+    }
+
+    public void setActiveFlag(ActiveFlag activeFlag) {
+        this.activeFlag = activeFlag;
+    }
+    
+    
 }

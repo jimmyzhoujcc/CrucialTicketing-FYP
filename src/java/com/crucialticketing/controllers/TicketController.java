@@ -123,6 +123,14 @@ public class TicketController {
             map.addAttribute("alert", "This application no longer exists");
             return preTicketCreation(map);
         }
+        
+        if(!applicationControlService.doesApplicationControlExistInOnline(
+                Integer.valueOf(ticketTypeId), 
+                Integer.valueOf(applicationId), 
+                Integer.valueOf(severityId))) {
+            map.addAttribute("alert", "An active ticket configuration does not exist");
+            return preTicketCreation(map);
+        }
 
         ApplicationControl applicationControl = applicationControlService.getApplicationControlByCriteria(
                 Integer.valueOf(ticketTypeId),
@@ -130,25 +138,17 @@ public class TicketController {
                 Integer.valueOf(severityId),
                 true);
 
-        if (applicationControl.getApplicationControlId() == 0) {
-            map.addAttribute("alert", "A workflow is not currently setup for this configuration");
-            return preTicketCreation(map);
-        }
-
         User user = (User) request.getSession().getAttribute("user");
 
         // Checks if correct role is maintained 
-        if (!userRoleConService.doesConExist(user.getUserId(),
-                roleService.getRoleByRoleName(
-                        "MAINT_"
-                        + ticketTypeId + "_TICKET_"
-                        + applicationId).getRoleId())) {
+        if (!userRoleConService.doesUserRoleConExistInOnline(user, 
+                applicationControl.getRole())) {
             // Not allowed
             map.addAttribute("alert", "You do not have the correct role privledges to perform this operation");
             return preTicketCreation(map);
         }
 
-        map.addAttribute("userList", userService.getUserList(false));
+        map.addAttribute("userList", userService.getOnlineUserList(false));
 
         Ticket ticket = new Ticket();
         ticket.setApplicationControl(applicationControl);
@@ -252,12 +252,8 @@ public class TicketController {
         User user = (User) request.getSession().getAttribute("user");
 
         // Checks if correct role is maintained 
-        if (!userRoleConService.doesConExist(user.getUserId(),
-                roleService.getRoleByRoleName(
-                        "MAINT_"
-                        + applicationControl.getTicketType().getTicketTypeId()
-                        + "_TICKET_"
-                        + applicationControl.getApplication().getApplicationId()).getRoleId())) {
+        if (!userRoleConService.doesUserRoleConExistInOnline(user,
+               applicationControl.getRole())) {
             map.addAttribute("alert", "You do not have the correct role privledges to perform this operation");
             map.addAttribute("page", "main/createticketselection.jsp");
             return "mainview";
@@ -324,18 +320,18 @@ public class TicketController {
 
         User user = (User) request.getSession().getAttribute("user");
 
-        // Checks if correct role is maintained 
-        // Checks if correct role is maintained 
-        if (!userRoleConService.doesConExist(user.getUserId(),
-                roleService.getRoleByRoleName("MAINT_"
-                        + ticket.getApplicationControl().getTicketType().getTicketTypeId() + "_TICKET_"
-                        + ticket.getApplicationControl().getApplication().getApplicationId()).getRoleId())) {
+        // Check: check if maintenance role is attached to user
+        if (!userRoleConService.doesUserRoleConExistInOnline(user,
+                ticket.getApplicationControl().getRole())) {
             map.put("ticketObject", ticket);
             map.addAttribute("page", "main/closedticket.jsp");
             map.addAttribute("alert", "You do not have the correct role privledges to perform a save operation");
             return "mainview";
         }
 
+        // Check: check if role is maintained for status change
+        
+        
         // Checks if this user has a open ticket lock
         if (!ticketLockRequestService.ticketOpenForEditByUser(Integer.valueOf(ticketId), user.getUserId())) {
             map.put("ticketObject", ticket);

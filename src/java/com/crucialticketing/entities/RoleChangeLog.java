@@ -13,11 +13,12 @@ public class RoleChangeLog {
 
     private int roleChangeLogId;
     private Role role;
-    private int activeFlag;
+    
     private Ticket ticket;
     private User requestor;
     private int stamp;
     
+    private ActiveFlag activeFlag;
 
     public RoleChangeLog() {
         this.role = new Role();
@@ -25,12 +26,12 @@ public class RoleChangeLog {
         this.requestor = new User();
     }
 
-    public RoleChangeLog(Role role, int activeFlag, Ticket ticket, User requestor, int stamp) {
+    public RoleChangeLog(Role role, Ticket ticket, User requestor, int stamp, ActiveFlag activeFlag) {
         this.role = role;
-        this.activeFlag = activeFlag;
         this.ticket = ticket;
         this.requestor = requestor;
         this.stamp = stamp;
+        this.activeFlag = activeFlag;
     }
 
     public int getRoleChangeLogId() {
@@ -47,14 +48,6 @@ public class RoleChangeLog {
 
     public void setRole(Role role) {
         this.role = role;
-    }
-
-    public int getActiveFlag() {
-        return activeFlag;
-    }
-
-    public void setActiveFlag(int activeFlag) {
-        this.activeFlag = activeFlag;
     }
 
     public Ticket getTicket() {
@@ -81,6 +74,15 @@ public class RoleChangeLog {
         this.stamp = stamp;
     }
 
+    public ActiveFlag getActiveFlag() {
+        return activeFlag;
+    }
+
+    public void setActiveFlag(ActiveFlag activeFlag) {
+        this.activeFlag = activeFlag;
+    }
     
     
+
+   
 }

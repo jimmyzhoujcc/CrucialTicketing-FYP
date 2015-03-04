@@ -7,16 +7,15 @@ package com.crucialticketing.daos.services;
 
 import com.crucialticketing.entities.RoleChangeLog;
 import com.crucialticketing.daos.RoleChangeLogDao;
+import com.crucialticketing.entities.ActiveFlag;
 import com.crucialticketing.entities.Role;
 import com.crucialticketing.entities.Ticket;
-import static com.crucialticketing.entities.Timestamp.getTimestamp;
 import com.crucialticketing.entities.User;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 
 /**
@@ -37,15 +36,16 @@ public class RoleChangeLogService extends JdbcDaoSupport implements RoleChangeLo
     @Override
     public void insertRoleChange(RoleChangeLog roleChangeLog) {
         String sql = "INSERT INTO role_change_log "
-                + "(role_id, active_flag, ticket_id, requestor_user_id, stamp) "
+                + "(role_id, role_name, ticket_id, requestor_user_id, stamp, active_flag) "
                 + "VALUES "
-                + "(?, ?, ?, ?, ?)";
+                + "(?, ?, ?, ?, ?, ?)";
         this.getJdbcTemplate().update(sql, new Object[]{
             roleChangeLog.getRole().getRoleId(), 
-            roleChangeLog.getActiveFlag(), 
+            roleChangeLog.getRole().getRoleName(), 
             roleChangeLog.getTicket().getTicketId(), 
             roleChangeLog.getRequestor().getUserId(), 
-            roleChangeLog.getStamp()
+            roleChangeLog.getStamp(), 
+            roleChangeLog.getActiveFlag()
         });
     }
 
@@ -69,18 +69,6 @@ public class RoleChangeLogService extends JdbcDaoSupport implements RoleChangeLo
             return new ArrayList<>();
         }
         return this.rowMapper(rs);
-    }
-
-    @Override
-    public void removeRoleChangeLogEntry(RoleChangeLog roleChangeLog) {
-        String sql = "DELETE FROM role_change_log WHERE role_change_log_id=?";
-        this.getJdbcTemplate().update(sql, new Object[]{roleChangeLog.getRoleChangeLogId()});
-    }
-
-    @Override
-    public void removeAllRoleChangeLogEntries(Role role) {
-        String sql = "DELETE FROM role_change_log WHERE role_id=?";
-        this.getJdbcTemplate().update(sql, new Object[]{role.getRoleId()});
     }
 
     @Override
@@ -121,7 +109,8 @@ public class RoleChangeLogService extends JdbcDaoSupport implements RoleChangeLo
                 retrievedUserList.put((int) row.get("requestor_user_id"), user);
             }
          
-            roleChangeLog.setActiveFlag((int) row.get("active_flag"));
+            roleChangeLog.setActiveFlag(ActiveFlag.values()[((int) row.get("active_flag"))+2]);
+            
             roleChangeLog.setStamp((int) row.get("stamp"));
             
             roleChangeLogList.add(roleChangeLog);

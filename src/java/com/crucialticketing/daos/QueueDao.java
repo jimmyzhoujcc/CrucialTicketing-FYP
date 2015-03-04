@@ -6,6 +6,8 @@
 package com.crucialticketing.daos;
 
 import com.crucialticketing.entities.Queue;
+import com.crucialticketing.entities.Ticket;
+import com.crucialticketing.entities.User;
 import java.util.List;
 import java.util.Map;
 
@@ -14,34 +16,32 @@ import java.util.Map;
  * @author DanFoley
  */
 public interface QueueDao {
-    
-    public int insertQueue(Queue queue);
-    
+
+    public int insertQueue(Queue queue, Ticket ticket, User requestor);
+
     public Queue getQueueById(int queueId);
-    
-    public List<Queue> getIncompleteQueueList();
-    
-    public List<Queue> getUnprocessedQueueList();
-    
-    public List<Queue> getOnlineQueueList();
-    
-    public List<Queue> getOfflineQueueList(); 
-    
-    public void updateToUnprocessed(Queue queue);
-    
-    public void updateToOnline(Queue queue);
-    
-    public void updateToOffline(Queue queue);
-    
+
     public boolean doesQueueExist(String queueName);
-    
-    public boolean doesQueueExistInOnline(Queue queue);
-    
+
+    public boolean doesQueueExistInOnline(int queueId);
+
     public boolean doesQueueExistInOnline(String queueName);
-    
+
     public boolean doesQueueExistInOnlineOrOffline(String queueName);
-  
-    public void removeQueueEntry(Queue queue);
-    
+
+    public List<Queue> getIncompleteQueueList();
+
+    public List<Queue> getUnprocessedQueueList();
+
+    public List<Queue> getOnlineQueueList();
+
+    public List<Queue> getOfflineQueueList();
+
+    public void updateToUnprocessed(int queueId, Ticket ticket, User requestor);
+
+    public void updateToOnline(int queueId, Ticket ticket, User requestor);
+
+    public void updateToOffline(int queueId, Ticket ticket, User requestor);
+
     public List<Queue> rowMapper(List<Map<String, Object>> resultSet);
 }

@@ -8,7 +8,6 @@ package com.crucialticketing.daos;
 import com.crucialticketing.entities.Role;
 import com.crucialticketing.entities.RoleChangeLog;
 import com.crucialticketing.entities.Ticket;
-import com.crucialticketing.entities.User;
 import java.util.List;
 import java.util.Map;
 
@@ -22,10 +21,6 @@ public interface RoleChangeLogDao {
     public List<RoleChangeLog> getChangeLogByRoleId(Role role);
     
     public List<RoleChangeLog> getChangeLogByTicketId(Ticket ticket);
-    
-    public void removeRoleChangeLogEntry(RoleChangeLog roleChangeLog);
-    
-    public void removeAllRoleChangeLogEntries(Role role);
     
     public List<RoleChangeLog> rowMapper(List<Map<String, Object>> resultSet);
 }

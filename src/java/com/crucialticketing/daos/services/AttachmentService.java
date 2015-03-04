@@ -9,7 +9,7 @@ import com.crucialticketing.entities.Attachment;
 import com.crucialticketing.entities.Ticket;
 import com.crucialticketing.entities.User;
 import com.crucialticketing.daos.AttachmentDao;
-import static com.crucialticketing.entities.Timestamp.getTimestamp;
+import static com.crucialticketing.util.Timestamp.getTimestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

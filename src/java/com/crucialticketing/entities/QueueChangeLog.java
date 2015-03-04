@@ -10,29 +10,29 @@ package com.crucialticketing.entities;
  * @author DanFoley
  */
 public class QueueChangeLog {
+
     private int queueChangeLogId;
     private Queue queue;
+    
+    private Ticket ticket;
     private User requestor;
+    
     private int stamp;
     
-    public QueueChangeLog() {}
-    
-    public QueueChangeLog(
-            Queue queue, 
-            User requestor) {
-        this.queue = queue;
-        this.requestor = requestor;
+    private ActiveFlag activeFlag;
+
+    public QueueChangeLog() {
+        this.queue = new Queue();
+        this.ticket = new Ticket();
+        this.requestor = new User();
     }
-    
-    public QueueChangeLog(
-            int queueChangeLogId, 
-            Queue queue, 
-            User requestor, 
-            int stamp) {
-        this.queueChangeLogId = queueChangeLogId;
+
+    public QueueChangeLog(Queue queue, Ticket ticket, User requestor, int stamp, ActiveFlag activeFlag) {
         this.queue = queue;
+        this.ticket = ticket;
         this.requestor = requestor;
         this.stamp = stamp;
+        this.activeFlag = activeFlag;
     }
 
     public int getQueueChangeLogId() {
@@ -51,6 +51,14 @@ public class QueueChangeLog {
         this.queue = queue;
     }
 
+    public Ticket getTicket() {
+        return ticket;
+    }
+
+    public void setTicket(Ticket ticket) {
+        this.ticket = ticket;
+    }
+
     public User getRequestor() {
         return requestor;
     }
@@ -66,6 +74,14 @@ public class QueueChangeLog {
     public void setStamp(int stamp) {
         this.stamp = stamp;
     }
-    
+
+    public ActiveFlag getActiveFlag() {
+        return activeFlag;
+    }
+
+    public void setActiveFlag(ActiveFlag activeFlag) {
+        this.activeFlag = activeFlag;
+    }
+
     
 }

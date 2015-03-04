@@ -6,8 +6,9 @@
 package com.crucialticketing.daos.services;
 
 import com.crucialticketing.daos.UserChangeLogDao;
+import com.crucialticketing.entities.ActiveFlag;
 import com.crucialticketing.entities.Ticket;
-import static com.crucialticketing.entities.Timestamp.getTimestamp;
+import static com.crucialticketing.util.Timestamp.getTimestamp;
 import com.crucialticketing.entities.User;
 import com.crucialticketing.entities.UserChangeLog;
 import java.util.ArrayList;
@@ -30,7 +31,7 @@ public class UserChangeLogService extends JdbcDaoSupport implements UserChangeLo
     UserService userService;
 
     @Override
-    public void insertQueueChangeLog(UserChangeLog userChangeLog) {
+    public void insertUserChangeLog(UserChangeLog userChangeLog) {
         String sql = "INSERT user_change_log "
                 + "(user_id, hash, email_address, contact, ticket_id, active_flag, requestor_user_id, stamp) "
                 + "VALUES "
@@ -90,6 +91,8 @@ public class UserChangeLogService extends JdbcDaoSupport implements UserChangeLo
 
             userChangeLog.setUserChangeLogId((int) row.get("user_change_log_id"));
 
+            
+            // User List
             if (retrievedUserList.containsKey((int) row.get("user_id"))) {
                 userChangeLog.setUser(retrievedUserList.get((int) row.get("user_id")));
             } else {
@@ -111,8 +114,18 @@ public class UserChangeLogService extends JdbcDaoSupport implements UserChangeLo
             userChangeLog.setHash((String) row.get("hash"));
             userChangeLog.setEmailAddress((String) row.get("email_address"));
             userChangeLog.setContact((String) row.get("contact"));
-            userChangeLog.setActiveFlag((int) row.get("active_flag"));
-            userChangeLog.getRequestor().setUserId((int) row.get("requestor_user_id"));
+            
+            // Requestor user List
+            if (retrievedUserList.containsKey((int) row.get("requestor_user_id"))) {
+                userChangeLog.setUser(retrievedUserList.get((int) row.get("requestor_user_id")));
+            } else {
+                User user = userService.getUserById((int) row.get("requestor_user_id"), false);
+                userChangeLog.setUser(user);
+                retrievedUserList.put((int) row.get("requestor_user_id"), user);
+            }
+            
+            userChangeLog.setActiveFlag(ActiveFlag.values()[((int) row.get("active_flag"))]);
+            
             userChangeLog.setStamp((int) row.get("stamp"));
 
             userChangeLogList.add(userChangeLog);

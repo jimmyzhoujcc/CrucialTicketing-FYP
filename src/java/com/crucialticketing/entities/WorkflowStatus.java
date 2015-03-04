@@ -12,6 +12,7 @@ package com.crucialticketing.entities;
 public class WorkflowStatus {
     private int statusId;
     private String statusName;
+    private ActiveFlag activeFlag;
     
     public WorkflowStatus() {}
 
@@ -34,6 +35,14 @@ public class WorkflowStatus {
 
     public void setStatusName(String statusName) {
         this.statusName = statusName;
+    }
+
+    public ActiveFlag getActiveFlag() {
+        return activeFlag;
+    }
+
+    public void setActiveFlag(ActiveFlag activeFlag) {
+        this.activeFlag = activeFlag;
     }
     
     

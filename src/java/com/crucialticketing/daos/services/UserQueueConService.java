@@ -6,6 +6,7 @@
 package com.crucialticketing.daos.services;
 
 import com.crucialticketing.daos.UserQueueConDao;
+import com.crucialticketing.entities.ActiveFlag;
 import com.crucialticketing.entities.Queue;
 import com.crucialticketing.entities.User;
 import com.crucialticketing.entities.UserQueueCon;
@@ -128,9 +129,15 @@ public class UserQueueConService extends JdbcDaoSupport implements UserQueueConD
     }
 
     @Override
-    public void removeQueueEntry(UserQueueCon userQueueCon) {
+    public void removeUserQueueConEntry(UserQueueCon userQueueCon) {
         String sql = "DELETE FROM user_queue_con WHERE user_queue_con_id=?";
         this.getJdbcTemplate().update(sql, new Object[]{userQueueCon.getUserQueueConId()});
+    }
+    
+    @Override
+    public void removeAllUserQueueConEntries(User user) {
+        String sql = "DELETE FROM user_queue_con WHERE user_id=?";
+        this.getJdbcTemplate().update(sql, new Object[]{user.getUserId()});
     }
 
     @Override
@@ -154,10 +161,10 @@ public class UserQueueConService extends JdbcDaoSupport implements UserQueueConD
     }
 
     @Override
-    public boolean doesUserQueueConExistPostUnprocessed(int userId, int queueId) {
+    public boolean doesUserQueueConExistInOnline(int userId, int queueId) {
         String sql = "SELECT COUNT(user_queue_con_id) AS result FROM user_queue_con "
-                + "WHERE user_id=? AND queue_id=? AND active_flag>?";
-         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{userId, queueId, -1});
+                + "WHERE user_id=? AND queue_id=? AND active_flag=?";
+         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{userId, queueId, ActiveFlag.ONLINE});
          int result = Integer.valueOf(rs.get(0).get("result").toString());
          
         return result != 0;

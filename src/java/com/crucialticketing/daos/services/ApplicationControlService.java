@@ -8,11 +8,23 @@ package com.crucialticketing.daos.services;
 import com.crucialticketing.entities.ApplicationControl;
 import com.crucialticketing.entities.Workflow;
 import com.crucialticketing.daos.ApplicationControlDao;
+import com.crucialticketing.entities.ActiveFlag;
+import com.crucialticketing.entities.ApplicationControlChangeLog;
+import com.crucialticketing.entities.Ticket;
+import com.crucialticketing.entities.User;
+import static com.crucialticketing.util.Timestamp.getTimestamp;
+import com.mysql.jdbc.PreparedStatement;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 
 /**
  *
@@ -22,18 +34,60 @@ public class ApplicationControlService extends JdbcDaoSupport implements Applica
 
     @Autowired
     TicketTypeService ticketTypeService;
-    
+
     @Autowired
     SeverityService severityService;
-    
+
+    @Autowired
+    RoleService roleService;
+
     @Autowired
     ApplicationService applicationService;
-    
+
     @Autowired
     WorkflowService workflowService;
-    
+
     @Autowired
     WorkflowMapService workflowMapService;
+    
+    @Autowired
+    ApplicationControlChangeLogService applicationControlChangeLogService;
+
+    @Override
+    public int insertApplicationControl(final ApplicationControl applicationControl, Ticket ticket, User requestor) {
+        final String sql = "INSERT INTO application_control "
+                + "(ticket_type_id, application_id, workfow_template_id, "
+                + "severity_id, role_id, sla_clock, active_flag) "
+                + "VALUES "
+                + "(?, ?, ?, ?, ?, ?, ?)";
+
+        KeyHolder holder = new GeneratedKeyHolder();
+
+        this.getJdbcTemplate().update(new PreparedStatementCreator() {
+
+            @Override
+            public PreparedStatement createPreparedStatement(Connection connection)
+                    throws SQLException {
+                PreparedStatement ps = (PreparedStatement) connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+                ps.setInt(1, applicationControl.getTicketType().getTicketTypeId());
+                ps.setInt(2, applicationControl.getApplication().getApplicationId());
+                ps.setInt(2, applicationControl.getWorkflow().getWorkflowId());
+                ps.setInt(2, applicationControl.getSeverity().getSeverityId());
+                ps.setInt(2, applicationControl.getRole().getRoleId());
+                ps.setInt(2, applicationControl.getSlaClock());
+                ps.setInt(4, ActiveFlag.INCOMPLETE.getActiveFlag());
+                return ps;
+            }
+        }, holder);
+
+        int insertedApplicationControlId = holder.getKey().intValue();
+
+        applicationControlChangeLogService.insertChangeLog(
+                new ApplicationControlChangeLog(applicationControl, ticket, requestor, getTimestamp(), ActiveFlag.INCOMPLETE)
+        );
+
+        return insertedApplicationControlId;
+    }
 
     @Override
     public ApplicationControl getApplicationControlById(int applicationControlId, boolean populateWorkflowMap) {
@@ -46,23 +100,106 @@ public class ApplicationControlService extends JdbcDaoSupport implements Applica
     }
 
     @Override
-    public ApplicationControl getApplicationControlByCriteria(int ticketTypeId, int applicationId, int severityId, boolean populateWorkflowMap) {
-        String sql = "SELECT * FROM application_control WHERE ticket_type_id=? AND application_id=? AND severity_id=?";
-        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{ticketTypeId, applicationId, severityId});
-        if (rs.isEmpty()) {
-            return new ApplicationControl();
-        }
-        return (this.rowMapper(rs, populateWorkflowMap)).get(0);
+    public boolean doesApplicationControlExist(int ticketTypeId, int applicationId, int severityId) {
+        String sql = "SELECT COUNT(application_control_id) AS result FROM application_control "
+                + "WHERE ticket_type_id=? AND application_id=? AND severity_id=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(
+                sql, new Object[]{ticketTypeId, applicationId, severityId});
+        int result = Integer.valueOf(rs.get(0).get("result").toString());
+        return result != 0;
     }
 
     @Override
-    public List<ApplicationControl> getApplicationControlList(boolean populateWorkflowMap) {
-        String sql = "SELECT * FROM application_control";
-        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql);
+    public boolean doesApplicationControlExistInOnline(int ticketTypeId, int applicationId, int severityId) {
+        String sql = "SELECT COUNT(application_control_id) AS result FROM application_control "
+                + "WHERE ticket_type_id=? AND application_id=? AND severity_id=? AND active_flag=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(
+                sql, new Object[]{ticketTypeId, applicationId, severityId, ActiveFlag.ONLINE.getActiveFlag()});
+        int result = Integer.valueOf(rs.get(0).get("result").toString());
+        return result != 0;
+    }
+
+    @Override
+    public boolean doesApplicationControlExistInOnlineOrOffline(int ticketTypeId, int applicationId, int severityId) {
+        String sql = "SELECT COUNT(application_control_id) AS result FROM application_control "
+                + "WHERE ticket_type_id=? AND application_id=? AND severity_id=? AND active_flag>?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(
+                sql, new Object[]{ticketTypeId, applicationId, severityId, ActiveFlag.UNPROCESSED.getActiveFlag()});
+        int result = Integer.valueOf(rs.get(0).get("result").toString());
+        return result != 0;
+    }
+
+    @Override
+    public List<ApplicationControl> getIncompleteApplicationControlList(boolean populateWorkflowMap) {
+        String sql = "SELECT * FROM application_control WHERE active_flag=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{ActiveFlag.INCOMPLETE.getActiveFlag()});
         if (rs.size() != 1) {
             return new ArrayList<>();
         }
-        return this.rowMapper(rs, populateWorkflowMap);
+        return rowMapper(rs, populateWorkflowMap);
+    }
+
+    @Override
+    public List<ApplicationControl> getUnprocessedApplicationControlList(boolean populateWorkflowMap) {
+        String sql = "SELECT * FROM application_control WHERE active_flag=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{ActiveFlag.UNPROCESSED.getActiveFlag()});
+        if (rs.size() != 1) {
+            return new ArrayList<>();
+        }
+        return rowMapper(rs, populateWorkflowMap);
+    }
+
+    @Override
+    public List<ApplicationControl> getOnlineApplicationControlList(boolean populateWorkflowMap) {
+        String sql = "SELECT * FROM application_control WHERE active_flag=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{ActiveFlag.ONLINE.getActiveFlag()});
+        if (rs.size() != 1) {
+            return new ArrayList<>();
+        }
+        return rowMapper(rs, populateWorkflowMap);
+    }
+
+    @Override
+    public List<ApplicationControl> getOfflineApplicationControlList(boolean populateWorkflowMap) {
+        String sql = "SELECT * FROM application_control WHERE active_flag=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{ActiveFlag.OFFLINE.getActiveFlag()});
+        if (rs.size() != 1) {
+            return new ArrayList<>();
+        }
+        return rowMapper(rs, populateWorkflowMap);
+    }
+    
+    @Override
+    public void updateToUnprocessed(int applicationControlId, Ticket ticket, User requestor) {
+        String sql = "UPDATE application_control SET active_flag=? WHERE application_control_id=?";
+        this.getJdbcTemplate().update(sql, new Object[]{ActiveFlag.UNPROCESSED.getActiveFlag(), applicationControlId});
+        
+        applicationControlChangeLogService.insertChangeLog(
+          new ApplicationControlChangeLog(this.getApplicationControlById(applicationControlId, false), 
+                  ticket, requestor, getTimestamp(), ActiveFlag.UNPROCESSED)
+        );
+    }
+
+    @Override
+    public void updateToOnline(int applicationControlId, Ticket ticket, User requestor) {
+        String sql = "UPDATE application_control SET active_flag=? WHERE application_control_id=?";
+        this.getJdbcTemplate().update(sql, new Object[]{ActiveFlag.ONLINE.getActiveFlag(), applicationControlId});
+        
+        applicationControlChangeLogService.insertChangeLog(
+          new ApplicationControlChangeLog(this.getApplicationControlById(applicationControlId, false), 
+                  ticket, requestor, getTimestamp(), ActiveFlag.ONLINE)
+        );
+    }
+
+    @Override
+    public void updateToOffline(int applicationControlId, Ticket ticket, User requestor) {
+        String sql = "UPDATE application_control SET active_flag=? WHERE application_control_id=?";
+        this.getJdbcTemplate().update(sql, new Object[]{ActiveFlag.OFFLINE.getActiveFlag(), applicationControlId});
+        
+        applicationControlChangeLogService.insertChangeLog(
+          new ApplicationControlChangeLog(this.getApplicationControlById(applicationControlId, false), 
+                  ticket, requestor, getTimestamp(), ActiveFlag.OFFLINE)
+        );
     }
 
     @Override
@@ -82,6 +219,9 @@ public class ApplicationControlService extends JdbcDaoSupport implements Applica
 
             // Gets application
             applicationControl.setApplication(applicationService.getApplicationById((int) row.get("application_id")));
+
+            // Gets role
+            applicationControl.setRole(roleService.getRoleById((int) row.get("role_id")));
 
             // Gets workflow
             Workflow workflow = workflowService.getWorkflowById((int) row.get("workflow_template_id"));

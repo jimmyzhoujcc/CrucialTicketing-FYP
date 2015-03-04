@@ -32,10 +32,10 @@
 </div>
 <br class="clearfix" />
 <br class="clearfix" />
-<form:form method="POST" action="${pageContext.request.contextPath}/home/create/queue/create/" commandName="queueRequest">
+<form:form method="POST" action="${pageContext.request.contextPath}/home/create/queue/create/" commandName="queue">
     <div class="create-form-button-container">
         <div class="form-group"> Ticket ID
-            <input type="text" name="ticket.ticketId" class="form-control" placeholder="Ticket ID for this request" required="required" />
+            <input type="text" name="ticketId" class="form-control" placeholder="Ticket ID for this request" required="required" />
             <p class="help-block">Ticket ID ongoing for this request</p>
         </div>      
     </div>
@@ -44,7 +44,7 @@
 
     <div class="create-form-button-container">
         <div class="form-group">Queue Name:
-            <form:input type="text" path="queue.queueName" class="form-control" placeholder="Enter desired queue name"  required="required" />
+            <form:input type="text" path="queueName" class="form-control" placeholder="Enter desired queue name"  required="required" />
             <p class="help-block">Name of this queue</p>
         </div>      
     </div>
@@ -88,7 +88,7 @@
         function addNewHiddenUser(userId) {
             var pattern = /(\d{2})\.(\d{2})\.(\d{4})/;
 
-            content = "<input type=\"hidden\" name=\"userQueueConList[" + counter + "\].user.userId\" value=\"" + userId + "\" />";
+            content = "<input type=\"hidden\" name=\"userList[" + counter + "\].user.userId\" value=\"" + userId + "\" />";
 
             newDiv = document.createElement('div');
             $(newDiv).html(content)
