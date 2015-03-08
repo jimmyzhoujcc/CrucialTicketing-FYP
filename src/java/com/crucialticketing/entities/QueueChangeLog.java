@@ -19,20 +19,17 @@ public class QueueChangeLog {
     
     private int stamp;
     
-    private ActiveFlag activeFlag;
-
     public QueueChangeLog() {
         this.queue = new Queue();
         this.ticket = new Ticket();
         this.requestor = new User();
     }
 
-    public QueueChangeLog(Queue queue, Ticket ticket, User requestor, int stamp, ActiveFlag activeFlag) {
+    public QueueChangeLog(Queue queue, Ticket ticket, User requestor, int stamp) {
         this.queue = queue;
         this.ticket = ticket;
         this.requestor = requestor;
         this.stamp = stamp;
-        this.activeFlag = activeFlag;
     }
 
     public int getQueueChangeLogId() {
@@ -74,14 +71,5 @@ public class QueueChangeLog {
     public void setStamp(int stamp) {
         this.stamp = stamp;
     }
-
-    public ActiveFlag getActiveFlag() {
-        return activeFlag;
-    }
-
-    public void setActiveFlag(ActiveFlag activeFlag) {
-        this.activeFlag = activeFlag;
-    }
-
     
 }

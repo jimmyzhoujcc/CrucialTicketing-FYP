@@ -52,7 +52,7 @@ public class ChangeLog {
                 WorkflowStep prevWorkflowStep
                         = prevChangeLogEntry.getApplicationControl().
                         getWorkflow().getWorkflowMap().
-                        getWorkflowStageByStatus(prevChangeLogEntry.getWorkflowStatus().getStatusId());
+                        getWorkflowStageByStatus(prevChangeLogEntry.getWorkflowStatus().getWorkflowStatusId());
 
                 clockActive = (prevWorkflowStep.getClockActive() != 0);
 
@@ -74,14 +74,14 @@ public class ChangeLog {
                     .getApplicationControl()
                     .getWorkflow()
                     .getWorkflowMap()
-                    .getWorkflowStageByStatus(prevChangeLogEntry.getWorkflowStatus().getStatusId());
+                    .getWorkflowStageByStatus(prevChangeLogEntry.getWorkflowStatus().getWorkflowStatusId());
 
             if (!workflowStep.getNextWorkflowStep().isEmpty()) {
                 if (prevChangeLogEntry
                         .getApplicationControl()
                         .getWorkflow()
                         .getWorkflowMap()
-                        .getWorkflowStageByStatus(prevChangeLogEntry.getWorkflowStatus().getStatusId()).getClockActive() != 0) {
+                        .getWorkflowStageByStatus(prevChangeLogEntry.getWorkflowStatus().getWorkflowStatusId()).getClockActive() != 0) {
                     this.timeElapsed += currentStamp - prevChangeLogEntry.getStamp();
                 }
             }

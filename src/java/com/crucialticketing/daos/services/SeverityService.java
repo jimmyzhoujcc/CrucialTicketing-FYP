@@ -56,13 +56,15 @@ public class SeverityService extends JdbcDaoSupport implements SeverityDao {
             }
         }, holder);
 
-        int insertedSeverityId = holder.getKey().intValue();
+        int insertedId = holder.getKey().intValue();
+        severity.setSeverityId(insertedId);
+        severity.setActiveFlag(ActiveFlag.INCOMPLETE);
 
         severityChangeLogService.insertSeverityChangeLog(
-                new SeverityChangeLog(severity, ticket, requestor, getTimestamp(), ActiveFlag.INCOMPLETE)
+                new SeverityChangeLog(severity, ticket, requestor, getTimestamp())
         );
 
-        return insertedSeverityId;
+        return insertedId;
     }
 
     @Override
@@ -158,10 +160,10 @@ public class SeverityService extends JdbcDaoSupport implements SeverityDao {
     public void updateToUnprocessed(int severityId, Ticket ticket, User requestor) {
         String sql = "UPDATE severity SET active_flag=? WHERE severity_id=?";
         this.getJdbcTemplate().update(sql, new Object[]{ActiveFlag.UNPROCESSED.getActiveFlag(), severityId});
-        
+
         severityChangeLogService.insertSeverityChangeLog(
-          new SeverityChangeLog(this.getSeverityById(severityId), 
-                  ticket, requestor, getTimestamp(), ActiveFlag.UNPROCESSED)
+                new SeverityChangeLog(this.getSeverityById(severityId),
+                        ticket, requestor, getTimestamp())
         );
     }
 
@@ -169,9 +171,9 @@ public class SeverityService extends JdbcDaoSupport implements SeverityDao {
     public void updateToOnline(int severityId, Ticket ticket, User requestor) {
         String sql = "UPDATE severity SET active_flag=? WHERE severity_id=?";
         this.getJdbcTemplate().update(sql, new Object[]{ActiveFlag.ONLINE.getActiveFlag(), severityId});
-        
+
         severityChangeLogService.insertSeverityChangeLog(
-          new SeverityChangeLog(this.getSeverityById(severityId), ticket, requestor, getTimestamp(), ActiveFlag.ONLINE)
+                new SeverityChangeLog(this.getSeverityById(severityId), ticket, requestor, getTimestamp())
         );
     }
 
@@ -179,9 +181,9 @@ public class SeverityService extends JdbcDaoSupport implements SeverityDao {
     public void updateToOffline(int severityId, Ticket ticket, User requestor) {
         String sql = "UPDATE severity SET active_flag=? WHERE severity_id=?";
         this.getJdbcTemplate().update(sql, new Object[]{ActiveFlag.OFFLINE.getActiveFlag(), severityId});
-        
+
         severityChangeLogService.insertSeverityChangeLog(
-          new SeverityChangeLog(this.getSeverityById(severityId), ticket, requestor, getTimestamp(), ActiveFlag.OFFLINE)
+                new SeverityChangeLog(this.getSeverityById(severityId), ticket, requestor, getTimestamp())
         );
     }
 
@@ -196,6 +198,7 @@ public class SeverityService extends JdbcDaoSupport implements SeverityDao {
             severity.setSeverityLevel((int) row.get("severity_level"));
             severity.setSeverityName((String) row.get("severity_name"));
 
+            severity.setActiveFlag(ActiveFlag.values()[((int)row.get("active_flag"))+2]);
             severityList.add(severity);
         }
         return severityList;

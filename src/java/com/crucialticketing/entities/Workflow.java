@@ -13,6 +13,7 @@ public class Workflow {
     private int workflowId;
     private String workflowName;
     private WorkflowMap workflowMap;
+    private ActiveFlag activeFlag;
 
     public Workflow() {
         workflowMap = new WorkflowMap();
@@ -28,6 +29,12 @@ public class Workflow {
         this.workflowId = workflowId;
         this.workflowName = workflowName;
         this.workflowMap = workflowMap;
+    }
+
+    public Workflow(String workflowName, WorkflowMap workflowMap, ActiveFlag activeFlag) {
+        this.workflowName = workflowName;
+        this.workflowMap = workflowMap;
+        this.activeFlag = activeFlag;
     }
 
     public int getWorkflowId() {
@@ -53,6 +60,14 @@ public class Workflow {
     public void setWorkflowMap(WorkflowMap workflowMap) {
         this.workflowMap = workflowMap;
     }
+
+    public ActiveFlag getActiveFlag() {
+        return activeFlag;
+    }
+
+    public void setActiveFlag(ActiveFlag activeFlag) {
+        this.activeFlag = activeFlag;
+    }
     
-    
+ 
 }

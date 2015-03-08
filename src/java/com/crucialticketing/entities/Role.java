@@ -16,11 +16,11 @@ public class Role {
     private String roleName;
     private String roleDescription;
     private List<RoleChangeLog> roleChangeLog;
-    private int activeFlag;
+    private ActiveFlag activeFlag;
     
     public Role() {}
 
-    public Role(int roleId, String roleName, String roleDescription, List<RoleChangeLog> roleChangeLog, int activeFlag) {
+    public Role(int roleId, String roleName, String roleDescription, List<RoleChangeLog> roleChangeLog, ActiveFlag activeFlag) {
         this.roleId = roleId;
         this.roleName = roleName;
         this.roleDescription = roleDescription;
@@ -68,11 +68,11 @@ public class Role {
         this.roleChangeLog = roleChangeLog;
     }
 
-    public int getActiveFlag() {
+    public ActiveFlag getActiveFlag() {
         return activeFlag;
     }
 
-    public void setActiveFlag(int activeFlag) {
+    public void setActiveFlag(ActiveFlag activeFlag) {
         this.activeFlag = activeFlag;
     }
     

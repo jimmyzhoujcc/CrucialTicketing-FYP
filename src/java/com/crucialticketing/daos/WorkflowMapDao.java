@@ -5,6 +5,7 @@
  */
 package com.crucialticketing.daos;
 
+import com.crucialticketing.entities.Workflow;
 import com.crucialticketing.entities.WorkflowMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,8 @@ import java.util.Map;
  * @author DanFoley
  */
 public interface WorkflowMapDao {
+    
+    public void insertWorkflowStep(Workflow workflow);
     
     public WorkflowMap getWorkflowMapById(int workflowMapId);
 

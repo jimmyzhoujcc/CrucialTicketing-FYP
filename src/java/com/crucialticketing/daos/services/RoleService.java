@@ -57,13 +57,15 @@ public class RoleService extends JdbcDaoSupport implements RoleDao {
             }
         }, holder);
 
-        int insertedRoleId = holder.getKey().intValue();
-        
+        int insertedId = holder.getKey().intValue();
+        role.setRoleId(insertedId);
+        role.setActiveFlag(ActiveFlag.INCOMPLETE);
+                
         roleChangeLogService.insertRoleChange(
-          new RoleChangeLog(role, ticket, requestor, getTimestamp(), ActiveFlag.INCOMPLETE)
+          new RoleChangeLog(role, ticket, requestor, getTimestamp())
         );
         
-        return insertedRoleId;
+        return insertedId;
     }
     
     @Override
@@ -168,7 +170,7 @@ public class RoleService extends JdbcDaoSupport implements RoleDao {
         this.getJdbcTemplate().update(sql, new Object[]{ActiveFlag.UNPROCESSED.getActiveFlag(), roleId});
         
         roleChangeLogService.insertRoleChange(
-          new RoleChangeLog(this.getRoleById(roleId), ticket, requestor, getTimestamp(), ActiveFlag.UNPROCESSED)
+          new RoleChangeLog(this.getRoleById(roleId), ticket, requestor, getTimestamp())
         );
     }
 
@@ -178,7 +180,7 @@ public class RoleService extends JdbcDaoSupport implements RoleDao {
         this.getJdbcTemplate().update(sql, new Object[]{ActiveFlag.ONLINE.getActiveFlag(), roleId});
         
         roleChangeLogService.insertRoleChange(
-          new RoleChangeLog(this.getRoleById(roleId), ticket, requestor, getTimestamp(), ActiveFlag.ONLINE)
+          new RoleChangeLog(this.getRoleById(roleId), ticket, requestor, getTimestamp())
         );
     }
 
@@ -188,7 +190,7 @@ public class RoleService extends JdbcDaoSupport implements RoleDao {
         this.getJdbcTemplate().update(sql, new Object[]{ActiveFlag.OFFLINE.getActiveFlag(), roleId});
         
         roleChangeLogService.insertRoleChange(
-          new RoleChangeLog(this.getRoleById(roleId), ticket, requestor, getTimestamp(), ActiveFlag.OFFLINE)
+          new RoleChangeLog(this.getRoleById(roleId), ticket, requestor, getTimestamp())
         );
     }
     
@@ -201,7 +203,7 @@ public class RoleService extends JdbcDaoSupport implements RoleDao {
 
             role.setRoleId((int) row.get("role_id"));
             role.setRoleName((String) row.get("role_name"));
-            role.setActiveFlag((int)row.get("active_flag"));
+            role.setActiveFlag(ActiveFlag.values()[((int)row.get("active_flag"))+2]);
             roleList.add(role);
         }
         return roleList;

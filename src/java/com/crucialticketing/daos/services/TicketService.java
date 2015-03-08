@@ -40,7 +40,7 @@ public class TicketService extends JdbcDaoSupport implements TicketDao {
     AttachmentService attachmentService;
 
     @Autowired
-    ChangeLogService changeLogService;
+    TicketChangeLogService changeLogService;
 
     @Override
     public int insertTicket(final String shortDescription, final int applicationControlId,

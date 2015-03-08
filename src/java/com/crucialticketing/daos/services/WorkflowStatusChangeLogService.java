@@ -42,12 +42,12 @@ public class WorkflowStatusChangeLogService extends JdbcDaoSupport implements Wo
                 + "VALUES "
                 + "(?, ?, ?, ?, ?, ?)";
         this.getJdbcTemplate().update(sql, new Object[]{
-            workflowStatusChangeLog.getWorkflowStatus().getStatusId(),
-            workflowStatusChangeLog.getWorkflowStatus().getStatusName(),
+            workflowStatusChangeLog.getWorkflowStatus().getWorkflowStatusId(),
+            workflowStatusChangeLog.getWorkflowStatus().getWorkflowStatusName(),
             workflowStatusChangeLog.getTicket().getTicketId(),
             workflowStatusChangeLog.getRequestor().getUserId(),
             getTimestamp(),
-            workflowStatusChangeLog.getActiveFlag().getActiveFlag()
+            workflowStatusChangeLog.getWorkflowStatus().getActiveFlag().getActiveFlag()
         });
     }
 
@@ -113,7 +113,7 @@ public class WorkflowStatusChangeLogService extends JdbcDaoSupport implements Wo
                 retrievedTicketList.put((int) row.get("ticket_id"), ticket);
             }
 
-            changeLog.getWorkflowStatus().setStatusName((String) row.get("workflow_status_name"));
+            changeLog.getWorkflowStatus().setWorkflowStatusName((String) row.get("workflow_status_name"));
             changeLog.getWorkflowStatus().setActiveFlag(ActiveFlag.values()[((int) row.get("active_flag")) + 2]);
 
             changeLog.setStamp((int) row.get("stamp"));

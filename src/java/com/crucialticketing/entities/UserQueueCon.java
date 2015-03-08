@@ -14,15 +14,17 @@ public class UserQueueCon {
     private int userQueueConId;
     private User user;
     private Queue queue;
+    private ActiveFlag activeFlag;
 
     public UserQueueCon() {
         this.user = new User();
         this.queue = new Queue();
     }
-    
-    public UserQueueCon(User user, Queue queue) {
+
+    public UserQueueCon(User user, Queue queue, ActiveFlag activeFlag) {
         this.user = user;
         this.queue = queue;
+        this.activeFlag = activeFlag;
     }
 
     public int getUserQueueConId() {
@@ -48,4 +50,14 @@ public class UserQueueCon {
     public void setQueue(Queue queue) {
         this.queue = queue;
     }
+
+    public ActiveFlag getActiveFlag() {
+        return activeFlag;
+    }
+
+    public void setActiveFlag(ActiveFlag activeFlag) {
+        this.activeFlag = activeFlag;
+    }
+    
+    
 }

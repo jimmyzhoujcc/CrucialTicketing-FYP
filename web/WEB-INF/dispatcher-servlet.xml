@@ -28,6 +28,14 @@
           class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
     
     <!-- Beans for DAO -->
+    <bean id="applicationChangeLogService" class="com.crucialticketing.daos.services.ApplicationChangeLogService">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    
+    <bean id="applicationControlChangeLogService" class="com.crucialticketing.daos.services.ApplicationControlChangeLogService">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    
     <bean id="applicationControlService" class="com.crucialticketing.daos.services.ApplicationControlService">
         <property name="dataSource" ref="dataSource" />
     </bean>
@@ -37,10 +45,6 @@
     </bean>
     
     <bean id="attachmentService" class="com.crucialticketing.daos.services.AttachmentService">
-        <property name="dataSource" ref="dataSource" />
-    </bean>
-
-    <bean id="changeLogService" class="com.crucialticketing.daos.services.ChangeLogService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     
@@ -60,7 +64,15 @@
         <property name="dataSource" ref="dataSource" />
     </bean>
     
+    <bean id="severityChangeLogService" class="com.crucialticketing.daos.services.SeverityChangeLogService">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    
     <bean id="severityService" class="com.crucialticketing.daos.services.SeverityService">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    
+    <bean id="ticketChangeLogService" class="com.crucialticketing.daos.services.TicketChangeLogService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     
@@ -88,7 +100,15 @@
         <property name="dataSource" ref="dataSource" />
     </bean>
     
+    <bean id="userQueueConChangeLogService" class="com.crucialticketing.daos.services.UserQueueConChangeLogService">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    
     <bean id="userQueueConService" class="com.crucialticketing.daos.services.UserQueueConService">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    
+    <bean id="userRoleConChangeLogService" class="com.crucialticketing.daos.services.UserRoleConChangeLogService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     
@@ -100,11 +120,19 @@
         <property name="dataSource" ref="dataSource" />
     </bean>
     
+    <bean id="workflowChangeLogService" class="com.crucialticketing.daos.services.WorkflowChangeLogService">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    
     <bean id="workflowMapService" class="com.crucialticketing.daos.services.WorkflowMapService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     
     <bean id="workflowService" class="com.crucialticketing.daos.services.WorkflowService">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    
+    <bean id="workflowStatusChangeLogService" class="com.crucialticketing.daos.services.WorkflowStatusChangeLogService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     

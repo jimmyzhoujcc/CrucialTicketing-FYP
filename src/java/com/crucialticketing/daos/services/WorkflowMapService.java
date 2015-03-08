@@ -10,6 +10,7 @@ import com.crucialticketing.entities.Role;
 import com.crucialticketing.entities.WorkflowMap;
 import com.crucialticketing.entities.WorkflowStep;
 import com.crucialticketing.daos.WorkflowMapDao;
+import com.crucialticketing.entities.Workflow;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +33,30 @@ public class WorkflowMapService extends JdbcDaoSupport implements WorkflowMapDao
     QueueService queueService;
 
     @Override
+    public void insertWorkflowStep(Workflow workflow) {
+        String sql = "INSERT INTO workflow_structure "
+                + "(workflow_template_id, from_workflow_status_id, to_workflow_status_id, role_id, queue_id, clock_active) "
+                + "VALUES(?, ?, ?, ?, ?, ?)";
+
+        WorkflowMap workflowMap = workflow.getWorkflowMap();
+
+        for (WorkflowStep workflowStep : workflowMap.getWorkflow()) {
+
+            for (WorkflowStep nextWorkflowStep : workflowStep.getNextWorkflowStep()) {
+                this.getJdbcTemplate().update(sql, new Object[]{
+                    workflow.getWorkflowId(),
+                    workflowStep.getWorkflowStatus().getWorkflowStatusId(),
+                    nextWorkflowStep.getWorkflowStatus().getWorkflowStatusId(), 
+                    nextWorkflowStep.getRole().getRoleId(), 
+                    nextWorkflowStep.getQueue().getQueueId(), 
+                    workflowStep.getClockActive()
+                });
+            }
+        }
+
+    }
+
+    @Override
     public WorkflowMap getWorkflowMapById(int workflowMapId) {
         String sql = "SELECT * FROM workflow_structure WHERE workflow_template_id=?";
         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{workflowMapId});
@@ -50,15 +75,15 @@ public class WorkflowMapService extends JdbcDaoSupport implements WorkflowMapDao
         for (Map row : resultSet) {
             if (!workflowMap.doesStepExist((int) row.get("from_workflow_status_id"))) {
                 workflowMap.addStep(
-                        workflowStatusService.getWorkflowStatusById((int) row.get("from_workflow_status_id")),
-                        new Role(-1, null, null, null, -1),
-                        new Queue(-1, null),
+                        workflowStatusService.getWorkflowStatus((int) row.get("from_workflow_status_id")),
+                        new Role(-1, null, null, null, null),
+                        new Queue(null, null, null),
                         0);
             }
 
             if (!workflowMap.doesStepExist((int) row.get("to_workflow_status_id"))) {
                 workflowMap.addStep(
-                        workflowStatusService.getWorkflowStatusById((int) row.get("to_workflow_status_id")),
+                        workflowStatusService.getWorkflowStatus((int) row.get("to_workflow_status_id")),
                         roleService.getRoleById((int) row.get("role_id")),
                         queueService.getQueueById((int) row.get("queue_id")),
                         (int) row.get("clock_active"));

@@ -18,20 +18,17 @@ public class WorkflowStatusChangeLog {
     
     private int stamp;
     
-    private ActiveFlag activeFlag;
-    
     public WorkflowStatusChangeLog() {
         this.workflowStatus = new WorkflowStatus();
         this.ticket = new Ticket();
         this.requestor = new User();
     }
 
-    public WorkflowStatusChangeLog(WorkflowStatus workflowStatus, Ticket ticket, User requestor, int stamp, ActiveFlag activeFlag) {
+    public WorkflowStatusChangeLog(WorkflowStatus workflowStatus, Ticket ticket, User requestor, int stamp) {
         this.workflowStatus = workflowStatus;
         this.ticket = ticket;
         this.requestor = requestor;
         this.stamp = stamp;
-        this.activeFlag = activeFlag;
     }
     
     
@@ -75,14 +72,4 @@ public class WorkflowStatusChangeLog {
     public void setStamp(int stamp) {
         this.stamp = stamp;
     }
-
-    public ActiveFlag getActiveFlag() {
-        return activeFlag;
-    }
-
-    public void setActiveFlag(ActiveFlag activeFlag) {
-        this.activeFlag = activeFlag;
-    }
-    
-    
 }

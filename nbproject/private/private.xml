@@ -12,13 +12,12 @@
     </editor-bookmarks>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/dan-project/web/WEB-INF/jsp/main/create/createqueue.jsp</file>
+            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/dan-project/web/WEB-INF/jsp/main/create/workflow/createworkflowp1.jsp</file>
             <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/dan-project/src/java/com/crucialticketing/controllers/CreationController.java</file>
-            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/dan-project/src/java/com/crucialticketing/daos/services/UserQueueConService.java</file>
-            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/dan-project/src/java/com/crucialticketing/daos/UserDao.java</file>
-            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/dan-project/src/java/com/crucialticketing/daos/services/QueueChangeLogService.java</file>
-            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/dan-project/src/java/com/crucialticketing/entities/Queue.java</file>
-            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/dan-project/src/java/com/crucialticketing/entities/QueueChangeLog.java</file>
+            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/dan-project/src/java/com/crucialticketing/entities/WorkflowStep.java</file>
+            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/dan-project/web/WEB-INF/jsp/main/create/workflow/createworkflowp2.jsp</file>
+            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/dan-project/src/java/com/crucialticketing/daos/services/WorkflowMapService.java</file>
+            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/dan-project/src/java/com/crucialticketing/daos/services/WorkflowService.java</file>
         </group>
     </open-files>
 </project-private>

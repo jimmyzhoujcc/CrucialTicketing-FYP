@@ -35,7 +35,7 @@ public class WorkflowMap {
 
     public boolean doesStepExist(int workflowStatusId) {
         for (WorkflowStep workflowStage : workflow) {
-            if (workflowStage.getStatus().getStatusId() == workflowStatusId) {
+            if (workflowStage.getWorkflowStatus().getWorkflowStatusId()== workflowStatusId) {
                 return true;
             }
         }
@@ -44,7 +44,7 @@ public class WorkflowMap {
 
     public WorkflowStep getWorkflowStageByStatus(int workflowStatusId) {
         for (WorkflowStep workflowStage : workflow) {
-            if (workflowStage.getStatus().getStatusId() == workflowStatusId) {
+            if (workflowStage.getWorkflowStatus().getWorkflowStatusId()== workflowStatusId) {
                 return workflowStage;
             }
         }

@@ -10,31 +10,51 @@ package com.crucialticketing.entities;
  * @author DanFoley
  */
 public class WorkflowStatus {
-    private int statusId;
-    private String statusName;
+    private int workflowStatusId;
+    private String workflowStatusName;
+    private boolean baseWorkflowStatus;
+    private boolean closureWorkflowStatus;
     private ActiveFlag activeFlag;
     
     public WorkflowStatus() {}
 
-    public WorkflowStatus(int statusId, String statusName) {
-        this.statusId = statusId;
-        this.statusName = statusName;
+    public WorkflowStatus(String workflowStatusName, boolean baseWorkflowStatus, boolean closureWorkflowStatus, ActiveFlag activeFlag) {
+        this.workflowStatusName = workflowStatusName;
+        this.baseWorkflowStatus = baseWorkflowStatus;
+        this.closureWorkflowStatus = closureWorkflowStatus;
+        this.activeFlag = activeFlag;
     }
 
-    public int getStatusId() {
-        return statusId;
+    public int getWorkflowStatusId() {
+        return workflowStatusId;
     }
 
-    public void setStatusId(int statusId) {
-        this.statusId = statusId;
+    public void setWorkflowStatusId(int workflowStatusId) {
+        this.workflowStatusId = workflowStatusId;
     }
 
-    public String getStatusName() {
-        return statusName;
+    public String getWorkflowStatusName() {
+        return workflowStatusName;
     }
 
-    public void setStatusName(String statusName) {
-        this.statusName = statusName;
+    public void setWorkflowStatusName(String workflowStatusName) {
+        this.workflowStatusName = workflowStatusName;
+    }
+
+    public boolean isBaseWorkflowStatus() {
+        return baseWorkflowStatus;
+    }
+
+    public void setBaseWorkflowStatus(boolean baseWorkflowStatus) {
+        this.baseWorkflowStatus = baseWorkflowStatus;
+    }
+
+    public boolean isClosureWorkflowStatus() {
+        return closureWorkflowStatus;
+    }
+
+    public void setClosureWorkflowStatus(boolean closureWorkflowStatus) {
+        this.closureWorkflowStatus = closureWorkflowStatus;
     }
 
     public ActiveFlag getActiveFlag() {
@@ -44,6 +64,7 @@ public class WorkflowStatus {
     public void setActiveFlag(ActiveFlag activeFlag) {
         this.activeFlag = activeFlag;
     }
+
     
     
 }

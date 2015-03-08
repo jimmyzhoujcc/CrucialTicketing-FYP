@@ -5,6 +5,7 @@
  */
 package com.crucialticketing.entities;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -20,15 +21,17 @@ public class User {
     private String emailAddress;
     private String contact;
     private List<UserRoleCon> userRoleConList;
-    private int activeFlag;
+    private ActiveFlag activeFlag;
 
     public User() {
         this.secure = new Secure();
+        userRoleConList = new ArrayList<>();
     }
 
     public User(int userId) {
         this.secure = new Secure();
         this.userId = userId;
+        userRoleConList = new ArrayList<>();
     }
     
     public User(int userId, String firstName, String lastName) {
@@ -36,6 +39,7 @@ public class User {
         this.userId = userId;
         this.firstName = firstName;
         this.lastName = lastName;
+        userRoleConList = new ArrayList<>();
     }
 
     public int getUserId() {
@@ -102,11 +106,11 @@ public class User {
         this.userRoleConList = userRoleConList;
     }
     
-    public int getActiveFlag() {
+    public ActiveFlag getActiveFlag() {
         return activeFlag;
     }
 
-    public void setActiveFlag(int activeFlag) {
+    public void setActiveFlag(ActiveFlag activeFlag) {
         this.activeFlag = activeFlag;
     }
 

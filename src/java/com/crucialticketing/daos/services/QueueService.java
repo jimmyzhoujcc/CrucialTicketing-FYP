@@ -47,18 +47,20 @@ public class QueueService extends JdbcDaoSupport implements QueueDao {
                     throws SQLException {
                 PreparedStatement ps = (PreparedStatement) connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
                 ps.setString(1, queue.getQueueName());
-                ps.setInt(2, -2);
+                ps.setInt(2, ActiveFlag.INCOMPLETE.getActiveFlag());
                 return ps;
             }
         }, holder);
 
-        int insertedQueueId = holder.getKey().intValue();
+        int insertedId = holder.getKey().intValue();
+        queue.setQueueId(insertedId);
+        queue.setActiveFlag(ActiveFlag.INCOMPLETE);
         
         queueChangeLogService.insertQueueChangeLog(
-          new QueueChangeLog(queue, ticket, requestor, getTimestamp(), ActiveFlag.INCOMPLETE)
+          new QueueChangeLog(queue, ticket, requestor, getTimestamp())
         );
         
-        return insertedQueueId;
+        return insertedId;
     }
 
     @Override
@@ -74,8 +76,9 @@ public class QueueService extends JdbcDaoSupport implements QueueDao {
     @Override
     public boolean doesQueueExistInOnline(int queueId) {
         String sql = "SELECT COUNT(queue_id) AS result FROM queue "
-                + "WHERE queue_id=?";
-        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{queueId});
+                + "WHERE queue_id=? AND active_flag=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(
+                sql, new Object[]{queueId, ActiveFlag.ONLINE.getActiveFlag()});
         int result = Integer.valueOf(rs.get(0).get("result").toString());
         return result != 0;
     }
@@ -83,8 +86,9 @@ public class QueueService extends JdbcDaoSupport implements QueueDao {
     @Override
     public boolean doesQueueExistInOnline(String queueName) {
         String sql = "SELECT COUNT(queue_id) AS result FROM queue "
-                + "WHERE queue_name=?";
-        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{queueName});
+                + "WHERE queue_name=? AND active_flag=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(
+                sql, new Object[]{queueName, ActiveFlag.ONLINE.getActiveFlag()});
         int result = Integer.valueOf(rs.get(0).get("result").toString());
         return result != 0;
     }
@@ -92,8 +96,9 @@ public class QueueService extends JdbcDaoSupport implements QueueDao {
     @Override
     public boolean doesQueueExistInOnlineOrOffline(String queueName) {
         String sql = "SELECT COUNT(queue_id) AS result FROM queue "
-                + "WHERE queue_name=?";
-        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{queueName});
+                + "WHERE queue_name=? AND active_flag>?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(
+                sql, new Object[]{queueName, ActiveFlag.UNPROCESSED.getActiveFlag()});
         int result = Integer.valueOf(rs.get(0).get("result").toString());
         return result != 0;
     }
@@ -101,8 +106,8 @@ public class QueueService extends JdbcDaoSupport implements QueueDao {
     @Override
     public boolean doesQueueExist(String queueName) {
         String sql = "SELECT COUNT(queue_id) AS result FROM queue "
-                + "WHERE queue_name=? AND active_flag>?";
-        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{queueName, -1});
+                + "WHERE queue_name=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{queueName});
         int result = Integer.valueOf(rs.get(0).get("result").toString());
         return result != 0;
     }
@@ -149,31 +154,31 @@ public class QueueService extends JdbcDaoSupport implements QueueDao {
 
     @Override
     public void updateToUnprocessed(int queueId, Ticket ticket, User requestor) {
-        String sql = "UPDATE queue SET active_flag=-1 WHERE queue_id=?";
-        this.getJdbcTemplate().update(sql, new Object[]{queueId});
+        String sql = "UPDATE queue SET active_flag=? WHERE queue_id=?";
+        this.getJdbcTemplate().update(sql, new Object[]{ActiveFlag.UNPROCESSED.getActiveFlag(), queueId});
         
         queueChangeLogService.insertQueueChangeLog(
-          new QueueChangeLog(this.getQueueById(queueId), ticket, requestor, getTimestamp(), ActiveFlag.UNPROCESSED)
+          new QueueChangeLog(this.getQueueById(queueId), ticket, requestor, getTimestamp())
         );
     }
     
     @Override
     public void updateToOnline(int queueId, Ticket ticket, User requestor) {
-        String sql = "UPDATE queue SET active_flag=1 WHERE queue_id=?";
-        this.getJdbcTemplate().update(sql, new Object[]{queueId});
+        String sql = "UPDATE queue SET active_flag=? WHERE queue_id=?";
+        this.getJdbcTemplate().update(sql, new Object[]{ActiveFlag.ONLINE.getActiveFlag(), queueId});
         
         queueChangeLogService.insertQueueChangeLog(
-          new QueueChangeLog(this.getQueueById(queueId), ticket, requestor, getTimestamp(), ActiveFlag.ONLINE)
+          new QueueChangeLog(this.getQueueById(queueId), ticket, requestor, getTimestamp())
         );
     }
     
     @Override
     public void updateToOffline(int queueId, Ticket ticket, User requestor) {
-        String sql = "UPDATE queue SET active_flag=0 WHERE queue_id=?";
-        this.getJdbcTemplate().update(sql, new Object[]{queueId});
+        String sql = "UPDATE queue SET active_flag=? WHERE queue_id=?";
+        this.getJdbcTemplate().update(sql, new Object[]{ActiveFlag.OFFLINE.getActiveFlag(), queueId});
         
         queueChangeLogService.insertQueueChangeLog(
-          new QueueChangeLog(this.getQueueById(queueId), ticket, requestor, getTimestamp(), ActiveFlag.OFFLINE)
+          new QueueChangeLog(this.getQueueById(queueId), ticket, requestor, getTimestamp())
         );
     }
 
@@ -186,6 +191,7 @@ public class QueueService extends JdbcDaoSupport implements QueueDao {
 
             queue.setQueueId((int) row.get("queue_id"));
             queue.setQueueName((String) row.get("queue_name"));
+            queue.setActiveFlag(ActiveFlag.values()[((int)row.get("active_flag"))+2]);
 
             queueList.add(queue);
         }

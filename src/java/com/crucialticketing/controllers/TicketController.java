@@ -15,7 +15,7 @@ import com.crucialticketing.entities.WorkflowStep;
 import com.crucialticketing.daos.services.ApplicationControlService;
 import com.crucialticketing.daos.services.ApplicationService;
 import com.crucialticketing.daos.services.AttachmentService;
-import com.crucialticketing.daos.services.ChangeLogService;
+import com.crucialticketing.daos.services.TicketChangeLogService;
 import com.crucialticketing.daos.services.RoleService;
 import com.crucialticketing.daos.services.SeverityService;
 import com.crucialticketing.daos.services.TicketLockRequestService;
@@ -71,7 +71,7 @@ public class TicketController {
     UserAlertService userAlertService;
 
     @Autowired
-    ChangeLogService changeLogService;
+    TicketChangeLogService changeLogService;
 
     @Autowired
     TicketLogService ticketLogService;
@@ -237,13 +237,13 @@ public class TicketController {
 
         if (newStatus.isEmpty()) {
             currentStatusId = applicationControl.getWorkflow().getWorkflowMap()
-                    .getWorkflow().get(0).getStatus().getStatusId();
+                    .getWorkflow().get(0).getWorkflowStatus().getStatusId();
         } else {
             currentStatusId = Integer.valueOf(newStatus);
         }
 
         WorkflowStep workflowStep = applicationControl.getWorkflow().getWorkflowMap().getWorkflow().get(0);
-        if ((workflowStep.getStatus().getStatusId() != currentStatusId) && (!workflowStep.isLegalStep(currentStatusId))) {
+        if ((workflowStep.getWorkflowStatus().getStatusId() != currentStatusId) && (!workflowStep.isLegalStep(currentStatusId))) {
             map.addAttribute("alert", "Status conflicts with workflow configuration");
             map.addAttribute("page", "main/createticketselection.jsp");
             return "mainview";
@@ -278,10 +278,10 @@ public class TicketController {
                 applicationControl.getApplicationControlId(),
                 user.getUserId(),
                 applicationControl.getWorkflow().getWorkflowMap()
-                .getWorkflow().get(0).getStatus().getStatusId());
+                .getWorkflow().get(0).getWorkflowStatus().getStatusId());
 
         if (currentStatusId != applicationControl.getWorkflow().getWorkflowMap()
-                .getWorkflow().get(0).getStatus().getStatusId()) {
+                .getWorkflow().get(0).getWorkflowStatus().getStatusId()) {
             changeLogService.addChangeLogEntry(
                     ticketId,
                     applicationControl.getApplicationControlId(),
@@ -366,7 +366,7 @@ public class TicketController {
                     .getWorkflowMap()
                     .getWorkflow()
                     .get(0).getNextWorkflowStep()
-                    .get(0).getStatus().getStatusId());
+                    .get(0).getWorkflowStatus().getStatusId());
 
             ticketLogService.addTicketLog(ticket.getTicketId(), user.getUserId(),
                     "Ticket severity has been changed from "
@@ -382,7 +382,7 @@ public class TicketController {
                     .getWorkflowMap()
                     .getWorkflow()
                     .get(0).getNextWorkflowStep()
-                    .get(0).getStatus().getStatusName());
+                    .get(0).getWorkflowStatus().getStatusName());
 
             changeLogEntryRequired = true;
         }
@@ -403,7 +403,7 @@ public class TicketController {
                             .getWorkflow()
                             .getWorkflowMap()
                             .getWorkflowStageByStatus(Integer.valueOf(newStatus))
-                            .getStatus();
+                            .getWorkflowStatus();
 
                     ticketService.updateStatus(ticket.getTicketId(), workflowStatus.getStatusId());
 
@@ -438,7 +438,7 @@ public class TicketController {
                     ticket.getTicketId(),
                     ticket.getApplicationControl().getApplicationControlId(),
                     user.getUserId(),
-                    ticket.getCurrentWorkflowStep().getStatus().getStatusId());
+                    ticket.getCurrentWorkflowStep().getWorkflowStatus().getStatusId());
         }
 
         ticket = ticketService.getTicketById(Integer.valueOf(ticketId), true, true, true, true);

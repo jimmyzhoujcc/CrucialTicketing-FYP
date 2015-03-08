@@ -15,18 +15,20 @@ public class UserRoleCon {
     private Role role;
     private int validFrom;
     private int validTo;
+    
+    private ActiveFlag activeFlag;
 
     public UserRoleCon() {
         this.user = new User();
         this.role = new Role();
     }
 
-    public UserRoleCon(int userRoleConId, User user, Role role, int validFrom, int validTo) {
-        this.userRoleConId = userRoleConId;
+    public UserRoleCon(User user, Role role, int validFrom, int validTo, ActiveFlag activeFlag) {
         this.user = user;
         this.role = role;
         this.validFrom = validFrom;
         this.validTo = validTo;
+        this.activeFlag = activeFlag;
     }
 
     public int getUserRoleConId() {
@@ -67,5 +69,15 @@ public class UserRoleCon {
 
     public void setValidTo(int validTo) {
         this.validTo = validTo;
-    }    
+    }
+
+    public ActiveFlag getActiveFlag() {
+        return activeFlag;
+    }
+
+    public void setActiveFlag(ActiveFlag activeFlag) {
+        this.activeFlag = activeFlag;
+    }
+
+    
 }

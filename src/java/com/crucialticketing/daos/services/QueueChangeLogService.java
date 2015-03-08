@@ -30,23 +30,23 @@ public class QueueChangeLogService extends JdbcDaoSupport implements QueueChange
 
     @Autowired
     QueueService queueService;
-    
+
     @Autowired
     TicketService ticketService;
 
     @Override
     public void insertQueueChangeLog(QueueChangeLog queueChangeLog) {
         String sql = "INSERT queue_change_log "
-                + "(queue_id, queue_name, active_flag, ticket_id, requestor_user_id, stamp) "
+                + "(queue_id, queue_name, ticket_id, requestor_user_id, stamp, active_flag) "
                 + "VALUES "
                 + "(?, ?, ?, ?, ?, ?)";
         this.getJdbcTemplate().update(sql, new Object[]{
-            queueChangeLog.getQueue().getQueueId(), 
+            queueChangeLog.getQueue().getQueueId(),
             queueChangeLog.getQueue().getQueueName(),
-            ActiveFlag.UNPROCESSED.getActiveFlag(), 
-            queueChangeLog.getTicket().getTicketId(), 
+            queueChangeLog.getTicket().getTicketId(),
             queueChangeLog.getRequestor().getUserId(),
-            getTimestamp()
+            getTimestamp(),
+            queueChangeLog.getQueue().getActiveFlag().getActiveFlag()
         });
     }
 
@@ -69,7 +69,7 @@ public class QueueChangeLogService extends JdbcDaoSupport implements QueueChange
         }
         return rowMapper(rs);
     }
-    
+
     @Override
     public List<QueueChangeLog> getQueueChangeLogListByTicketId(Ticket ticket) {
         String sql = "SELECT * FROM queue_change_log WHERE ticket_id=?";
@@ -79,13 +79,13 @@ public class QueueChangeLogService extends JdbcDaoSupport implements QueueChange
         }
         return rowMapper(rs);
     }
-    
+
     @Override
     public void removeQueueChangeLogEntry(QueueChangeLog queueChangeLog) {
         String sql = "DELETE FROM queue_change_log WHERE queue_change_log_id=?";
         this.getJdbcTemplate().update(sql, new Object[]{queueChangeLog.getQueueChangeLogId()});
     }
-    
+
     @Override
     public void removeAllQueueChangeLogEntries(Queue queue) {
         String sql = "DELETE FROM queue_change_log WHERE queue_id=?";
@@ -111,7 +111,7 @@ public class QueueChangeLogService extends JdbcDaoSupport implements QueueChange
                 queueChangeLog.setQueue(queue);
                 retrievedQueueList.put((int) row.get("queue_id"), queue);
             }
-            
+
             // Ticket checks
             if (retrievedTicketList.containsKey((int) row.get("ticket_id"))) {
                 queueChangeLog.setTicket(retrievedTicketList.get((int) row.get("ticket_id")));

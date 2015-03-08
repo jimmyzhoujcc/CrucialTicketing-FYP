@@ -18,15 +18,15 @@ import java.util.Map;
 public interface WorkflowStatusDao {
     public int insertWorkflowStatus(WorkflowStatus workflowStatus, Ticket ticket, User requestor);
 
-    public WorkflowStatus getWorkflowStatusById(int workflowStatusId);
+    public WorkflowStatus getWorkflowStatus(int workflowStatusId);
     
-    public WorkflowStatus getWorkflowStatusByName(String workflowStatusName);
+    public WorkflowStatus getWorkflowStatus(String workflowStatusName);
     
-    public boolean doesWorkflowStatusExistInOnlineById(int workflowStatusId);
+    public boolean doesWorkflowStatusExistInOnline(int workflowStatusId);
     
-    public boolean doesWorkflowStatusExistInOnlineByName(String workflowStatusName);
+    public boolean doesWorkflowStatusExistInOnline(String workflowStatusName);
     
-    public boolean doesWorkflowStatusExistInOnlineOrOfflineByName(String workflowStatusName);
+    public boolean doesWorkflowStatusExistInOnlineOrOffline(String workflowStatusName);
 
     public List<WorkflowStatus> getIncompleteWorkflowStatusList();
 

@@ -33,7 +33,7 @@ public class UserChangeLogService extends JdbcDaoSupport implements UserChangeLo
     @Override
     public void insertUserChangeLog(UserChangeLog userChangeLog) {
         String sql = "INSERT user_change_log "
-                + "(user_id, hash, email_address, contact, ticket_id, active_flag, requestor_user_id, stamp) "
+                + "(user_id, hash, email_address, contact, ticket_id, requestor_user_id, stamp, active_flag) "
                 + "VALUES "
                 + "(?, ?, ?, ?, ?, ?, ?, ?)";
         this.getJdbcTemplate().update(sql, new Object[]{
@@ -42,9 +42,9 @@ public class UserChangeLogService extends JdbcDaoSupport implements UserChangeLo
             userChangeLog.getUser().getEmailAddress(),
             userChangeLog.getUser().getContact(),
             userChangeLog.getTicket().getTicketId(),
-            userChangeLog.getActiveFlag(),
             userChangeLog.getRequestor().getUserId(),
-            getTimestamp()
+            getTimestamp(), 
+            userChangeLog.getUser().getActiveFlag().getActiveFlag()
         });
     }
 
@@ -111,9 +111,9 @@ public class UserChangeLogService extends JdbcDaoSupport implements UserChangeLo
                 retrievedTicketList.put((int) row.get("ticket_id"), ticket);
             }
 
-            userChangeLog.setHash((String) row.get("hash"));
-            userChangeLog.setEmailAddress((String) row.get("email_address"));
-            userChangeLog.setContact((String) row.get("contact"));
+            userChangeLog.getUser().getSecure().setHash((String) row.get("hash"));
+            userChangeLog.getUser().setEmailAddress((String) row.get("email_address"));
+            userChangeLog.getUser().setContact((String) row.get("contact"));
             
             // Requestor user List
             if (retrievedUserList.containsKey((int) row.get("requestor_user_id"))) {
@@ -124,7 +124,7 @@ public class UserChangeLogService extends JdbcDaoSupport implements UserChangeLo
                 retrievedUserList.put((int) row.get("requestor_user_id"), user);
             }
             
-            userChangeLog.setActiveFlag(ActiveFlag.values()[((int) row.get("active_flag"))]);
+            userChangeLog.getUser().setActiveFlag(ActiveFlag.values()[((int) row.get("active_flag"))]);
             
             userChangeLog.setStamp((int) row.get("stamp"));
 

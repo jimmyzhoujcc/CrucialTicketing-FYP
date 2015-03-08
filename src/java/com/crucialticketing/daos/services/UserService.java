@@ -33,10 +33,10 @@ public class UserService extends JdbcDaoSupport implements UserDao {
 
     @Autowired
     UserRoleConService userRoleConService;
-    
+
     @Autowired
     UserChangeLogService userChangeLogService;
-    
+
     @Override
     public int insertUser(final User user, Ticket ticket, User requestor) {
         final String sql = "INSERT INTO user "
@@ -64,12 +64,13 @@ public class UserService extends JdbcDaoSupport implements UserDao {
         }, holder);
 
         int insertedUserId = holder.getKey().intValue();
-        
+        user.setUserId(insertedUserId);
+        user.setActiveFlag(ActiveFlag.INCOMPLETE);
+
         userChangeLogService.insertUserChangeLog(
-          new UserChangeLog(user, user.getSecure().getHash(), user.getEmailAddress(), 
-                  user.getContact(), ticket, requestor, getTimestamp(), ActiveFlag.INCOMPLETE)
+                new UserChangeLog(user, ticket, requestor, getTimestamp())
         );
-        
+
         return insertedUserId;
     }
 
@@ -101,7 +102,7 @@ public class UserService extends JdbcDaoSupport implements UserDao {
         int result = Integer.valueOf(rs.get(0).get("result").toString());
         return result != 0;
     }
-    
+
     @Override
     public boolean doesUserExistInOnline(int userId) {
         String sql = "SELECT COUNT(user_id) AS result FROM user "
@@ -111,7 +112,7 @@ public class UserService extends JdbcDaoSupport implements UserDao {
         int result = Integer.valueOf(rs.get(0).get("result").toString());
         return result != 0;
     }
-    
+
     @Override
     public boolean doesUserExistInOnline(String username) {
         String sql = "SELECT COUNT(user_id) AS result FROM user "
@@ -120,7 +121,7 @@ public class UserService extends JdbcDaoSupport implements UserDao {
         int result = Integer.valueOf(rs.get(0).get("result").toString());
         return result != 0;
     }
-    
+
     @Override
     public boolean doesUserExistInOnlineOrOffline(String username) {
         String sql = "SELECT COUNT(user_id) AS result FROM user "
@@ -129,7 +130,7 @@ public class UserService extends JdbcDaoSupport implements UserDao {
         int result = Integer.valueOf(rs.get(0).get("result").toString());
         return result != 0;
     }
-    
+
     @Override
     public List<User> getIncompleteUserList() {
         String sql = "SELECT * FROM user WHERE active_flag=?";
@@ -175,21 +176,36 @@ public class UserService extends JdbcDaoSupport implements UserDao {
     }
 
     @Override
-    public void updateToUnprocessed(User user, Ticket ticket, User requestor) {
+    public void updateToUnprocessed(int userId, Ticket ticket, User requestor) {
         String sql = "UPDATE user SET active_flag=? WHERE user_id=?";
-        this.getJdbcTemplate().update(sql, new Object[]{ActiveFlag.UNPROCESSED.getActiveFlag(), user.getUserId()});
+        this.getJdbcTemplate().update(sql, new Object[]{ActiveFlag.UNPROCESSED.getActiveFlag(), userId});
+
+        userChangeLogService.insertUserChangeLog(
+                new UserChangeLog(this.getUserById(userId, false),
+                        ticket, requestor, getTimestamp())
+        );
     }
 
     @Override
-    public void updateToOnline(User user, Ticket ticket, User requestor) {
+    public void updateToOnline(int userId, Ticket ticket, User requestor) {
         String sql = "UPDATE user SET active_flag=? WHERE user_id=?";
-        this.getJdbcTemplate().update(sql, new Object[]{ActiveFlag.ONLINE.getActiveFlag(), user.getUserId()});
+        this.getJdbcTemplate().update(sql, new Object[]{ActiveFlag.ONLINE.getActiveFlag(), userId});
+
+        userChangeLogService.insertUserChangeLog(
+                new UserChangeLog(this.getUserById(userId, false),
+                        ticket, requestor, getTimestamp())
+        );
     }
 
     @Override
-    public void updateToOffline(User user, Ticket ticket, User requestor) {
+    public void updateToOffline(int userId, Ticket ticket, User requestor) {
         String sql = "UPDATE user SET active_flag=? WHERE user_id=?";
-        this.getJdbcTemplate().update(sql, new Object[]{ActiveFlag.OFFLINE.getActiveFlag(), user.getUserId()});
+        this.getJdbcTemplate().update(sql, new Object[]{ActiveFlag.OFFLINE.getActiveFlag(), userId});
+
+        userChangeLogService.insertUserChangeLog(
+                new UserChangeLog(this.getUserById(userId, false),
+                        ticket, requestor, getTimestamp())
+        );
     }
 
     @Override
@@ -216,8 +232,8 @@ public class UserService extends JdbcDaoSupport implements UserDao {
 
             user.setEmailAddress((String) row.get("email_address"));
             user.setContact((String) row.get("contact"));
-            
-            user.setActiveFlag((int)row.get("active_flag"));
+
+            user.setActiveFlag(ActiveFlag.values()[((int) row.get("active_flag")) + 2]);
             userList.add(user);
         }
         return userList;

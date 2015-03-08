@@ -45,7 +45,7 @@ public class RoleChangeLogService extends JdbcDaoSupport implements RoleChangeLo
             roleChangeLog.getTicket().getTicketId(), 
             roleChangeLog.getRequestor().getUserId(), 
             roleChangeLog.getStamp(), 
-            roleChangeLog.getActiveFlag()
+            roleChangeLog.getRole().getActiveFlag().getActiveFlag()
         });
     }
 
@@ -109,7 +109,7 @@ public class RoleChangeLogService extends JdbcDaoSupport implements RoleChangeLo
                 retrievedUserList.put((int) row.get("requestor_user_id"), user);
             }
          
-            roleChangeLog.setActiveFlag(ActiveFlag.values()[((int) row.get("active_flag"))+2]);
+            roleChangeLog.getRole().setActiveFlag(ActiveFlag.values()[((int) row.get("active_flag"))+2]);
             
             roleChangeLog.setStamp((int) row.get("stamp"));
             

@@ -18,7 +18,13 @@ public class ApplicationControl {
     private Role role;
     private int slaClock;
     
-    public ApplicationControl() {}
+    public ApplicationControl() {
+        this.ticketType = new TicketType();
+        this.application = new Application();
+        this.workflow = new Workflow();
+        this.severity = new Severity();
+        this.role = new Role();
+    }
 
     public ApplicationControl(TicketType ticketType, Application application, Workflow workflow, Severity severity, Role role, int slaClock) {
         this.ticketType = ticketType;

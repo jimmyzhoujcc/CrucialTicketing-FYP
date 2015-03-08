@@ -17,8 +17,6 @@ public class ApplicationChangeLog {
     private Ticket ticket;
     private User requestor;
     private int stamp;
-
-    private ActiveFlag activeFlag;
    
     public ApplicationChangeLog() {
         this.application = new Application();
@@ -26,12 +24,11 @@ public class ApplicationChangeLog {
         this.requestor = new User();
     }
 
-    public ApplicationChangeLog(Application application, Ticket ticket, User requestor, int stamp, ActiveFlag activeFlag) {
+    public ApplicationChangeLog(Application application, Ticket ticket, User requestor, int stamp) {
         this.application = application;
         this.ticket = ticket;
         this.requestor = requestor;
         this.stamp = stamp;
-        this.activeFlag = activeFlag;
     }
     
     
@@ -75,14 +72,4 @@ public class ApplicationChangeLog {
     public void setStamp(int stamp) {
         this.stamp = stamp;
     }
-
-    public ActiveFlag getActiveFlag() {
-        return activeFlag;
-    }
-
-    public void setActiveFlag(ActiveFlag activeFlag) {
-        this.activeFlag = activeFlag;
-    }
-    
-    
 }

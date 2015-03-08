@@ -46,7 +46,7 @@ public class ApplicationChangeLogService extends JdbcDaoSupport implements Appli
             applicationChangeLog.getTicket().getTicketId(),
             applicationChangeLog.getRequestor().getUserId(),
             getTimestamp(),
-            applicationChangeLog.getActiveFlag().getActiveFlag()
+            applicationChangeLog.getApplication().getActiveFlag().getActiveFlag()
         });
     }
 
@@ -116,7 +116,7 @@ public class ApplicationChangeLogService extends JdbcDaoSupport implements Appli
 
             applicationChangeLog.setStamp((int) row.get("stamp"));
 
-            applicationChangeLog.setActiveFlag(ActiveFlag.values()[((int) row.get("active_flag")) + 2]); // Offset 2 to get the correct array
+            applicationChangeLog.getApplication().setActiveFlag(ActiveFlag.values()[((int) row.get("active_flag")) + 2]); // Offset 2 to get the correct array
 
             applicationChangeLogList.add(applicationChangeLog);
         }

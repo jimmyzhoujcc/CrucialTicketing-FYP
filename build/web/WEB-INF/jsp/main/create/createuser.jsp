@@ -34,10 +34,10 @@
 <br class="clearfix" />
 <form:form method="POST" action="${pageContext.request.contextPath}/home/create/user/create/" commandName="user">
     <div class="create-form-button-container">
-        <!--<div class="form-group"> Ticket ID
-            <input type="text" name="ticket.ticketId" class="form-control" placeholder="Ticket ID for this request" required="required" />
+        <div class="form-group"> Ticket ID
+            <input type="text" name="ticketId" class="form-control" placeholder="Ticket ID for this request" required="required" />
             <p class="help-block">Ticket ID ongoing for this request</p>
-        </div>  -->    
+        </div>
     </div>
 
     <br class="clearfix" />

@@ -36,17 +36,18 @@ public class SeverityChangeLogService extends JdbcDaoSupport implements Severity
 
     @Override
     public void insertSeverityChangeLog(SeverityChangeLog severityChangeLog) {
-        String sql = "INSERT queue_change_log "
+        String sql = "INSERT severity_change_log "
                 + "(severity_id, severity_level, severity_name, ticket_id, requestor_user_id, stamp, active_flag) "
                 + "VALUES "
                 + "(?, ?, ?, ?, ?, ?, ?)";
         this.getJdbcTemplate().update(sql, new Object[]{
+            severityChangeLog.getSeverity().getSeverityId(), 
             severityChangeLog.getSeverity().getSeverityLevel(),
             severityChangeLog.getSeverity().getSeverityName(),
             severityChangeLog.getTicket().getTicketId(),
             severityChangeLog.getRequestor().getUserId(),
             getTimestamp(),
-            ActiveFlag.UNPROCESSED.getActiveFlag()
+            severityChangeLog.getSeverity().getActiveFlag().getActiveFlag()
         });
     }
 
@@ -111,13 +112,10 @@ public class SeverityChangeLogService extends JdbcDaoSupport implements Severity
                 severityChangeLog.setRequestor(user);
                 retrievedUserList.put((int) row.get("requestor_user_id"), user);
             }
-
-            severityChangeLog.setSeverityLevel((int) row.get("severity_level"));
-            severityChangeLog.setSeverityName((String) row.get("severity_name"));
             
             severityChangeLog.setStamp((int) row.get("stamp"));
 
-            severityChangeLog.setActiveFlag(ActiveFlag.values()[((int) row.get("active_flag")) + 2]);
+            severityChangeLog.getSeverity().setActiveFlag(ActiveFlag.values()[((int) row.get("active_flag")) + 2]);
 
             severityChangeLogList.add(severityChangeLog);
         }

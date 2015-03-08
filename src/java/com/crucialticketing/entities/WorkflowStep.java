@@ -5,6 +5,7 @@
  */
 package com.crucialticketing.entities;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -12,16 +13,22 @@ import java.util.List;
  * @author Daniel Foley
  */
 public class WorkflowStep {
-    private WorkflowStatus status;
+
+    private WorkflowStatus workflowStatus;
     private Role role;
     private Queue queue;
     private List<WorkflowStep> nextWorkflowStep;
     private int clockActive;
-    
-    public WorkflowStep() {}
 
-    public WorkflowStep(WorkflowStatus status, Role role, Queue queue, List<WorkflowStep> nextWorkflowStep, int clockActive) {
-        this.status = status;
+    public WorkflowStep() {
+        this.nextWorkflowStep = new ArrayList<>();
+        this.workflowStatus = new WorkflowStatus();
+        this.role = new Role();
+        this.queue = new Queue();
+    }
+
+    public WorkflowStep(WorkflowStatus workflowStatus, Role role, Queue queue, List<WorkflowStep> nextWorkflowStep, int clockActive) {
+        this.workflowStatus = workflowStatus;
         this.role = role;
         this.queue = queue;
         this.nextWorkflowStep = nextWorkflowStep;
@@ -34,19 +41,19 @@ public class WorkflowStep {
 
     public boolean isLegalStep(int workflowStatusId) {
         for (WorkflowStep workflowStep : nextWorkflowStep) {
-            if(workflowStep.getStatus().getStatusId() == workflowStatusId) {
+            if (workflowStep.getWorkflowStatus().getWorkflowStatusId() == workflowStatusId) {
                 return true;
             }
         }
         return false;
     }
-    
-    public WorkflowStatus getStatus() {
-        return status;
+
+    public WorkflowStatus getWorkflowStatus() {
+        return workflowStatus;
     }
 
-    public void setStatus(WorkflowStatus status) {
-        this.status = status;
+    public void setWorkflowStatus(WorkflowStatus workflowStatus) {
+        this.workflowStatus = workflowStatus;
     }
 
     public Role getRole() {
@@ -80,8 +87,5 @@ public class WorkflowStep {
     public void setClockActive(int clockActive) {
         this.clockActive = clockActive;
     }
-   
-    
-    
-    
+
 }

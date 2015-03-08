@@ -13,15 +13,10 @@ public class SeverityChangeLog {
     private int severityChangeLogId;
     private Severity severity;
     
-    private int severityLevel;
-    private String severityName;
-    
     private Ticket ticket;
     private User requestor;
     
     private int stamp;
-    
-    private ActiveFlag activeFlag;
 
     public SeverityChangeLog() {
         this.severity = new Severity();
@@ -29,14 +24,11 @@ public class SeverityChangeLog {
         this.requestor = new User();
     }
     
-    public SeverityChangeLog(Severity severity, Ticket ticket, User requestor, int stamp, ActiveFlag activeFlag) {
+    public SeverityChangeLog(Severity severity, Ticket ticket, User requestor, int stamp) {
         this.severity = severity;
-        this.severityLevel = severityLevel;
-        this.severityName = severityName;
         this.ticket = ticket;
         this.requestor = requestor;
         this.stamp = stamp;
-        this.activeFlag = activeFlag;
     }
 
     public int getSeverityChangeLogId() {
@@ -53,22 +45,6 @@ public class SeverityChangeLog {
 
     public void setSeverity(Severity severity) {
         this.severity = severity;
-    }
-
-    public int getSeverityLevel() {
-        return severityLevel;
-    }
-
-    public void setSeverityLevel(int severityLevel) {
-        this.severityLevel = severityLevel;
-    }
-
-    public String getSeverityName() {
-        return severityName;
-    }
-
-    public void setSeverityName(String severityName) {
-        this.severityName = severityName;
     }
 
     public Ticket getTicket() {
@@ -94,14 +70,5 @@ public class SeverityChangeLog {
     public void setStamp(int stamp) {
         this.stamp = stamp;
     }
-
-    public ActiveFlag getActiveFlag() {
-        return activeFlag;
-    }
-
-    public void setActiveFlag(ActiveFlag activeFlag) {
-        this.activeFlag = activeFlag;
-    }
-    
     
 }

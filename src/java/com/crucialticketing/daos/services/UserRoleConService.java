@@ -10,6 +10,9 @@ import com.crucialticketing.entities.UserRoleCon;
 import com.crucialticketing.daos.UserRoleConDao;
 import com.crucialticketing.entities.ActiveFlag;
 import com.crucialticketing.entities.Role;
+import com.crucialticketing.entities.Ticket;
+import com.crucialticketing.entities.UserRoleConChangeLog;
+import static com.crucialticketing.util.Timestamp.getTimestamp;
 import com.mysql.jdbc.PreparedStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -32,14 +35,17 @@ public class UserRoleConService extends JdbcDaoSupport implements UserRoleConDao
 
     @Autowired
     UserService userService;
-    
+
     @Autowired
     RoleService roleService;
 
+    @Autowired
+    UserRoleConChangeLogService changeLogService;
+
     @Override
-    public int insertUserRoleCon(final UserRoleCon userRoleCon, final boolean newUserFlag) {
+    public int insertUserRoleCon(final UserRoleCon userRoleCon, final boolean newUserFlag, Ticket ticket, User requestor) {
         final String sql = "INSERT INTO user_role_con "
-                + "(user_id, role_id, valid_from, valid_to, active_flag, new_user_flag) "
+                + "(user_id, role_id, valid_from, valid_to, new_user_flag, active_flag) "
                 + "VALUES "
                 + "(?, ?, ?, ?, ?, ?)";
 
@@ -55,19 +61,78 @@ public class UserRoleConService extends JdbcDaoSupport implements UserRoleConDao
                 ps.setInt(2, userRoleCon.getRole().getRoleId());
                 ps.setInt(3, userRoleCon.getValidFrom());
                 ps.setInt(4, userRoleCon.getValidTo());
-                ps.setInt(5, ActiveFlag.INCOMPLETE.getActiveFlag());
-                ps.setInt(6, (newUserFlag) ? 1 : 0);
+                ps.setInt(5, (newUserFlag) ? 1 : 0);
+                ps.setInt(6, ActiveFlag.INCOMPLETE.getActiveFlag());
                 return ps;
             }
         }, holder);
 
-        return holder.getKey().intValue();
+        int insertedId = holder.getKey().intValue();
+        userRoleCon.setUserRoleConId(insertedId);
+        userRoleCon.setActiveFlag(ActiveFlag.INCOMPLETE);
+        
+        changeLogService.insertChangeLog(
+                new UserRoleConChangeLog(userRoleCon, ticket, requestor, getTimestamp())
+        );
+
+        return insertedId;
+    }
+    
+    @Override
+    public UserRoleCon getUserRoleConById(int userRoleConId) {
+        String sql = "SELECT * FROM user_role_con WHERE user_role_con_id=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{userRoleConId});
+        if (rs.size() != 1) {
+            return new UserRoleCon();
+        }
+        return this.rowMapper(rs).get(0);
+    }
+    
+    @Override
+    public List<UserRoleCon> getUserListByRoleId(int roleId) {
+        String sql = "SELECT * FROM user_role_con WHERE role_id=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{roleId});
+        if (rs.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return this.rowMapper(rs);
+    }
+
+    @Override
+    public List<UserRoleCon> getRoleListByUserId(int userId) {
+        String sql = "SELECT * FROM user_role_con WHERE user_id=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{userId});
+        if (rs.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return this.rowMapper(rs);
+    }
+
+    @Override
+    public boolean doesUserRoleConExist(int userId, int roleId) {
+        String sql = "SELECT COUNT(user_role_con_id) AS result FROM user_role_con "
+                + "WHERE user_id=? AND role_id=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(
+                sql, new Object[]{userId, roleId});
+        int result = Integer.valueOf(rs.get(0).get("result").toString());
+        return result != 0;
+    }
+    
+    @Override
+    public boolean doesUserRoleConExistInOnline(int userId, int roleId) {
+        String sql = "SELECT COUNT(user_role_con_id) AS result FROM user_role_con "
+                + "WHERE user_id=? AND role_id=? AND active_flag=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(
+                sql, new Object[]{userId, roleId, ActiveFlag.ONLINE.getActiveFlag()});
+        int result = Integer.valueOf(rs.get(0).get("result").toString());
+        return result != 0;
     }
 
     @Override
     public List<UserRoleCon> getIncompleteUserRoleConList(boolean newUserFlag) {
         String sql = "SELECT * FROM user_role_con WHERE active_flag=? AND new_user_flag=?";
-        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{-2, (newUserFlag) ? 1 : 0});
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(
+                sql, new Object[]{ActiveFlag.INCOMPLETE.getActiveFlag(), (newUserFlag) ? 1 : 0});
         if (rs.isEmpty()) {
             return new ArrayList<>();
         }
@@ -77,7 +142,8 @@ public class UserRoleConService extends JdbcDaoSupport implements UserRoleConDao
     @Override
     public List<UserRoleCon> getUnprocessedUserRoleConList(boolean newUserFlag) {
         String sql = "SELECT * FROM user_role_con WHERE active_flag=? AND new_user_flag=?";
-        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{-1, (newUserFlag) ? 1 : 0});
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(
+                sql, new Object[]{ActiveFlag.UNPROCESSED.getActiveFlag(), (newUserFlag) ? 1 : 0});
         if (rs.isEmpty()) {
             return new ArrayList<>();
         }
@@ -85,19 +151,10 @@ public class UserRoleConService extends JdbcDaoSupport implements UserRoleConDao
     }
 
     @Override
-    public List<UserRoleCon> getUnprocessedUserRoleConListByRoleId(Role role, boolean newUserFlag) {
+    public List<UserRoleCon> getUnprocessedUserRoleConListByRoleId(int roleId, boolean newUserFlag) {
         String sql = "SELECT * FROM user_role_con WHERE role_id=? AND active_flag=? AND new_user_flag=?";
-        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{role.getRoleId(), -1, (newUserFlag) ? 1 : 0});
-        if (rs.isEmpty()) {
-            return new ArrayList<>();
-        }
-        return this.rowMapper(rs);
-    }
-    
-    @Override
-    public List<UserRoleCon> getUnprocessedUserRoleConListByUserId(User user, boolean newUserFlag) {
-        String sql = "SELECT * FROM user_role_con WHERE user_id=? AND active_flag=? AND new_user_flag=?";
-        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{user.getUserId(), -1, (newUserFlag) ? 1 : 0});
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(
+                sql, new Object[]{roleId, ActiveFlag.INCOMPLETE.getActiveFlag(), (newUserFlag) ? 1 : 0});
         if (rs.isEmpty()) {
             return new ArrayList<>();
         }
@@ -107,7 +164,8 @@ public class UserRoleConService extends JdbcDaoSupport implements UserRoleConDao
     @Override
     public List<UserRoleCon> getOnlineUserRoleConList(boolean newUserFlag) {
         String sql = "SELECT * FROM user_role_con WHERE active_flag=? AND new_user_flag=?";
-        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{1, (newUserFlag) ? 1 : 0});
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(
+                sql, new Object[]{ActiveFlag.ONLINE.getActiveFlag(), (newUserFlag) ? 1 : 0});
         if (rs.isEmpty()) {
             return new ArrayList<>();
         }
@@ -117,7 +175,8 @@ public class UserRoleConService extends JdbcDaoSupport implements UserRoleConDao
     @Override
     public List<UserRoleCon> getOfflineUserRoleConList(boolean newUserFlag) {
         String sql = "SELECT * FROM user_role_con WHERE active_flag=? AND new_user_flag=?";
-        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{0, (newUserFlag) ? 1 : 0});
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(
+                sql, new Object[]{ActiveFlag.OFFLINE.getActiveFlag(), (newUserFlag) ? 1 : 0});
         if (rs.isEmpty()) {
             return new ArrayList<>();
         }
@@ -125,63 +184,36 @@ public class UserRoleConService extends JdbcDaoSupport implements UserRoleConDao
     }
 
     @Override
-    public void updateToUnprocessed(UserRoleCon userRoleCon) {
-        String sql = "UPDATE user_role_con SET active_flag=-1 WHERE user_role_con_id=?";
-        this.getJdbcTemplate().update(sql, new Object[]{userRoleCon.getUserRoleConId()});
+    public void updateToUnprocessed(int userRoleConId, Ticket ticket, User requestor) {
+        String sql = "UPDATE user_role_con SET active_flag=? WHERE user_role_con_id=?";
+        this.getJdbcTemplate().update(
+                sql, new Object[]{ActiveFlag.UNPROCESSED.getActiveFlag(), userRoleConId});
+        
+        changeLogService.insertChangeLog(
+                new UserRoleConChangeLog(this.getUserRoleConById(userRoleConId), ticket, requestor, getTimestamp())
+        );
     }
 
     @Override
-    public void updateToOnline(UserRoleCon userRoleCon) {
-        String sql = "UPDATE user_role_con SET active_flag=1 WHERE user_role_con_id=?";
-        this.getJdbcTemplate().update(sql, new Object[]{userRoleCon.getUserRoleConId()});
+    public void updateToOnline(int userRoleConId, Ticket ticket, User requestor) {
+        String sql = "UPDATE user_role_con SET active_flag=? WHERE user_role_con_id=?";
+        this.getJdbcTemplate().update(
+                sql, new Object[]{ActiveFlag.ONLINE.getActiveFlag(), userRoleConId});
+        
+        changeLogService.insertChangeLog(
+                new UserRoleConChangeLog(this.getUserRoleConById(userRoleConId), ticket, requestor, getTimestamp())
+        );
     }
 
     @Override
-    public void updateToOffline(UserRoleCon userRoleCon) {
-        String sql = "UPDATE user_role_con SET active_flag=0 WHERE user_role_con_id=?";
-        this.getJdbcTemplate().update(sql, new Object[]{userRoleCon.getUserRoleConId()});
-    }
-
-    @Override
-    public void removeUserRoleConEntry(UserRoleCon userRoleCon) {
-        String sql = "DELETE FROM user_role_con WHERE user_role_con_id=?";
-        this.getJdbcTemplate().update(sql, new Object[]{userRoleCon.getUserRoleConId()});
-    }
-    
-    @Override
-    public void removeAllUserRoleConEntries(User user) {
-        String sql = "DELETE FROM user_role_con WHERE user_id=?";
-        this.getJdbcTemplate().update(sql, new Object[]{user.getUserId()});
-    }
-
-    @Override
-    public List<UserRoleCon> getUserListByRoleId(Role role) {
-        String sql = "SELECT * FROM user_role_con WHERE role_id=?";
-        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{role.getRoleId()});
-        if (rs.isEmpty()) {
-            return new ArrayList<>();
-        }
-        return this.rowMapper(rs);
-    }
-
-    @Override
-    public List<UserRoleCon> getRoleListByUserId(User user) {
-        String sql = "SELECT * FROM user_role_con WHERE user_id=?";
-        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{user.getUserId()});
-        if (rs.isEmpty()) {
-            return new ArrayList<>();
-        }
-        return this.rowMapper(rs);
-    }
-
-    @Override
-    public boolean doesUserRoleConExistInOnline(User user, Role role) {
-        String sql = "SELECT COUNT(user_role_con_id) AS result FROM user_role_con "
-                + "WHERE user_id=? AND role_id=? AND active_flag=?";
-        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{user.getUserId(), role.getRoleId(), ActiveFlag.ONLINE.getActiveFlag()});
-        int result = Integer.valueOf(rs.get(0).get("result").toString());
-
-        return result != 0;
+    public void updateToOffline(int userRoleConId, Ticket ticket, User requestor) {
+        String sql = "UPDATE user_role_con SET active_flag=? WHERE user_role_con_id=?";
+        this.getJdbcTemplate().update(
+                sql, new Object[]{ActiveFlag.OFFLINE.getActiveFlag(), userRoleConId});
+        
+        changeLogService.insertChangeLog(
+                new UserRoleConChangeLog(this.getUserRoleConById(userRoleConId), ticket, requestor, getTimestamp())
+        );
     }
 
     @Override
@@ -189,12 +221,13 @@ public class UserRoleConService extends JdbcDaoSupport implements UserRoleConDao
         List<UserRoleCon> userRoleConList = new ArrayList<>();
         Map<Integer, User> userList = new HashMap<>();
         Map<Integer, Role> roleList = new HashMap<>();
-        
+
         for (Map row : resultSet) {
             UserRoleCon userRoleCon = new UserRoleCon();
 
             userRoleCon.setUserRoleConId((int) row.get("user_role_con_id"));
-            
+
+            // User
             if (userList.containsKey((int) row.get("user_id"))) {
                 userRoleCon.setUser(userList.get((int) row.get("user_id")));
             } else {
@@ -203,6 +236,7 @@ public class UserRoleConService extends JdbcDaoSupport implements UserRoleConDao
                 userList.put((int) row.get("user_id"), user);
             }
 
+            // Role
             if (roleList.containsKey((int) row.get("role_id"))) {
                 userRoleCon.setRole(roleList.get((int) row.get("role_id")));
             } else {
@@ -210,14 +244,12 @@ public class UserRoleConService extends JdbcDaoSupport implements UserRoleConDao
                 userRoleCon.setRole(role);
                 roleList.put((int) row.get("role_id"), role);
             }
-            
-            userRoleCon.setUser(new User((int) row.get("user_id")));
-
-            userRoleCon.setRole(roleService.getRoleById((int) row.get("role_id")));
 
             userRoleCon.setValidFrom((int) row.get("valid_from"));
             userRoleCon.setValidTo((int) row.get("valid_to"));
 
+            userRoleCon.setActiveFlag(ActiveFlag.values()[((int)row.get("active_flag"))+2]);
+            
             userRoleConList.add(userRoleCon);
         }
         return userRoleConList;

@@ -40,7 +40,18 @@ public class LoginController {
     UserRoleConService userRoleConService;
 
     @RequestMapping(value = "/login/", method = RequestMethod.GET)
-    public String defaultLoginVisit(ModelMap map) {
+    public String defaultLoginVisit(HttpServletRequest request, ModelMap map) {
+        // Gets user off session
+        User user = (User) request.getSession().getAttribute("user");
+
+        if (user != null) {
+            boolean active = (boolean) request.getSession().getAttribute("active");
+
+            if (active) {
+                map.addAttribute("page", "menu/main.jsp");
+                return "mainview";
+            }
+        }
         return "login/login";
     }
 
@@ -49,6 +60,17 @@ public class LoginController {
     public String attemptLogin(HttpServletRequest request,
             @RequestParam(value = "username", required = false) String username,
             @RequestParam(value = "password", required = false) String password, ModelMap map) {
+
+        User user = (User) request.getSession().getAttribute("user");
+
+        if (user != null) {
+            boolean active = (boolean) request.getSession().getAttribute("active");
+
+            if (active) {
+                map.addAttribute("page", "menu/main.jsp");
+                return "mainview";
+            }
+        }
 
         try {
             request.getSession().removeAttribute("alert");
@@ -59,7 +81,7 @@ public class LoginController {
                 return "/login/login";
             }
 
-            User user = userService.getUserByUsername(username, true);
+            user = userService.getUserByUsername(username, true);
 
             PasswordHash passwordHash = new PasswordHash();
 
@@ -75,7 +97,7 @@ public class LoginController {
 
             Role role = roleService.getRoleByRoleName("END_USER");
 
-            if (!userRoleConService.doesUserRoleConExistInOnline(user, role)) {
+            if (!userRoleConService.doesUserRoleConExistInOnline(user.getUserId(), role.getRoleId())) {
                 map.addAttribute("alert", "User does not have the correct privledges to login");
                 return "/login/login";
             }
@@ -85,7 +107,7 @@ public class LoginController {
 
             map.addAttribute("page", "menu/main.jsp");
             return "mainview";
-            
+
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
             map.addAttribute("alert", "Unable to complete your login request");
             return "/login/login";

@@ -21,6 +21,14 @@ public interface ApplicationDao {
 
     public Application getApplicationById(int applicationId);
 
+    public boolean doesApplicationExist(String applicationName);
+
+    public boolean doesApplicationExistInOnline(int applicationId);
+
+    public boolean doesApplicationExistInOnline(String applicationName);
+
+    public boolean doesApplicationExistInOnlineOrOffline(String applicationName);
+    
     public List<Application> getIncompleteApplicationList();
 
     public List<Application> getUnprocessedApplicationList();
@@ -34,14 +42,6 @@ public interface ApplicationDao {
     public void updateToOnline(int applicationId, Ticket ticket, User requestor);
 
     public void updateToOffline(int applicationId, Ticket ticket, User requestor);
-
-    public boolean doesApplicationExist(String applicationName);
-
-    public boolean doesApplicationExistInOnline(int applicationId);
-
-    public boolean doesApplicationExistInOnline(String applicationName);
-
-    public boolean doesApplicationExistInOnlineOrOffline(String applicationName);
 
     public List<Application> rowMapper(List<Map<String, Object>> resultSet);
 }

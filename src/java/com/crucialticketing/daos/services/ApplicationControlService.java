@@ -224,7 +224,7 @@ public class ApplicationControlService extends JdbcDaoSupport implements Applica
             applicationControl.setRole(roleService.getRoleById((int) row.get("role_id")));
 
             // Gets workflow
-            Workflow workflow = workflowService.getWorkflowById((int) row.get("workflow_template_id"));
+            Workflow workflow = workflowService.getWorkflow((int) row.get("workflow_template_id"));
 
             // If flag is true then the mapping of the workflow is also obtained
             if (populateWorkflowMap) {

@@ -14,13 +14,10 @@ public class Severity {
     private int severityLevel;
     private String severityName;
     
+    private ActiveFlag activeFlag;
+    
     public Severity() {}
 
-    public Severity(int severityId) {
-        this.severityId = severityId;
-    }
-
-    
     public int getSeverityId() {
         return severityId;
     }
@@ -44,6 +41,14 @@ public class Severity {
     public void setSeverityName(String severityName) {
         this.severityName = severityName;
     }
-    
+
+    public ActiveFlag getActiveFlag() {
+        return activeFlag;
+    }
+
+    public void setActiveFlag(ActiveFlag activeFlag) {
+        this.activeFlag = activeFlag;
+    }
+
     
 }

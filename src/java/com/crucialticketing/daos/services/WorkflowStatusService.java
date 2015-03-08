@@ -50,7 +50,7 @@ public class WorkflowStatusService extends JdbcDaoSupport implements WorkflowSta
             public PreparedStatement createPreparedStatement(Connection connection)
                     throws SQLException {
                 PreparedStatement ps = (PreparedStatement) connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-                ps.setString(1, workflowStatus.getStatusName());
+                ps.setString(1, workflowStatus.getWorkflowStatusName());
                 ps.setInt(2, ActiveFlag.INCOMPLETE.getActiveFlag());
                 return ps;
             }
@@ -59,7 +59,7 @@ public class WorkflowStatusService extends JdbcDaoSupport implements WorkflowSta
         int insertedId = holder.getKey().intValue();
 
         changeLogService.insertChangeLog(
-                new WorkflowStatusChangeLog(workflowStatus, ticket, requestor, getTimestamp(), ActiveFlag.INCOMPLETE)
+                new WorkflowStatusChangeLog(workflowStatus, ticket, requestor, getTimestamp())
         );
 
         return insertedId;
@@ -67,7 +67,7 @@ public class WorkflowStatusService extends JdbcDaoSupport implements WorkflowSta
     }
 
     @Override
-    public WorkflowStatus getWorkflowStatusById(int workflowStatusId) {
+    public WorkflowStatus getWorkflowStatus(int workflowStatusId) {
         String sql = "SELECT * FROM workflow_status WHERE workflow_status_id=?";
         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{workflowStatusId});
         if (rs.size() != 1) {
@@ -77,7 +77,7 @@ public class WorkflowStatusService extends JdbcDaoSupport implements WorkflowSta
     }
 
     @Override
-    public WorkflowStatus getWorkflowStatusByName(String workflowStatusName) {
+    public WorkflowStatus getWorkflowStatus(String workflowStatusName) {
         String sql = "SELECT * FROM workflow_status WHERE workflow_status_name=?";
         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{workflowStatusName});
         if (rs.size() != 1) {
@@ -87,7 +87,7 @@ public class WorkflowStatusService extends JdbcDaoSupport implements WorkflowSta
     }
 
     @Override
-    public boolean doesWorkflowStatusExistInOnlineById(int workflowStatusId) {
+    public boolean doesWorkflowStatusExistInOnline(int workflowStatusId) {
         String sql = "SELECT COUNT(workflow_status_id) AS result FROM workflow_status "
                 + "WHERE workflow_status_id=?";
         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{workflowStatusId});
@@ -96,7 +96,7 @@ public class WorkflowStatusService extends JdbcDaoSupport implements WorkflowSta
     }
 
     @Override
-    public boolean doesWorkflowStatusExistInOnlineByName(String workflowStatusName) {
+    public boolean doesWorkflowStatusExistInOnline(String workflowStatusName) {
         String sql = "SELECT COUNT(workflow_status_name) AS result FROM workflow_status "
                 + "WHERE workflow_status_name=?";
         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{workflowStatusName});
@@ -105,7 +105,7 @@ public class WorkflowStatusService extends JdbcDaoSupport implements WorkflowSta
     }
 
     @Override
-    public boolean doesWorkflowStatusExistInOnlineOrOfflineByName(String workflowStatusName) {
+    public boolean doesWorkflowStatusExistInOnlineOrOffline(String workflowStatusName) {
         String sql = "SELECT COUNT(workflow_status_name) AS result FROM workflow_status "
                 + "WHERE workflow_status_name=?";
         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{workflowStatusName});
@@ -127,7 +127,7 @@ public class WorkflowStatusService extends JdbcDaoSupport implements WorkflowSta
     public List<WorkflowStatus> getUnprocessedWorkflowStatusList() {
         String sql = "SELECT * FROM workflow_status WHERE active_flag=?";
         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{ActiveFlag.UNPROCESSED.getActiveFlag()});
-        if (rs.size() != 1) {
+        if (rs.isEmpty()) {
             return new ArrayList<>();
         }
         return this.rowMapper(rs);
@@ -137,7 +137,7 @@ public class WorkflowStatusService extends JdbcDaoSupport implements WorkflowSta
     public List<WorkflowStatus> getOnlineWorkflowStatusList() {
         String sql = "SELECT * FROM workflow_status WHERE active_flag=?";
         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{ActiveFlag.ONLINE.getActiveFlag()});
-        if (rs.size() != 1) {
+        if (rs.isEmpty()) {
             return new ArrayList<>();
         }
         return this.rowMapper(rs);
@@ -147,7 +147,7 @@ public class WorkflowStatusService extends JdbcDaoSupport implements WorkflowSta
     public List<WorkflowStatus> getOfflineWorkflowStatusList() {
         String sql = "SELECT * FROM workflow_status WHERE active_flag=?";
         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{ActiveFlag.OFFLINE.getActiveFlag()});
-        if (rs.size() != 1) {
+        if (rs.isEmpty()) {
             return new ArrayList<>();
         }
         return this.rowMapper(rs);
@@ -159,7 +159,7 @@ public class WorkflowStatusService extends JdbcDaoSupport implements WorkflowSta
         this.getJdbcTemplate().update(sql, new Object[]{ActiveFlag.UNPROCESSED.getActiveFlag(), workflowStatusId});
         
         changeLogService.insertChangeLog(
-          new WorkflowStatusChangeLog(this.getWorkflowStatusById(workflowStatusId), ticket, requestor, getTimestamp(), ActiveFlag.UNPROCESSED)
+          new WorkflowStatusChangeLog(this.getWorkflowStatus(workflowStatusId), ticket, requestor, getTimestamp())
         );
     }
     
@@ -169,7 +169,7 @@ public class WorkflowStatusService extends JdbcDaoSupport implements WorkflowSta
         this.getJdbcTemplate().update(sql, new Object[]{ActiveFlag.ONLINE.getActiveFlag(), workflowStatusId});
         
         changeLogService.insertChangeLog(
-          new WorkflowStatusChangeLog(this.getWorkflowStatusById(workflowStatusId), ticket, requestor, getTimestamp(), ActiveFlag.ONLINE)
+          new WorkflowStatusChangeLog(this.getWorkflowStatus(workflowStatusId), ticket, requestor, getTimestamp())
         );
     }
     
@@ -179,7 +179,7 @@ public class WorkflowStatusService extends JdbcDaoSupport implements WorkflowSta
         this.getJdbcTemplate().update(sql, new Object[]{ActiveFlag.OFFLINE.getActiveFlag(), workflowStatusId});
         
         changeLogService.insertChangeLog(
-          new WorkflowStatusChangeLog(this.getWorkflowStatusById(workflowStatusId), ticket, requestor, getTimestamp(), ActiveFlag.OFFLINE)
+          new WorkflowStatusChangeLog(this.getWorkflowStatus(workflowStatusId), ticket, requestor, getTimestamp())
         );
     }
 
@@ -190,9 +190,11 @@ public class WorkflowStatusService extends JdbcDaoSupport implements WorkflowSta
         for (Map row : resultSet) {
             WorkflowStatus workflowStatus = new WorkflowStatus();
 
-            workflowStatus.setStatusId((int) row.get("workflow_status_id"));
-            workflowStatus.setStatusName((String) row.get("workflow_status_name"));
-            workflowStatus.setActiveFlag(ActiveFlag.values()[((int) row.get("workflow_status_name"))+2]);
+            workflowStatus.setWorkflowStatusId((int) row.get("workflow_status_id"));
+            workflowStatus.setWorkflowStatusName((String) row.get("workflow_status_name"));
+            workflowStatus.setBaseWorkflowStatus((int)row.get("base") != 0);
+            workflowStatus.setClosureWorkflowStatus((int)row.get("closure") != 0);
+            workflowStatus.setActiveFlag(ActiveFlag.values()[((int) row.get("active_flag"))+2]);
 
             workflowStatusList.add(workflowStatus);
         }

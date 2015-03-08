@@ -8,8 +8,11 @@ package com.crucialticketing.daos.services;
 import com.crucialticketing.daos.UserQueueConDao;
 import com.crucialticketing.entities.ActiveFlag;
 import com.crucialticketing.entities.Queue;
+import com.crucialticketing.entities.Ticket;
 import com.crucialticketing.entities.User;
 import com.crucialticketing.entities.UserQueueCon;
+import com.crucialticketing.entities.UserQueueConChangeLog;
+import static com.crucialticketing.util.Timestamp.getTimestamp;
 import com.mysql.jdbc.PreparedStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -36,9 +39,12 @@ public class UserQueueConService extends JdbcDaoSupport implements UserQueueConD
     @Autowired
     QueueService queueService;
 
+    @Autowired
+    UserQueueConChangeLogService changeLogService;
+
     @Override
-    public int insertUserQueueCon(final UserQueueCon userQueueCon, final boolean newUserFlag) {
-        final String sql = "INSERT INTO user_queue_con (user_id, queue_id, active_flag, new_user_flag) VALUES "
+    public int insertUserQueueCon(final UserQueueCon userQueueCon, final boolean newUserFlag, Ticket ticket, User requestor) {
+        final String sql = "INSERT INTO user_queue_con (user_id, queue_id, new_user_flag, active_flag) VALUES "
                 + "(?, ?, ?, ?)";
 
         KeyHolder holder = new GeneratedKeyHolder();
@@ -51,125 +57,141 @@ public class UserQueueConService extends JdbcDaoSupport implements UserQueueConD
                 PreparedStatement ps = (PreparedStatement) connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
                 ps.setInt(1, userQueueCon.getUser().getUserId());
                 ps.setInt(2, userQueueCon.getQueue().getQueueId());
-                ps.setInt(3, -2);
-                ps.setInt(4, (newUserFlag) ? 1 : 0);
+                ps.setInt(3, (newUserFlag) ? 1 : 0);
+                ps.setInt(4, ActiveFlag.INCOMPLETE.getActiveFlag());
                 return ps;
             }
         }, holder);
 
-        return holder.getKey().intValue();
-    }
+        int insertedId = holder.getKey().intValue();
+        userQueueCon.setUserQueueConId(insertedId);
+        userQueueCon.setActiveFlag(ActiveFlag.INCOMPLETE);
+        
+        changeLogService.insertChangeLog(
+                new UserQueueConChangeLog(userQueueCon, ticket, requestor, getTimestamp())
+        );
 
-    @Override
-    public List<UserQueueCon> getIncompleteUserQueueConList(boolean newUserFlag) {
-        String sql = "SELECT * FROM user_queue_con WHERE active_flag=? AND new_user_flag=?";
-        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{-2, (newUserFlag) ? 1 : 0});
-        if (rs.isEmpty()) {
-            return new ArrayList<>();
-        }
-        return this.rowMapper(rs);
-    }
-
-    @Override
-    public List<UserQueueCon> getUnprocessedUserQueueConList(boolean newUserFlag) {
-        String sql = "SELECT * FROM user_queue_con WHERE active_flag=? AND new_user_flag=?";
-        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{-1, (newUserFlag) ? 1 : 0});
-        if (rs.isEmpty()) {
-            return new ArrayList<>();
-        }
-        return this.rowMapper(rs);
+        return insertedId;
     }
     
     @Override
-    public List<UserQueueCon> getUnprocessedUserQueueConListByQueueId(Queue queue, boolean newUserFlag) {
-        String sql = "SELECT * FROM user_queue_con WHERE queue_id=? AND active_flag=? AND new_user_flag=?";
-        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{queue.getQueueId(), -1, (newUserFlag) ? 1 : 0});
-        if (rs.isEmpty()) {
-            return new ArrayList<>();
-        }
-        return this.rowMapper(rs);
+    public UserQueueCon getUserQueueConById(int userQueueConId) {
+        String sql = "SELECT * FROM user_queue_con WHERE user_queue_con_id=?";
+        return this.queryForSingle(sql, new Object[]{userQueueConId});
     }
 
     @Override
-    public List<UserQueueCon> getOnlineUserQueueConList(boolean newUserFlag) {
-        String sql = "SELECT * FROM user_queue_con WHERE active_flag=? AND new_user_flag=?";
-        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{1, (newUserFlag) ? 1 : 0});
-        if (rs.isEmpty()) {
-            return new ArrayList<>();
-        }
-        return this.rowMapper(rs);
-    }
-
-    @Override
-    public List<UserQueueCon> getOfflineUserQueueConList(boolean newUserFlag) {
-        String sql = "SELECT * FROM user_queue_con WHERE active_flag=? AND new_user_flag=?";
-        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{0, (newUserFlag) ? 1 : 0});
-        if (rs.isEmpty()) {
-            return new ArrayList<>();
-        }
-        return this.rowMapper(rs);
-    }
-
-    @Override
-    public void updateToUnprocessed(UserQueueCon userQueueCon) {
-        String sql = "UPDATE user_queue_con SET active_flag=-1 WHERE user_queue_con_id=?";
-        this.getJdbcTemplate().update(sql, new Object[]{userQueueCon.getUserQueueConId()});
-    }
-
-    @Override
-    public void updateToOnline(UserQueueCon userQueueCon) {
-        String sql = "UPDATE user_queue_con SET active_flag=1 WHERE user_queue_con_id=?";
-        this.getJdbcTemplate().update(sql, new Object[]{userQueueCon.getUserQueueConId()});
-    }
-
-    @Override
-    public void updateToOffline(UserQueueCon userQueueCon) {
-        String sql = "UPDATE user_queue_con SET active_flag=0 WHERE user_queue_con_id=?";
-        this.getJdbcTemplate().update(sql, new Object[]{userQueueCon.getUserQueueConId()});
-    }
-
-    @Override
-    public void removeUserQueueConEntry(UserQueueCon userQueueCon) {
-        String sql = "DELETE FROM user_queue_con WHERE user_queue_con_id=?";
-        this.getJdbcTemplate().update(sql, new Object[]{userQueueCon.getUserQueueConId()});
-    }
-    
-    @Override
-    public void removeAllUserQueueConEntries(User user) {
-        String sql = "DELETE FROM user_queue_con WHERE user_id=?";
-        this.getJdbcTemplate().update(sql, new Object[]{user.getUserId()});
-    }
-
-    @Override
-    public List<UserQueueCon> getUserListByQueueId(int queueId) {
-        String sql = "SELECT * FROM user_queue_con WHERE queue_id=?";
-        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{queueId});
-        if (rs.isEmpty()) {
-            return new ArrayList<>();
-        }
-        return this.rowMapper(rs);
-    }
-
-    @Override
-    public List<UserQueueCon> getQueueListByUserId(int userId) {
-        String sql = "SELECT * FROM user_queue_con WHERE user_id=?";
-        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{userId});
-        if (rs.isEmpty()) {
-            return new ArrayList<>();
-        }
-        return this.rowMapper(rs);
+    public boolean doesUserQueueConExist(int userId, int queueId) {
+        String sql = "SELECT COUNT(user_queue_con_id) AS result FROM user_queue_con "
+                + "WHERE user_id=? AND queue_id=?";
+        return this.queryForExistCheck(sql, new Object[]{userId, queueId});
     }
 
     @Override
     public boolean doesUserQueueConExistInOnline(int userId, int queueId) {
         String sql = "SELECT COUNT(user_queue_con_id) AS result FROM user_queue_con "
                 + "WHERE user_id=? AND queue_id=? AND active_flag=?";
-         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{userId, queueId, ActiveFlag.ONLINE});
-         int result = Integer.valueOf(rs.get(0).get("result").toString());
-         
+        return this.queryForExistCheck(sql, new Object[]{userId, queueId, ActiveFlag.ONLINE});
+    }
+
+    @Override
+    public List<UserQueueCon> getUserListByQueueId(int queueId) {
+        String sql = "SELECT * FROM user_queue_con WHERE queue_id=?";
+        return this.queryForArray(sql, new Object[]{queueId});
+    }
+
+    @Override
+    public List<UserQueueCon> getQueueListByUserId(int userId) {
+        String sql = "SELECT * FROM user_queue_con WHERE user_id=?";
+        return this.queryForArray(sql, new Object[]{userId});
+    }
+
+    @Override
+    public List<UserQueueCon> getIncompleteUserQueueConList(boolean newUserFlag) {
+        String sql = "SELECT * FROM user_queue_con WHERE active_flag=? AND new_user_flag=?";
+        return this.queryForArray(sql, new Object[]{-2, (newUserFlag) ? 1 : 0});
+    }
+
+    @Override
+    public List<UserQueueCon> getUnprocessedUserQueueConList(boolean newUserFlag) {
+        String sql = "SELECT * FROM user_queue_con WHERE active_flag=? AND new_user_flag=?";
+        return this.queryForArray(sql, new Object[]{-1, (newUserFlag) ? 1 : 0});
+    }
+
+    @Override
+    public List<UserQueueCon> getUnprocessedUserQueueConListByQueueId(Queue queue, boolean newUserFlag) {
+        String sql = "SELECT * FROM user_queue_con WHERE queue_id=? AND active_flag=? AND new_user_flag=?";
+        return this.queryForArray(sql, new Object[]{queue.getQueueId(), -1, (newUserFlag) ? 1 : 0});
+    }
+
+    @Override
+    public List<UserQueueCon> getOnlineUserQueueConList(boolean newUserFlag) {
+        String sql = "SELECT * FROM user_queue_con WHERE active_flag=? AND new_user_flag=?";
+        return this.queryForArray(sql, new Object[]{1, (newUserFlag) ? 1 : 0});
+    }
+
+    @Override
+    public List<UserQueueCon> getOfflineUserQueueConList(boolean newUserFlag) {
+        String sql = "SELECT * FROM user_queue_con WHERE active_flag=? AND new_user_flag=?";
+        return this.queryForArray(sql, new Object[]{0, (newUserFlag) ? 1 : 0});
+    }
+
+    @Override
+    public void updateToUnprocessed(int userQueueConId, Ticket ticket, User requestor) {
+        String sql = "UPDATE user_queue_con SET active_flag=? WHERE user_queue_con_id=?";
+        this.queryUpdate(sql, new Object[]{ActiveFlag.UNPROCESSED.getActiveFlag(), userQueueConId});
+        
+        changeLogService.insertChangeLog(
+          new UserQueueConChangeLog(this.getUserQueueConById(userQueueConId), ticket, requestor, getTimestamp())
+        );
+    }
+
+    @Override
+    public void updateToOnline(int userQueueConId, Ticket ticket, User requestor) {
+        String sql = "UPDATE user_queue_con SET active_flag=? WHERE user_queue_con_id=?";
+        this.queryUpdate(sql, new Object[]{ActiveFlag.ONLINE.getActiveFlag(), userQueueConId});
+        
+        changeLogService.insertChangeLog(
+          new UserQueueConChangeLog(this.getUserQueueConById(userQueueConId), ticket, requestor, getTimestamp())
+        );
+    }
+
+    @Override
+    public void updateToOffline(int userQueueConId, Ticket ticket, User requestor) {
+        String sql = "UPDATE user_queue_con SET active_flag=? WHERE user_queue_con_id=?";
+        this.queryUpdate(sql, new Object[]{ActiveFlag.OFFLINE.getActiveFlag(), userQueueConId});
+        
+        changeLogService.insertChangeLog(
+          new UserQueueConChangeLog(this.getUserQueueConById(userQueueConId), ticket, requestor, getTimestamp())
+        );
+    }
+
+    private UserQueueCon queryForSingle(String sql, Object[] objectList) {
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, objectList);
+        if (rs.size() != 1) {
+            return new UserQueueCon();
+        }
+        return this.rowMapper(rs).get(0);
+    }
+
+    private List<UserQueueCon> queryForArray(String sql, Object[] objectList) {
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, objectList);
+        if (rs.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return this.rowMapper(rs);
+    }
+
+    private void queryUpdate(String sql, Object[] objectList) {
+        this.getJdbcTemplate().update(sql, objectList);
+    }
+
+    private boolean queryForExistCheck(String sql, Object[] objectList) {
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, objectList);
+        int result = Integer.valueOf(rs.get(0).get("result").toString());
         return result != 0;
     }
-    
+
     @Override
     public List<UserQueueCon> rowMapper(List<Map<String, Object>> resultSet) {
         List<UserQueueCon> userQueueConList = new ArrayList<>();

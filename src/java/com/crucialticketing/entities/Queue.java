@@ -16,16 +16,19 @@ public class Queue {
     private int queueId;
     private String queueName;
     private List<UserQueueCon> userList;
+    private ActiveFlag activeFlag;
     
     public Queue() {
         userList = new ArrayList<>();
     }
 
-    public Queue(int queueId, String queueName) {
-        userList = new ArrayList<>();
-        this.queueId = queueId;
+    public Queue(String queueName, List<UserQueueCon> userList, ActiveFlag activeFlag) {
         this.queueName = queueName;
+        this.userList = userList;
+        this.activeFlag = activeFlag;
     }
+
+    
 
     public int getQueueId() {
         return queueId;
@@ -51,6 +54,14 @@ public class Queue {
         this.userList = userList;
     }
 
-  
+    public ActiveFlag getActiveFlag() {
+        return activeFlag;
+    }
+
+    public void setActiveFlag(ActiveFlag activeFlag) {
+        this.activeFlag = activeFlag;
+    }
+
+   
     
 }

@@ -38,11 +38,11 @@ public interface UserDao {
     
     public List<User> getOfflineUserList(boolean populateInternal);
     
-    public void updateToUnprocessed(User user, Ticket ticket, User requestor);
+    public void updateToUnprocessed(int userId, Ticket ticket, User requestor);
     
-    public void updateToOnline(User user, Ticket ticket, User requestor);
+    public void updateToOnline(int userId, Ticket ticket, User requestor);
     
-    public void updateToOffline(User user, Ticket ticket, User requestor);
+    public void updateToOffline(int userId, Ticket ticket, User requestor);
     
     public void updateHash(User user, String hash);
     
