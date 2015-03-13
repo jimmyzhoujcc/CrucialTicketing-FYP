@@ -6,6 +6,7 @@
 package com.crucialticketing.daos;
 
 import com.crucialticketing.entities.Ticket;
+import com.crucialticketing.entities.User;
 import java.util.List;
 import java.util.Map;
 
@@ -14,8 +15,8 @@ import java.util.Map;
  * @author DanFoley
  */
 public interface TicketDao {
-    public int insertTicket(String shortDescription, int applicationControlId, int createdByUserId, int reportedByUserId, int currentStatusId);
-            
+    public int insertTicket(final Ticket ticket);
+    
     public Ticket getTicketById(int ticketId, boolean popWorkflowMap, boolean popTicketLog, boolean popAttachments, boolean popChangeLog);
     
     public List<Ticket> getTicketList(boolean popWorkflowMap, boolean popTicketLog, boolean popAttachments, boolean popChangeLog);

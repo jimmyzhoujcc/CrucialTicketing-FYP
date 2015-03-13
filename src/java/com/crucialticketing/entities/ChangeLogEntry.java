@@ -17,7 +17,12 @@ public class ChangeLogEntry {
     private WorkflowStatus workflowStatus;
     private int stamp;
     
-    public ChangeLogEntry() {}
+    public ChangeLogEntry() {
+        this.ticket = new Ticket();
+        this.applicationControl = new ApplicationControl();
+        this.user = new User();
+        this.workflowStatus = new WorkflowStatus();
+    }
 
     public int getChangeLogEntryId() {
         return changeLogEntryId;

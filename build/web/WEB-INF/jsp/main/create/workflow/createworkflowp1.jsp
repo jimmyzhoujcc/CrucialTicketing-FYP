@@ -62,8 +62,11 @@
                 for (var i = 1; i < rowLength; i += 1) {
                     var row = table.rows[i];
                     if (document.getElementById(row.cells[0].innerText + '_status_checkbox').checked) {
+                        clockActive = document.getElementById(row.cells[0].innerText + '_sla_checkbox').checked;
+                        queueDropdown = document.getElementById(row.cells[0].innerText + '_queue');
+
                         statusList = document.getElementById('confirmedStatusList');
-                        addNewHiddenStatus(row.cells[0].innerText);
+                        addNewHiddenStatus(row.cells[0].innerText, queueDropdown.options[queueDropdown.selectedIndex], clockActive);
                         statusList.options[statusList.options.length] = new Option(row.cells[1].innerText);
                     }
                 }
@@ -86,8 +89,10 @@
 
     <script>
         var counter = 0;
-        function addNewHiddenStatus(statusId) {
+        function addNewHiddenStatus(statusId, queueDropdown, clockActive) {
             content = "<input type=\"hidden\" name=\"workflowMap.workflow[" + counter + "\].workflowStatus.workflowStatusId\" value=\"" + statusId + "\" />";
+            content += "<input type=\"hidden\" name=\"workflowMap.workflow[" + counter + "\].queue.queueId\" value=\"" + queueDropdown.value + "\" />";
+            content += "<input type=\"hidden\" name=\"workflowMap.workflow[" + counter + "\].clockActive\" value=\"" + (clockActive ? 1 : 0) + "\" />";
 
             newDiv = document.createElement('div');
             $(newDiv).html(content)
@@ -104,6 +109,7 @@
                     <td>Status ID</td>
                     <td>Status Name</td>
                     <td>Choice to use</td>
+                    <td>Queue responsible at Status</td>
                     <td>SLA Activator</td>
                 </tr>
 
@@ -112,6 +118,13 @@
                         <td>${workflowStatus.workflowStatusId}</td>
                         <td>${workflowStatus.workflowStatusName}</td>
                         <td><input type="checkbox" id="${workflowStatus.workflowStatusId}_status_checkbox" /></td>
+                        <td>
+                            <select id="${workflowStatus.workflowStatusId}_queue">
+                                <c:forEach var="queue" items="${queueList}">
+                                    <option value="${queue.queueId}">${queue.queueName}</option>
+                                </c:forEach>
+                            </select>
+                        </td>
                         <td><input type="checkbox" id="${workflowStatus.workflowStatusId}_sla_checkbox" /></td>
                     </tr>
                 </c:forEach>

@@ -20,14 +20,9 @@ public class Ticket {
     
     private WorkflowStep currentWorkflowStep;
     
-    private User messageProcessor;
+    private User lastProcessedBy;
     private User createdBy;
     private User reportedBy;
-    
-    private int timeDateCreated;
-    private int timeDateChanged;
-    private int timeDateClosed;
-    private int timeDateReopened;  
     
     private TicketLog ticketLog;
     private List<Attachment> attachmentList;
@@ -38,7 +33,7 @@ public class Ticket {
     public Ticket(int ticketId) {
         this.ticketId = ticketId;
     }
-    
+
     public int getTicketId() {
         return ticketId;
     }
@@ -71,12 +66,12 @@ public class Ticket {
         this.currentWorkflowStep = currentWorkflowStep;
     }
 
-    public User getMessageProcessor() {
-        return messageProcessor;
+    public User getLastProcessedBy() {
+        return lastProcessedBy;
     }
 
-    public void setMessageProcessor(User messageProcessor) {
-        this.messageProcessor = messageProcessor;
+    public void setLastProcessedBy(User lastProcessedBy) {
+        this.lastProcessedBy = lastProcessedBy;
     }
 
     public User getCreatedBy() {
@@ -95,45 +90,13 @@ public class Ticket {
         this.reportedBy = reportedBy;
     }
 
-    public int getTimeDateCreated() {
-        return timeDateCreated;
-    }
-
-    public void setTimeDateCreated(int timeDateCreated) {
-        this.timeDateCreated = timeDateCreated;
-    }
-
-    public int getTimeDateChanged() {
-        return timeDateChanged;
-    }
-
-    public void setTimeDateChanged(int timeDateChanged) {
-        this.timeDateChanged = timeDateChanged;
-    }
-
-    public int getTimeDateClosed() {
-        return timeDateClosed;
-    }
-
-    public void setTimeDateClosed(int timeDateClosed) {
-        this.timeDateClosed = timeDateClosed;
-    }
-
-    public int getTimeDateReopened() {
-        return timeDateReopened;
-    }
-
-    public void setTimeDateReopened(int timeDateReopened) {
-        this.timeDateReopened = timeDateReopened;
-    }
-
     public TicketLog getTicketLog() {
         return ticketLog;
     }
 
     public void setTicketLog(TicketLog ticketLog) {
         this.ticketLog = ticketLog;
-    } 
+    }
 
     public List<Attachment> getAttachmentList() {
         return attachmentList;
@@ -150,7 +113,6 @@ public class Ticket {
     public void setChangeLog(ChangeLog changeLog) {
         this.changeLog = changeLog;
     }
-    
     
     
 }

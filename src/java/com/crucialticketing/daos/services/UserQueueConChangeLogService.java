@@ -6,7 +6,7 @@
 package com.crucialticketing.daos.services;
 
 import com.crucialticketing.daos.UserQueueConChangeLogDao;
-import com.crucialticketing.entities.ActiveFlag;
+import com.crucialticketing.util.ActiveFlag;
 import com.crucialticketing.entities.Queue;
 import com.crucialticketing.entities.Ticket;
 import com.crucialticketing.entities.User;
@@ -34,16 +34,18 @@ public class UserQueueConChangeLogService extends JdbcDaoSupport implements User
 
     @Autowired
     TicketService ticketService;
+    
+    @Autowired
+    UserQueueConService userQueueConService;
 
     @Override
     public void insertChangeLog(UserQueueConChangeLog changeLog) {
         String sql = "INSERT user_queue_con_change_log "
-                + "(user_id, queue_id, ticket_id, requestor_user_id, stamp, active_flag) "
+                + "(user_queue_con_id, ticket_id, requestor_user_id, stamp, active_flag) "
                 + "VALUES "
-                + "(?, ?, ?, ?, ?, ?)";
+                + "(?, ?, ?, ?, ?)";
         this.getJdbcTemplate().update(sql, new Object[]{
-            changeLog.getUserQueueCon().getUser().getUserId(),
-            changeLog.getUserQueueCon().getQueue().getQueueId(),
+            changeLog.getUserQueueCon().getUserQueueConId(),
             changeLog.getTicket().getTicketId(),
             changeLog.getRequestor().getUserId(),
             getTimestamp(),
@@ -53,7 +55,7 @@ public class UserQueueConChangeLogService extends JdbcDaoSupport implements User
 
     @Override
     public List<UserQueueConChangeLog> getChangeLogByUserId(int userId) {
-        String sql = "SELECT * FROM user_queue_con_change_log WHERE user_id=?";
+        String sql = "SELECT * FROM user_queue_con_change_log WHERE user_id=? ";
         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(
                 sql, new Object[]{userId});
         if (rs.isEmpty()) {
@@ -88,7 +90,6 @@ public class UserQueueConChangeLogService extends JdbcDaoSupport implements User
     public List<UserQueueConChangeLog> rowMapper(List<Map<String, Object>> resultSet) {
         List<UserQueueConChangeLog> changeLogList = new ArrayList<>();
         Map<Integer, User> retrievedUserList = new HashMap<>();
-        Map<Integer, Queue> retrievedQueueList = new HashMap<>();
         Map<Integer, Ticket> retrievedTicketList = new HashMap<>();
 
         for (Map row : resultSet) {
@@ -96,30 +97,8 @@ public class UserQueueConChangeLogService extends JdbcDaoSupport implements User
 
             changeLog.setUserQueueConChangeLogId((int) row.get("user_queue_con_change_log_id"));
 
-            // User Queue Con retrieval via Queue and User
-            // --- getting user
-            User user;
-            if (retrievedUserList.containsKey((int) row.get("user_id"))) {
-                user = retrievedUserList.get((int) row.get("user_id"));
-            } else {
-                user = userService.getUserById((int) row.get("user_id"), false);
-                retrievedUserList.put((int) row.get("user_id"), user);
-            }
-
-            // --- getting Queue
-            Queue queue;
-            if (retrievedQueueList.containsKey((int) row.get("queue_id"))) {
-                queue = retrievedQueueList.get((int) row.get("queue_id"));
-            } else {
-                queue = queueService.getQueueById((int) row.get("queue_id"));
-                retrievedQueueList.put((int) row.get("queue_id"), queue);
-            }
-
-            changeLog.setUserQueueCon(
-                    new UserQueueCon(
-                            user, queue,
-                            ActiveFlag.values()[((int) row.get("active_flag")) + 2]
-                    ));
+            // User Queue Con retrieval
+            changeLog.setUserQueueCon(userQueueConService.getUserQueueConById((int)row.get("user_queue_con_id")));
 
             // Ticket checks
             if (retrievedTicketList.containsKey((int) row.get("ticket_id"))) {
@@ -135,7 +114,7 @@ public class UserQueueConChangeLogService extends JdbcDaoSupport implements User
             if (retrievedUserList.containsKey((int) row.get("requestor_user_id"))) {
                 changeLog.setRequestor(retrievedUserList.get((int) row.get("requestor_user_id")));
             } else {
-                user = userService.getUserById((int) row.get("requestor_user_id"), false);
+                User user = userService.getUserById((int) row.get("requestor_user_id"), false);
                 changeLog.setRequestor(user);
                 retrievedUserList.put((int) row.get("requestor_user_id"), user);
             }

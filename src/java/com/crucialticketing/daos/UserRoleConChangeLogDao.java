@@ -14,13 +14,12 @@ import java.util.Map;
  * @author DanFoley
  */
 public interface UserRoleConChangeLogDao {
+
     public void insertChangeLog(UserRoleConChangeLog changeLog);
-    
-    public List<UserRoleConChangeLog> getChangeLogByUserId(int userId);
-    
-    public List<UserRoleConChangeLog> getChangeLogByRoleId(int roleId);
-    
+
+    public List<UserRoleConChangeLog> getChangeLogByUserRoleConId(int userRoleConId);
+
     public List<UserRoleConChangeLog> getChangeLogByTicketId(int ticketId);
-    
+
     public List<UserRoleConChangeLog> rowMapper(List<Map<String, Object>> resultSet);
 }

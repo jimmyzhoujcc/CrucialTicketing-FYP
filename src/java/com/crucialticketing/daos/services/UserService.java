@@ -6,7 +6,7 @@
 package com.crucialticketing.daos.services;
 
 import com.crucialticketing.daos.UserDao;
-import com.crucialticketing.entities.ActiveFlag;
+import com.crucialticketing.util.ActiveFlag;
 import com.crucialticketing.entities.Secure;
 import com.crucialticketing.entities.Ticket;
 import static com.crucialticketing.util.Timestamp.getTimestamp;
@@ -209,9 +209,15 @@ public class UserService extends JdbcDaoSupport implements UserDao {
     }
 
     @Override
-    public void updateHash(User user, String hash) {
+    public void updateHash(int userId, String hash) {
         String sql = "UPDATE user SET hash=? WHERE user_id=?";
-        this.getJdbcTemplate().update(sql, new Object[]{hash, user.getUserId()});
+        this.getJdbcTemplate().update(sql, new Object[]{hash, userId});
+    }
+    
+    @Override
+    public void removeUser(int userId) {
+        String sql = "DELETE FROM user WHERE user_id=?";
+        this.getJdbcTemplate().update(sql, new Object[]{userId});
     }
 
     @Override

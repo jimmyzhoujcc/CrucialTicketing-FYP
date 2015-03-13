@@ -38,53 +38,52 @@ public class ChangeLog {
     }
 
     public void setTimeElapsed() {
-        ChangeLogEntry prevChangeLogEntry = null;
+        ChangeLogEntry prevChangeLogEntry;
+        ChangeLogEntry currChangeLogEntry;
         this.timeElapsed = 0;
-        boolean clockActive = false;
-        int lastStampRecorded = 0;
+        boolean clockActive;
         int currentStamp = (int) (System.currentTimeMillis() / 1000);
 
-        for (ChangeLogEntry changeLogEntry : changeLog) {
+        if (changeLog.isEmpty()) {
+            return;
+        }
 
-            if (prevChangeLogEntry == null) {
-                prevChangeLogEntry = changeLogEntry;
+        prevChangeLogEntry = changeLog.get(0);
+
+        if (changeLog.size() == 1) {
+            currChangeLogEntry = prevChangeLogEntry;
+        }
+
+        int i = 0;
+
+        for (ChangeLogEntry tempChangeLogEntry : changeLog) {
+            if (i == 0) {
+                i++;
             } else {
-                WorkflowStep prevWorkflowStep
-                        = prevChangeLogEntry.getApplicationControl().
-                        getWorkflow().getWorkflowMap().
-                        getWorkflowStageByStatus(prevChangeLogEntry.getWorkflowStatus().getWorkflowStatusId());
+                currChangeLogEntry = tempChangeLogEntry;
 
-                clockActive = (prevWorkflowStep.getClockActive() != 0);
+                clockActive = prevChangeLogEntry.getApplicationControl().
+                        getWorkflow().getWorkflowMap().
+                        getWorkflowStageByStatus(prevChangeLogEntry.getWorkflowStatus().getWorkflowStatusId()).getClockActive() != 0;
 
                 if (clockActive) {
-                    this.timeElapsed += changeLogEntry.getStamp() - prevChangeLogEntry.getStamp();
-                }
-                // If the SLA clock has changed 
-                if (prevChangeLogEntry.getApplicationControl().getSlaClock() != changeLogEntry.getApplicationControl().getSlaClock()) {
-                    float convTimeElapsed = (float) this.timeElapsed / prevChangeLogEntry.getApplicationControl().getSlaClock();
-                    this.timeElapsed = (int) (convTimeElapsed * changeLogEntry.getApplicationControl().getSlaClock());
+                    this.timeElapsed += currChangeLogEntry.getStamp() - prevChangeLogEntry.getStamp();
                 }
 
-                prevChangeLogEntry = changeLogEntry;
+                // If the SLA clock has changed 
+                if (prevChangeLogEntry.getApplicationControl().getSlaClock() != currChangeLogEntry.getApplicationControl().getSlaClock()) {
+                    float convTimeElapsed = (float) this.timeElapsed / prevChangeLogEntry.getApplicationControl().getSlaClock();
+                    this.timeElapsed = (int) (convTimeElapsed * currChangeLogEntry.getApplicationControl().getSlaClock());
+                }
+
+                prevChangeLogEntry = currChangeLogEntry;
             }
         }
 
-        if (prevChangeLogEntry != null) {
-            WorkflowStep workflowStep = prevChangeLogEntry
-                    .getApplicationControl()
-                    .getWorkflow()
-                    .getWorkflowMap()
-                    .getWorkflowStageByStatus(prevChangeLogEntry.getWorkflowStatus().getWorkflowStatusId());
-
-            if (!workflowStep.getNextWorkflowStep().isEmpty()) {
-                if (prevChangeLogEntry
-                        .getApplicationControl()
-                        .getWorkflow()
-                        .getWorkflowMap()
-                        .getWorkflowStageByStatus(prevChangeLogEntry.getWorkflowStatus().getWorkflowStatusId()).getClockActive() != 0) {
-                    this.timeElapsed += currentStamp - prevChangeLogEntry.getStamp();
-                }
-            }
+        if (prevChangeLogEntry.getApplicationControl().
+                getWorkflow().getWorkflowMap().
+                getWorkflowStageByStatus(prevChangeLogEntry.getWorkflowStatus().getWorkflowStatusId()).getClockActive() != 0) {
+            this.timeElapsed += currentStamp - prevChangeLogEntry.getStamp();
         }
 
     }

@@ -13,11 +13,11 @@ import org.springframework.ui.ModelMap;
  */
 public class Validation {
     public static void inputNotProvided(ModelMap map, String field) {
-        map.addAttribute("alert", field + " was not completed on the previous form");
+        map.addAttribute("alert", field + " was not provided, please check and try again");
     }
     
     public static void inputIsInvalid(ModelMap map, String field) {
-        map.addAttribute("alert", "The " + field + " provided was either invalid or has become disabled on the previous form");
+        map.addAttribute("alert", "The " + field + " provided is invalid, please check and try again");
     }
     
     public static void databaseError(ModelMap map) {

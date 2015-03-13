@@ -46,5 +46,7 @@ public interface UserQueueConDao {
 
     public void updateToOffline(int userQueueConId, Ticket ticket, User requestor);
 
+    public void removeUserQueueConByQueueId(int queueId);
+    
     public List<UserQueueCon> rowMapper(List<Map<String, Object>> resultSet);
 }

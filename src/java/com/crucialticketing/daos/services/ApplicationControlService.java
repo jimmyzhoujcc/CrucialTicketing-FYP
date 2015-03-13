@@ -8,7 +8,7 @@ package com.crucialticketing.daos.services;
 import com.crucialticketing.entities.ApplicationControl;
 import com.crucialticketing.entities.Workflow;
 import com.crucialticketing.daos.ApplicationControlDao;
-import com.crucialticketing.entities.ActiveFlag;
+import com.crucialticketing.util.ActiveFlag;
 import com.crucialticketing.entities.ApplicationControlChangeLog;
 import com.crucialticketing.entities.Ticket;
 import com.crucialticketing.entities.User;
@@ -56,7 +56,7 @@ public class ApplicationControlService extends JdbcDaoSupport implements Applica
     @Override
     public int insertApplicationControl(final ApplicationControl applicationControl, Ticket ticket, User requestor) {
         final String sql = "INSERT INTO application_control "
-                + "(ticket_type_id, application_id, workfow_template_id, "
+                + "(ticket_type_id, application_id, workflow_id, "
                 + "severity_id, role_id, sla_clock, active_flag) "
                 + "VALUES "
                 + "(?, ?, ?, ?, ?, ?, ?)";
@@ -71,19 +71,22 @@ public class ApplicationControlService extends JdbcDaoSupport implements Applica
                 PreparedStatement ps = (PreparedStatement) connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
                 ps.setInt(1, applicationControl.getTicketType().getTicketTypeId());
                 ps.setInt(2, applicationControl.getApplication().getApplicationId());
-                ps.setInt(2, applicationControl.getWorkflow().getWorkflowId());
-                ps.setInt(2, applicationControl.getSeverity().getSeverityId());
-                ps.setInt(2, applicationControl.getRole().getRoleId());
-                ps.setInt(2, applicationControl.getSlaClock());
-                ps.setInt(4, ActiveFlag.INCOMPLETE.getActiveFlag());
+                ps.setInt(3, applicationControl.getWorkflow().getWorkflowId());
+                ps.setInt(4, applicationControl.getSeverity().getSeverityId());
+                ps.setInt(5, applicationControl.getRole().getRoleId());
+                ps.setInt(6, applicationControl.getSlaClock());
+                ps.setInt(7, ActiveFlag.INCOMPLETE.getActiveFlag());
                 return ps;
             }
         }, holder);
 
         int insertedApplicationControlId = holder.getKey().intValue();
-
+        applicationControl.setApplicationControlId(insertedApplicationControlId);
+        applicationControl.setActiveFlag(ActiveFlag.INCOMPLETE);
+        
+        // Timestamp is set to 0 as it is generated on insert
         applicationControlChangeLogService.insertChangeLog(
-                new ApplicationControlChangeLog(applicationControl, ticket, requestor, getTimestamp(), ActiveFlag.INCOMPLETE)
+                new ApplicationControlChangeLog(applicationControl, ticket, requestor)
         );
 
         return insertedApplicationControlId;
@@ -94,6 +97,17 @@ public class ApplicationControlService extends JdbcDaoSupport implements Applica
         String sql = "SELECT * FROM application_control WHERE application_control_id=?";
         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{applicationControlId});
         if (rs.size() != 1) {
+            return new ApplicationControl();
+        }
+        return (this.rowMapper(rs, populateWorkflowMap)).get(0);
+    }
+    
+    @Override
+    public ApplicationControl getApplicationControlByCriteria(int ticketTypeId, int applicationId, int severityId, boolean populateWorkflowMap) {
+        String sql = "SELECT * FROM application_control WHERE ticket_type_id=? AND application_id=? AND severity_id=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(
+                sql, new Object[]{ticketTypeId, applicationId, severityId});
+        if (rs.size()!= 1) {
             return new ApplicationControl();
         }
         return (this.rowMapper(rs, populateWorkflowMap)).get(0);
@@ -130,7 +144,7 @@ public class ApplicationControlService extends JdbcDaoSupport implements Applica
     }
 
     @Override
-    public List<ApplicationControl> getIncompleteApplicationControlList(boolean populateWorkflowMap) {
+    public List<ApplicationControl> getIncompleteList(boolean populateWorkflowMap) {
         String sql = "SELECT * FROM application_control WHERE active_flag=?";
         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{ActiveFlag.INCOMPLETE.getActiveFlag()});
         if (rs.size() != 1) {
@@ -140,7 +154,7 @@ public class ApplicationControlService extends JdbcDaoSupport implements Applica
     }
 
     @Override
-    public List<ApplicationControl> getUnprocessedApplicationControlList(boolean populateWorkflowMap) {
+    public List<ApplicationControl> getUnprocessedList(boolean populateWorkflowMap) {
         String sql = "SELECT * FROM application_control WHERE active_flag=?";
         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{ActiveFlag.UNPROCESSED.getActiveFlag()});
         if (rs.size() != 1) {
@@ -150,7 +164,7 @@ public class ApplicationControlService extends JdbcDaoSupport implements Applica
     }
 
     @Override
-    public List<ApplicationControl> getOnlineApplicationControlList(boolean populateWorkflowMap) {
+    public List<ApplicationControl> getOnlineList(boolean populateWorkflowMap) {
         String sql = "SELECT * FROM application_control WHERE active_flag=?";
         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{ActiveFlag.ONLINE.getActiveFlag()});
         if (rs.size() != 1) {
@@ -160,7 +174,7 @@ public class ApplicationControlService extends JdbcDaoSupport implements Applica
     }
 
     @Override
-    public List<ApplicationControl> getOfflineApplicationControlList(boolean populateWorkflowMap) {
+    public List<ApplicationControl> getOfflineList(boolean populateWorkflowMap) {
         String sql = "SELECT * FROM application_control WHERE active_flag=?";
         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{ActiveFlag.OFFLINE.getActiveFlag()});
         if (rs.size() != 1) {
@@ -176,7 +190,7 @@ public class ApplicationControlService extends JdbcDaoSupport implements Applica
         
         applicationControlChangeLogService.insertChangeLog(
           new ApplicationControlChangeLog(this.getApplicationControlById(applicationControlId, false), 
-                  ticket, requestor, getTimestamp(), ActiveFlag.UNPROCESSED)
+                  ticket, requestor)
         );
     }
 
@@ -187,10 +201,10 @@ public class ApplicationControlService extends JdbcDaoSupport implements Applica
         
         applicationControlChangeLogService.insertChangeLog(
           new ApplicationControlChangeLog(this.getApplicationControlById(applicationControlId, false), 
-                  ticket, requestor, getTimestamp(), ActiveFlag.ONLINE)
+                  ticket, requestor)
         );
     }
-
+    
     @Override
     public void updateToOffline(int applicationControlId, Ticket ticket, User requestor) {
         String sql = "UPDATE application_control SET active_flag=? WHERE application_control_id=?";
@@ -198,8 +212,14 @@ public class ApplicationControlService extends JdbcDaoSupport implements Applica
         
         applicationControlChangeLogService.insertChangeLog(
           new ApplicationControlChangeLog(this.getApplicationControlById(applicationControlId, false), 
-                  ticket, requestor, getTimestamp(), ActiveFlag.OFFLINE)
+                  ticket, requestor)
         );
+    }
+    
+    @Override
+    public void removeApplicationControl(int applicationControlId) {
+        String sql = "DELETE FROM application_control SET WHERE application_control_id=?";
+        this.getJdbcTemplate().update(sql, new Object[]{applicationControlId});
     }
 
     @Override
@@ -224,16 +244,20 @@ public class ApplicationControlService extends JdbcDaoSupport implements Applica
             applicationControl.setRole(roleService.getRoleById((int) row.get("role_id")));
 
             // Gets workflow
-            Workflow workflow = workflowService.getWorkflow((int) row.get("workflow_template_id"));
+            Workflow workflow = workflowService.getWorkflow((int) row.get("workflow_id"));
 
             // If flag is true then the mapping of the workflow is also obtained
             if (populateWorkflowMap) {
-                workflow.setWorkflowMap(workflowMapService.getWorkflowMapById((int) row.get("workflow_template_id")));
+                workflow.setWorkflowMap(workflowMapService.getWorkflowMapById((int) row.get("workflow_id")));
             }
 
             applicationControl.setWorkflow(workflow);
 
             applicationControl.setSlaClock((int) row.get("sla_clock"));
+            
+            applicationControl.setActiveFlag(ActiveFlag.values()[((int) row.get("active_flag"))+2]);
+            
+            
             // 
             applicationControlList.add(applicationControl);
         }

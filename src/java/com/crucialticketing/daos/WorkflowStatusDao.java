@@ -28,19 +28,21 @@ public interface WorkflowStatusDao {
     
     public boolean doesWorkflowStatusExistInOnlineOrOffline(String workflowStatusName);
 
-    public List<WorkflowStatus> getIncompleteWorkflowStatusList();
+    public List<WorkflowStatus> getIncompleteList();
 
-    public List<WorkflowStatus> getUnprocessedWorkflowStatusList();
+    public List<WorkflowStatus> getUnprocessedList();
     
-    public List<WorkflowStatus> getOnlineWorkflowStatusList();
+    public List<WorkflowStatus> getOnlineList();
     
-    public List<WorkflowStatus> getOfflineWorkflowStatusList();
+    public List<WorkflowStatus> getOfflineList();
     
     public void updateToUnprocessed(int workflowStatusId, Ticket ticket, User requestor);
     
     public void updateToOnline(int workflowStatusId, Ticket ticket, User requestor);
     
     public void updateToOffline(int workflowStatusId, Ticket ticket, User requestor);
+    
+    public void removeWorkflowStatus(int workflowStatusId);
     
     public List<WorkflowStatus> rowMapper(List<Map<String, Object>> resultSet);
 }

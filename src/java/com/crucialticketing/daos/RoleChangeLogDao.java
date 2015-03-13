@@ -22,5 +22,7 @@ public interface RoleChangeLogDao {
     
     public List<RoleChangeLog> getChangeLogByTicketId(Ticket ticket);
     
+    public void removeChangeLogByRoleId(int roleId);
+    
     public List<RoleChangeLog> rowMapper(List<Map<String, Object>> resultSet);
 }

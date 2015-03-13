@@ -6,7 +6,7 @@
 package com.crucialticketing.daos.services;
 
 import com.crucialticketing.daos.SeverityChangeLogDao;
-import com.crucialticketing.entities.ActiveFlag;
+import com.crucialticketing.util.ActiveFlag;
 import com.crucialticketing.entities.Severity;
 import com.crucialticketing.entities.SeverityChangeLog;
 import com.crucialticketing.entities.Ticket;

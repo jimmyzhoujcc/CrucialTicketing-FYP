@@ -45,5 +45,7 @@ public interface RoleDao {
     
     public void updateToOffline(int roleId, Ticket ticket, User requestor);
     
+    public void removeRole(int roleId);
+    
     public List<Role> rowMapper(List<Map<String, Object>> resultSet);
 }

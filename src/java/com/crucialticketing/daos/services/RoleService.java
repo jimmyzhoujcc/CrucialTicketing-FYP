@@ -7,7 +7,7 @@ package com.crucialticketing.daos.services;
 
 import com.crucialticketing.entities.Role;
 import com.crucialticketing.daos.RoleDao;
-import com.crucialticketing.entities.ActiveFlag;
+import com.crucialticketing.util.ActiveFlag;
 import com.crucialticketing.entities.RoleChangeLog;
 import com.crucialticketing.entities.Ticket;
 import static com.crucialticketing.util.Timestamp.getTimestamp;
@@ -193,6 +193,13 @@ public class RoleService extends JdbcDaoSupport implements RoleDao {
           new RoleChangeLog(this.getRoleById(roleId), ticket, requestor, getTimestamp())
         );
     }
+    
+    @Override
+    public void removeRole(int roleId) {
+        String sql = "DELETE FROM role SET WHERE role_id=?";
+        this.getJdbcTemplate().update(sql, new Object[]{roleId});
+    }
+    
     
     @Override
     public List<Role> rowMapper(List<Map<String, Object>> resultSet) {

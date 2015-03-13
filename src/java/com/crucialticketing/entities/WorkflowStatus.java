@@ -5,6 +5,9 @@
  */
 package com.crucialticketing.entities;
 
+import com.crucialticketing.util.ActiveFlag;
+import com.crucialticketing.util.WorkflowStatusType;
+
 /**
  *
  * @author DanFoley
@@ -12,16 +15,14 @@ package com.crucialticketing.entities;
 public class WorkflowStatus {
     private int workflowStatusId;
     private String workflowStatusName;
-    private boolean baseWorkflowStatus;
-    private boolean closureWorkflowStatus;
+    private WorkflowStatusType workflowStatusType;
     private ActiveFlag activeFlag;
     
     public WorkflowStatus() {}
 
-    public WorkflowStatus(String workflowStatusName, boolean baseWorkflowStatus, boolean closureWorkflowStatus, ActiveFlag activeFlag) {
+    public WorkflowStatus(String workflowStatusName, WorkflowStatusType workflowStatusType, ActiveFlag activeFlag) {
         this.workflowStatusName = workflowStatusName;
-        this.baseWorkflowStatus = baseWorkflowStatus;
-        this.closureWorkflowStatus = closureWorkflowStatus;
+        this.workflowStatusType = workflowStatusType;
         this.activeFlag = activeFlag;
     }
 
@@ -41,21 +42,15 @@ public class WorkflowStatus {
         this.workflowStatusName = workflowStatusName;
     }
 
-    public boolean isBaseWorkflowStatus() {
-        return baseWorkflowStatus;
+    public WorkflowStatusType getWorkflowStatusType() {
+        return workflowStatusType;
     }
 
-    public void setBaseWorkflowStatus(boolean baseWorkflowStatus) {
-        this.baseWorkflowStatus = baseWorkflowStatus;
+    public void setWorkflowStatusType(WorkflowStatusType workflowStatusType) {
+        this.workflowStatusType = workflowStatusType;
     }
 
-    public boolean isClosureWorkflowStatus() {
-        return closureWorkflowStatus;
-    }
-
-    public void setClosureWorkflowStatus(boolean closureWorkflowStatus) {
-        this.closureWorkflowStatus = closureWorkflowStatus;
-    }
+    
 
     public ActiveFlag getActiveFlag() {
         return activeFlag;

@@ -6,7 +6,7 @@
 package com.crucialticketing.daos.services;
 
 import com.crucialticketing.daos.ApplicationChangeLogDao;
-import com.crucialticketing.entities.ActiveFlag;
+import com.crucialticketing.util.ActiveFlag;
 import com.crucialticketing.entities.Application;
 import com.crucialticketing.entities.ApplicationChangeLog;
 import com.crucialticketing.entities.Ticket;

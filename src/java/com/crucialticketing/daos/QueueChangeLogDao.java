@@ -20,13 +20,9 @@ public interface QueueChangeLogDao {
 
     public List<QueueChangeLog> getQueueChangeLogList();
     
-    public List<QueueChangeLog> getQueueChangeLogListByQueueId(Queue queue);
+    public List<QueueChangeLog> getQueueChangeLogListByQueueId(int queueId);
 
     public List<QueueChangeLog> getQueueChangeLogListByTicketId(Ticket ticket);
-    
-    public void removeQueueChangeLogEntry(QueueChangeLog queueChangeLog);
-    
-    public void removeAllQueueChangeLogEntries(Queue queue);
     
     public List<QueueChangeLog> rowMapper(List<Map<String, Object>> resultSet);
 }

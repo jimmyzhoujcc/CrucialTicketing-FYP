@@ -5,6 +5,8 @@
  */
 package com.crucialticketing.entities;
 
+import com.crucialticketing.util.ActiveFlag;
+
 /**
  *
  * @author Daniel Foley
@@ -18,6 +20,8 @@ public class ApplicationControl {
     private Role role;
     private int slaClock;
     
+    private ActiveFlag activeFlag;
+    
     public ApplicationControl() {
         this.ticketType = new TicketType();
         this.application = new Application();
@@ -26,17 +30,17 @@ public class ApplicationControl {
         this.role = new Role();
     }
 
-    public ApplicationControl(TicketType ticketType, Application application, Workflow workflow, Severity severity, Role role, int slaClock) {
+    public ApplicationControl(int applicationControlId, TicketType ticketType, Application application, Workflow workflow, Severity severity, Role role, int slaClock, ActiveFlag activeFlag) {
+        this.applicationControlId = applicationControlId;
         this.ticketType = ticketType;
         this.application = application;
         this.workflow = workflow;
         this.severity = severity;
         this.role = role;
         this.slaClock = slaClock;
+        this.activeFlag = activeFlag;
     }
 
-    
-    
     public int getApplicationControlId() {
         return applicationControlId;
     }
@@ -91,6 +95,16 @@ public class ApplicationControl {
 
     public void setSlaClock(int slaClock) {
         this.slaClock = slaClock;
-    } 
+    }
+
+    public ActiveFlag getActiveFlag() {
+        return activeFlag;
+    }
+
+    public void setActiveFlag(ActiveFlag activeFlag) {
+        this.activeFlag = activeFlag;
+    }
+
+     
 }
 

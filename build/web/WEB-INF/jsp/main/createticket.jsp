@@ -43,10 +43,10 @@
 
                     Workflow: ${ticketObject.applicationControl.workflow.workflowName}
                     <br /><br />
-                    Current status: ${ticketObject.currentWorkflowStep.status.statusName}<br />
+                    Current status: ${ticketObject.currentWorkflowStep.workflowStatus.workflowStatusName}<br />
 
                     Current Queue: 
-                    <c:if test="${ticketObject.currentWorkflowStep.queue.queueId == -1}">
+                    <c:if test="${ticketObject.currentWorkflowStep.queue.queueId == 1}">
                         Reporting user
                     </c:if>
                     <c:if test="${ticketObject.currentWorkflowStep.queue.queueId > 0}">
@@ -66,7 +66,7 @@
                     Created By: ${user.firstName} ${user.lastName}
                     <br />
                     Reported By: ${ticketObject.reportedBy.firstName} ${ticketObject.reportedBy.lastName}
-                    <select name="reportedByUser">
+                    <select name="reportedById">
                         <c:forEach var="reportedByUser" items="${userList}">
                             <option 
                                 <c:if test="${user.userId == reportedByUser.userId}">
@@ -179,7 +179,7 @@
                         <ul class="dropdown-menu" role="menu">
                             <c:forEach var="nextNode" items="${ticketObject.currentWorkflowStep.nextWorkflowStep}">
                                 <li>
-                                    <a href="javascript:changeStatus('${nextNode.status.statusId}');">${nextNode.status.statusName}</a>
+                                    <a href="javascript:changeStatus('${nextNode.workflowStatus.workflowStatusId}');">${nextNode.workflowStatus.workflowStatusName}</a>
                                 </li>
                             </c:forEach>
                             <c:if test="${totalNextNodes == 0}">

@@ -7,7 +7,7 @@ package com.crucialticketing.daos.services;
 
 import com.crucialticketing.entities.Severity;
 import com.crucialticketing.daos.SeverityDao;
-import com.crucialticketing.entities.ActiveFlag;
+import com.crucialticketing.util.ActiveFlag;
 import com.crucialticketing.entities.SeverityChangeLog;
 import com.crucialticketing.entities.Ticket;
 import com.crucialticketing.entities.User;
@@ -117,7 +117,7 @@ public class SeverityService extends JdbcDaoSupport implements SeverityDao {
     }
 
     @Override
-    public List<Severity> getIncompleteQueueList() {
+    public List<Severity> getIncompleteList() {
         String sql = "SELECT * FROM severity WHERE active_flag=?";
         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{ActiveFlag.INCOMPLETE.getActiveFlag()});
         if (rs.isEmpty()) {
@@ -127,7 +127,7 @@ public class SeverityService extends JdbcDaoSupport implements SeverityDao {
     }
 
     @Override
-    public List<Severity> getUnprocessedQueueList() {
+    public List<Severity> getUnprocessedList() {
         String sql = "SELECT * FROM severity WHERE active_flag=?";
         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{ActiveFlag.UNPROCESSED.getActiveFlag()});
         if (rs.isEmpty()) {
@@ -137,7 +137,7 @@ public class SeverityService extends JdbcDaoSupport implements SeverityDao {
     }
 
     @Override
-    public List<Severity> getOnlineSeverityList() {
+    public List<Severity> getOnlineList() {
         String sql = "SELECT * FROM severity WHERE active_flag=?";
         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{ActiveFlag.ONLINE.getActiveFlag()});
         if (rs.isEmpty()) {
@@ -147,7 +147,7 @@ public class SeverityService extends JdbcDaoSupport implements SeverityDao {
     }
 
     @Override
-    public List<Severity> getOfflineSeverityList() {
+    public List<Severity> getOfflineList() {
         String sql = "SELECT * FROM severity WHERE active_flag=?";
         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{ActiveFlag.OFFLINE.getActiveFlag()});
         if (rs.isEmpty()) {
@@ -185,6 +185,12 @@ public class SeverityService extends JdbcDaoSupport implements SeverityDao {
         severityChangeLogService.insertSeverityChangeLog(
                 new SeverityChangeLog(this.getSeverityById(severityId), ticket, requestor, getTimestamp())
         );
+    }
+    
+    @Override
+    public void removeSeverity(int severityId) {
+        String sql = "DELETE FROM severity SET WHERE severity_id=?";
+        this.getJdbcTemplate().update(sql, new Object[]{severityId});
     }
 
     @Override

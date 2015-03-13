@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import com.crucialticketing.entities.Application;
 import com.crucialticketing.daos.ApplicationDao;
-import com.crucialticketing.entities.ActiveFlag;
+import com.crucialticketing.util.ActiveFlag;
 import com.crucialticketing.entities.ApplicationChangeLog;
 import com.crucialticketing.entities.Ticket;
 import static com.crucialticketing.util.Timestamp.getTimestamp;
@@ -191,6 +191,13 @@ public class ApplicationService extends JdbcDaoSupport implements ApplicationDao
         applicationChangeLogService.insertApplicationChangeLog(
           new ApplicationChangeLog(this.getApplicationById(applicationId), ticket, requestor, getTimestamp())
         );
+    }
+    
+    @Override
+    public void removeApplication(int applicationId) {
+        String sql = "DETETE FROM application WHERE application_id=?";
+        this.getJdbcTemplate().update(
+                sql, new Object[]{applicationId});
     }
     
     @Override

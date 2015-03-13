@@ -25,6 +25,8 @@ import com.crucialticketing.daos.services.TicketTypeService;
 import com.crucialticketing.daos.services.UserAlertService;
 import com.crucialticketing.daos.services.UserRoleConService;
 import com.crucialticketing.daos.services.UserService;
+import com.crucialticketing.entities.Role;
+import com.crucialticketing.util.Validation;
 import java.io.File;
 import java.io.FileOutputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -93,9 +95,9 @@ public class TicketController {
 
         map.addAttribute("ticketTypeList", ticketTypeService.getTicketTypeList());
 
-        map.addAttribute("applicationList", applicationService.getApplicationList());
+        map.addAttribute("applicationList", applicationService.getOnlineApplicationList());
 
-        map.addAttribute("severityList", severityService.getSeverityList());
+        map.addAttribute("severityList", severityService.getOnlineList());
 
         map.addAttribute("page", "main/createticketselection.jsp");
         return "mainview";
@@ -103,10 +105,19 @@ public class TicketController {
 
     @RequestMapping(value = "/create/createticket/", method = RequestMethod.POST)
     public String ticketCreation(HttpServletRequest request,
-            @RequestParam(value = "ticketTypeId", required = true) String ticketTypeId,
-            @RequestParam(value = "severityId", required = true) String severityId,
-            @RequestParam(value = "applicationId", required = true) String applicationId,
+            @RequestParam(value = "ticketTypeId", required = false) String ticketTypeId,
+            @RequestParam(value = "severityId", required = false) String severityId,
+            @RequestParam(value = "applicationId", required = false) String applicationId,
             ModelMap map) {
+
+        // Checks if fields are provided
+        if ((ticketTypeId == null) || (severityId == null) || (applicationId == null)) {
+            Validation.inputNotProvided(map, "Ticket Type, Severity or Application");
+            return preTicketCreation(map);
+        } else if ((ticketTypeId.isEmpty()) || (severityId.isEmpty()) || (applicationId.isEmpty())) {
+            Validation.inputNotProvided(map, "Ticket Type, Severity or Application");
+            return preTicketCreation(map);
+        }
 
         // Pre checks
         if (!ticketTypeService.doesTicketTypeExist(Integer.valueOf(ticketTypeId))) {
@@ -114,19 +125,19 @@ public class TicketController {
             return preTicketCreation(map);
         }
 
-        if (!severityService.doesSeverityExist(Integer.valueOf(severityId))) {
+        if (!severityService.doesSeverityExistInOnlineById(Integer.valueOf(severityId))) {
             map.addAttribute("alert", "This severity no longer exists");
             return preTicketCreation(map);
         }
 
-        if (!applicationService.doesApplicationExist(Integer.valueOf(applicationId))) {
+        if (!applicationService.doesApplicationExistInOnline(Integer.valueOf(applicationId))) {
             map.addAttribute("alert", "This application no longer exists");
             return preTicketCreation(map);
         }
-        
-        if(!applicationControlService.doesApplicationControlExistInOnline(
-                Integer.valueOf(ticketTypeId), 
-                Integer.valueOf(applicationId), 
+
+        if (!applicationControlService.doesApplicationControlExistInOnline(
+                Integer.valueOf(ticketTypeId),
+                Integer.valueOf(applicationId),
                 Integer.valueOf(severityId))) {
             map.addAttribute("alert", "An active ticket configuration does not exist");
             return preTicketCreation(map);
@@ -135,16 +146,14 @@ public class TicketController {
         ApplicationControl applicationControl = applicationControlService.getApplicationControlByCriteria(
                 Integer.valueOf(ticketTypeId),
                 Integer.valueOf(applicationId),
-                Integer.valueOf(severityId),
-                true);
+                Integer.valueOf(severityId), true);
 
         User user = (User) request.getSession().getAttribute("user");
 
         // Checks if correct role is maintained 
-        if (!userRoleConService.doesUserRoleConExistInOnline(user, 
-                applicationControl.getRole())) {
-            // Not allowed
-            map.addAttribute("alert", "You do not have the correct role privledges to perform this operation");
+        if (!userRoleConService.doesUserRoleConExistInOnline(user.getUserId(),
+                applicationControl.getRole().getRoleId())) {
+            Validation.userDoesntHaveRole(map);
             return preTicketCreation(map);
         }
 
@@ -159,23 +168,26 @@ public class TicketController {
     }
 
     @RequestMapping(value = "/update/viewticket/", method = RequestMethod.POST)
-    public String viewTicket(@RequestParam(value = "ticketid", required = true) String ticketId, ModelMap map) {
-        if (ticketId.length() == 0) {
-            map.addAttribute("alert", "No search criteria was provided");
-            map.addAttribute("page", "main/queryticket.jsp");
+    public String viewTicket(@RequestParam(value = "ticketid", required = false) String ticketId, ModelMap map) {
+        map.addAttribute("page", "main/queryticket.jsp");
+
+        if (ticketId == null) {
+            Validation.inputNotProvided(map, "Ticket ID");
+            return "mainview";
+        } else if (ticketId.isEmpty()) {
+            Validation.inputNotProvided(map, "Ticket ID");
             return "mainview";
         }
 
         Ticket ticket = ticketService.getTicketById(Integer.valueOf(ticketId), true, true, true, true);
 
         if (ticket.getTicketId() == 0) {
-            map.addAttribute("alert", "No ticket was found with that ID, please check and try again");
-            map.addAttribute("page", "main/queryticket.jsp");
+            Validation.inputIsInvalid(map, "Ticket ID");
             return "mainview";
         }
 
+        // Success
         map.put("ticketObject", ticket);
-
         map.addAttribute("page", "main/closedticket.jsp");
         return "mainview";
     }
@@ -185,19 +197,27 @@ public class TicketController {
             HttpServletRequest request,
             ModelMap map) {
 
+        if (ticketId == null) {
+            Validation.inputNotProvided(map, "Ticket ID");
+            return "mainview";
+        } else if (ticketId.isEmpty()) {
+            Validation.inputNotProvided(map, "Ticket ID");
+            return "mainview";
+        }
+
         User user = (User) request.getSession().getAttribute("user");
 
         if (ticketLockRequestService.ticketOpenForEditByUser(
                 Integer.valueOf(ticketId),
                 user.getUserId())) {
-            map.addAttribute("severityList", severityService.getSeverityList());
+            map.addAttribute("severityList", severityService.getOnlineList());
             map.addAttribute("page", "main/openticket.jsp");
         } else {
             ticketLockRequestService.addTicketLockRequest(
                     Integer.valueOf(ticketId),
                     user.getUserId());
 
-            userAlertService.insertUserAlert(user.getUserId(), "(" + ticketId + ") Access requested");
+            userAlertService.insertUserAlert(user.getUserId(), "Access requested");
 
             map.addAttribute("page", "main/closedticket.jsp");
         }
@@ -210,15 +230,18 @@ public class TicketController {
 
     @RequestMapping(value = "/create/saveticket/", method = RequestMethod.POST)
     public String saveNewTicket(HttpServletRequest request,
-            @RequestParam(value = "shortdescription", required = true) String shortDescription,
-            @RequestParam(value = "applicationControlId", required = true) String applicationControlId,
-            @RequestParam(value = "ticketTypeId", required = true) String ticketTypeId,
-            @RequestParam(value = "applicationId", required = true) String applicationId,
-            @RequestParam(value = "severityId", required = true) String severityId,
-            @RequestParam(value = "newstatus", required = true) String newStatus,
-            @RequestParam(value = "logentry", required = true) String logEntry,
+            @RequestParam(value = "shortdescription", required = false) String shortDescription,
+            @RequestParam(value = "applicationControlId", required = false) String applicationControlId,
+            @RequestParam(value = "ticketTypeId", required = false) String ticketTypeId,
+            @RequestParam(value = "applicationId", required = false) String applicationId,
+            @RequestParam(value = "severityId", required = false) String severityId,
+            @RequestParam(value = "newstatus", required = false) String newStatus,
+            @RequestParam(value = "reportedById", required = false) String reportedById,
+            @RequestParam(value = "logentry", required = false) String logEntry,
             @ModelAttribute("uploadfilelist") UploadedFileLog uploadedFileLog,
             ModelMap map) {
+
+        map.addAttribute("page", "main/createticketselection.jsp");
 
         // Checks if the IDs provided match the application control ID details from DB
         // This provides a level of security with the application control ID being correct
@@ -228,7 +251,6 @@ public class TicketController {
                 || (applicationControl.getApplication().getApplicationId() != Integer.valueOf(applicationId))
                 || (applicationControl.getSeverity().getSeverityId() != Integer.valueOf(severityId))) {
             map.addAttribute("alert", "Configuration details received did not match expected");
-            map.addAttribute("page", "main/createticketselection.jsp");
             return "mainview";
         }
 
@@ -237,105 +259,119 @@ public class TicketController {
 
         if (newStatus.isEmpty()) {
             currentStatusId = applicationControl.getWorkflow().getWorkflowMap()
-                    .getWorkflow().get(0).getWorkflowStatus().getStatusId();
+                    .getWorkflow().get(0).getWorkflowStatus().getWorkflowStatusId();
         } else {
             currentStatusId = Integer.valueOf(newStatus);
         }
 
         WorkflowStep workflowStep = applicationControl.getWorkflow().getWorkflowMap().getWorkflow().get(0);
-        if ((workflowStep.getWorkflowStatus().getStatusId() != currentStatusId) && (!workflowStep.isLegalStep(currentStatusId))) {
+        if ((workflowStep.getWorkflowStatus().getWorkflowStatusId() != currentStatusId) && (!workflowStep.isLegalStep(currentStatusId))) {
             map.addAttribute("alert", "Status conflicts with workflow configuration");
             map.addAttribute("page", "main/createticketselection.jsp");
             return "mainview";
         }
 
         User user = (User) request.getSession().getAttribute("user");
+        Ticket ticket = new Ticket();
+
+        if (newStatus.isEmpty()) {
+            ticket.setCurrentWorkflowStep(applicationControl.getWorkflow().getWorkflowMap().getWorkflow().get(0));
+        } else {
+            boolean found = false;
+            Role role = new Role();
+
+            for (WorkflowStep nextWorkflowStep : workflowStep.getNextWorkflowStep()) {
+                if (nextWorkflowStep.getWorkflowStatus().getWorkflowStatusId() == currentStatusId) {
+                    ticket.setCurrentWorkflowStep(nextWorkflowStep);
+                    found = true;
+                    role = nextWorkflowStep.getRole();
+                }
+            }
+
+            if (!found) {
+                Validation.pageError(map);
+                return "mainview";
+            }
+
+            // Checks if correct role is maintained 
+            if (!userRoleConService.doesUserRoleConExistInOnline(user.getUserId(),
+                    role.getRoleId())) {
+                Validation.userDoesntHaveRole(map);
+                return "mainview";
+            }
+        }
 
         // Checks if correct role is maintained 
-        if (!userRoleConService.doesUserRoleConExistInOnline(user,
-               applicationControl.getRole())) {
-            map.addAttribute("alert", "You do not have the correct role privledges to perform this operation");
+        if (!userRoleConService.doesUserRoleConExistInOnline(user.getUserId(),
+                applicationControl.getRole().getRoleId())) {
+            Validation.userDoesntHaveRole(map);
             map.addAttribute("page", "main/createticketselection.jsp");
             return "mainview";
         }
 
-        int ticketId = ticketService.insertTicket(
-                shortDescription,
-                applicationControl.getApplicationControlId(),
-                user.getUserId(),
-                user.getUserId(),
-                currentStatusId);
+        // Populates ticket information
+        ticket.setShortDescription(shortDescription);
+        ticket.setApplicationControl(applicationControl);
+        ticket.setReportedBy(new User(Integer.valueOf(reportedById)));
+        ticket.setCreatedBy(user);
+        ticket.setLastProcessedBy(user);
 
-        if (ticketId == 0) {
-            map.addAttribute("alert", "The ticket could not be saved");
-            map.addAttribute("page", "main/createticketselection.jsp");
-            return "mainview";
-        }
+        // Inserts ticket
+        ticketService.insertTicket(ticket);
 
-        // Adds change log entry
-        changeLogService.addChangeLogEntry(
-                ticketId,
-                applicationControl.getApplicationControlId(),
-                user.getUserId(),
-                applicationControl.getWorkflow().getWorkflowMap()
-                .getWorkflow().get(0).getWorkflowStatus().getStatusId());
-
-        if (currentStatusId != applicationControl.getWorkflow().getWorkflowMap()
-                .getWorkflow().get(0).getWorkflowStatus().getStatusId()) {
-            changeLogService.addChangeLogEntry(
-                    ticketId,
-                    applicationControl.getApplicationControlId(),
-                    user.getUserId(),
-                    currentStatusId);
-        }
         // Ticket log
-
         // Checks if a log entry has been made
         if (logEntry.length() > 0) {
             logEntry = logEntry.replaceAll("(\r\n|\n)", "<br />");
-            ticketLogService.addTicketLog(ticketId, user.getUserId(), logEntry);
+            ticketLogService.addTicketLog(ticket.getTicketId(), user.getUserId(), logEntry);
         }
 
         // Complete any uploads
-        this.fileUploadHandler(request, uploadedFileLog, Integer.valueOf(ticketId), user);
+        this.fileUploadHandler(request, uploadedFileLog, ticket.getTicketId(), user);
 
-        map.put("ticketObject", ticketService.getTicketById(ticketId, true, true, true, true));
+        map.put("ticketObject", ticketService.getTicketById(ticket.getTicketId(), true, true, true, true));
         map.addAttribute("page", "main/closedticket.jsp");
         return "mainview";
     }
 
     @RequestMapping(value = "/update/saveticket/", method = RequestMethod.POST)
     public String saveExistingTicket(HttpServletRequest request,
-            @RequestParam(value = "ticketid", required = true) String ticketId,
-            @RequestParam(value = "old_shortdescription", required = true) String oldShortDescription,
-            @RequestParam(value = "new_shortdescription", required = true) String newShortDescription,
-            @RequestParam(value = "severity", required = true) String severity,
-            @RequestParam(value = "newstatus", required = true) String newStatus,
-            @RequestParam(value = "logentry", required = true) String logEntry,
+            @RequestParam(value = "ticketid", required = false) String ticketId,
+            @RequestParam(value = "old_shortdescription", required = false) String oldShortDescription,
+            @RequestParam(value = "new_shortdescription", required = false) String newShortDescription,
+            @RequestParam(value = "severity", required = false) String severity,
+            @RequestParam(value = "newstatus", required = false) String newStatus,
+            @RequestParam(value = "logentry", required = false) String logEntry,
             @ModelAttribute("uploadfilelist") UploadedFileLog uploadedFileLog,
             ModelMap map) {
 
+        map.addAttribute("page", "main/closedticket.jsp");
+  
+        if(ticketId == null) {
+            Validation.inputIsInvalid(map, "Ticket ID");
+            return "mainview";
+        }
         // Checks if this ticket is open for editing by this user
         Ticket ticket = ticketService.getTicketById(Integer.valueOf(ticketId), true, true, true, true);
 
+        if(ticket.getTicketId() == 0) {
+            Validation.inputIsInvalid(map, "Ticket ID");
+            return "mainview";
+        }
+        
+        map.put("ticketObject", ticket);
         User user = (User) request.getSession().getAttribute("user");
 
         // Check: check if maintenance role is attached to user
-        if (!userRoleConService.doesUserRoleConExistInOnline(user,
-                ticket.getApplicationControl().getRole())) {
-            map.put("ticketObject", ticket);
-            map.addAttribute("page", "main/closedticket.jsp");
-            map.addAttribute("alert", "You do not have the correct role privledges to perform a save operation");
+        if (!userRoleConService.doesUserRoleConExistInOnline(user.getUserId(),
+                ticket.getApplicationControl().getRole().getRoleId())) {
+            Validation.userDoesntHaveRole(map);
             return "mainview";
         }
 
         // Check: check if role is maintained for status change
-        
-        
         // Checks if this user has a open ticket lock
         if (!ticketLockRequestService.ticketOpenForEditByUser(Integer.valueOf(ticketId), user.getUserId())) {
-            map.put("ticketObject", ticket);
-            map.addAttribute("page", "main/closedticket.jsp");
             map.addAttribute("alert", "You do not have exclusive rights to save this ticket");
             return "mainview";
         }
@@ -353,8 +389,6 @@ public class TicketController {
                     false);
 
             if (applicationControl.getApplicationControlId() == 0) {
-                map.put("ticketObject", ticket);
-                map.addAttribute("page", "main/closedticket.jsp");
                 map.addAttribute("alert", "A workflow is not currently setup for this configuration");
                 return "mainview";
             }
@@ -366,7 +400,7 @@ public class TicketController {
                     .getWorkflowMap()
                     .getWorkflow()
                     .get(0).getNextWorkflowStep()
-                    .get(0).getWorkflowStatus().getStatusId());
+                    .get(0).getWorkflowStatus().getWorkflowStatusId());
 
             ticketLogService.addTicketLog(ticket.getTicketId(), user.getUserId(),
                     "Ticket severity has been changed from "
@@ -382,7 +416,7 @@ public class TicketController {
                     .getWorkflowMap()
                     .getWorkflow()
                     .get(0).getNextWorkflowStep()
-                    .get(0).getWorkflowStatus().getStatusName());
+                    .get(0).getWorkflowStatus().getWorkflowStatusName());
 
             changeLogEntryRequired = true;
         }
@@ -405,10 +439,10 @@ public class TicketController {
                             .getWorkflowStageByStatus(Integer.valueOf(newStatus))
                             .getWorkflowStatus();
 
-                    ticketService.updateStatus(ticket.getTicketId(), workflowStatus.getStatusId());
+                    ticketService.updateStatus(ticket.getTicketId(), workflowStatus.getWorkflowStatusId());
 
                     ticketLogService.addTicketLog(ticket.getTicketId(), user.getUserId(), "Ticket status has been changed to "
-                            + workflowStatus.getStatusName());
+                            + workflowStatus.getWorkflowStatusName());
 
                     changeLogEntryRequired = true;
                 }
@@ -437,8 +471,8 @@ public class TicketController {
             changeLogService.addChangeLogEntry(
                     ticket.getTicketId(),
                     ticket.getApplicationControl().getApplicationControlId(),
-                    user.getUserId(),
-                    ticket.getCurrentWorkflowStep().getWorkflowStatus().getStatusId());
+                    ticket.getCurrentWorkflowStep().getWorkflowStatus().getWorkflowStatusId(), 
+                    user.getUserId());
         }
 
         ticket = ticketService.getTicketById(Integer.valueOf(ticketId), true, true, true, true);

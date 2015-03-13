@@ -53,8 +53,8 @@ function checkForNotification() {
 
             var messageString = obj.userAlertLog[i].message;
             
-            if (messageString.length > 25) {
-                var sliceString = messageString.slice(0, 25) + "...";
+            if (messageString.length > 50) {
+                var sliceString = messageString.slice(0, 50) + "...";
             } else {
                 var sliceString = messageString;
             }

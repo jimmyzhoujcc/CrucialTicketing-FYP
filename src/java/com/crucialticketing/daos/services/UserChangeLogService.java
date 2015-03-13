@@ -6,7 +6,7 @@
 package com.crucialticketing.daos.services;
 
 import com.crucialticketing.daos.UserChangeLogDao;
-import com.crucialticketing.entities.ActiveFlag;
+import com.crucialticketing.util.ActiveFlag;
 import com.crucialticketing.entities.Ticket;
 import static com.crucialticketing.util.Timestamp.getTimestamp;
 import com.crucialticketing.entities.User;
@@ -26,7 +26,7 @@ public class UserChangeLogService extends JdbcDaoSupport implements UserChangeLo
 
     @Autowired
     TicketService ticketService;
-    
+
     @Autowired
     UserService userService;
 
@@ -43,7 +43,7 @@ public class UserChangeLogService extends JdbcDaoSupport implements UserChangeLo
             userChangeLog.getUser().getContact(),
             userChangeLog.getTicket().getTicketId(),
             userChangeLog.getRequestor().getUserId(),
-            getTimestamp(), 
+            getTimestamp(),
             userChangeLog.getUser().getActiveFlag().getActiveFlag()
         });
     }
@@ -59,9 +59,9 @@ public class UserChangeLogService extends JdbcDaoSupport implements UserChangeLo
     }
 
     @Override
-    public List<UserChangeLog> getUserChangeLogList(User user) {
+    public List<UserChangeLog> getUserChangeLogListByUserId(int userId) {
         String sql = "SELECT * FROM user_change_log WHERE user_id=?";
-        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{user.getUserId()});
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{userId});
         if (rs.isEmpty()) {
             return new ArrayList<>();
         }
@@ -69,15 +69,9 @@ public class UserChangeLogService extends JdbcDaoSupport implements UserChangeLo
     }
 
     @Override
-    public void removeUserChangeLogEntry(UserChangeLog userChangeLog) {
-        String sql = "DELETE FROM user_change_log WHERE user_change_log_id=?";
-        this.getJdbcTemplate().update(sql, new Object[]{userChangeLog.getUserChangeLogId()});
-    }
-
-    @Override
-    public void removeAllUserChangeLogEntries(User user) {
+    public void removeUserChangeLogEntryByUserId(int userId) {
         String sql = "DELETE FROM user_change_log WHERE user_id=?";
-        this.getJdbcTemplate().update(sql, new Object[]{user.getUserId()});
+        this.getJdbcTemplate().update(sql, new Object[]{userId});
     }
 
     @Override
@@ -91,7 +85,6 @@ public class UserChangeLogService extends JdbcDaoSupport implements UserChangeLo
 
             userChangeLog.setUserChangeLogId((int) row.get("user_change_log_id"));
 
-            
             // User List
             if (retrievedUserList.containsKey((int) row.get("user_id"))) {
                 userChangeLog.setUser(retrievedUserList.get((int) row.get("user_id")));
@@ -114,18 +107,18 @@ public class UserChangeLogService extends JdbcDaoSupport implements UserChangeLo
             userChangeLog.getUser().getSecure().setHash((String) row.get("hash"));
             userChangeLog.getUser().setEmailAddress((String) row.get("email_address"));
             userChangeLog.getUser().setContact((String) row.get("contact"));
-            
+
             // Requestor user List
             if (retrievedUserList.containsKey((int) row.get("requestor_user_id"))) {
                 userChangeLog.setUser(retrievedUserList.get((int) row.get("requestor_user_id")));
             } else {
                 User user = userService.getUserById((int) row.get("requestor_user_id"), false);
-                userChangeLog.setUser(user);
+                userChangeLog.setRequestor(user);
                 retrievedUserList.put((int) row.get("requestor_user_id"), user);
             }
-            
-            userChangeLog.getUser().setActiveFlag(ActiveFlag.values()[((int) row.get("active_flag"))]);
-            
+
+            userChangeLog.getUser().setActiveFlag(ActiveFlag.values()[((int) row.get("active_flag")) + 2]);
+
             userChangeLog.setStamp((int) row.get("stamp"));
 
             userChangeLogList.add(userChangeLog);

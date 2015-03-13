@@ -5,6 +5,8 @@
  */
 package com.crucialticketing.entities;
 
+import com.crucialticketing.util.ActiveFlag;
+
 /**
  *
  * @author Daniel Foley

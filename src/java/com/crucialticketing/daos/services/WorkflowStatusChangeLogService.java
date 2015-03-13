@@ -6,7 +6,7 @@
 package com.crucialticketing.daos.services;
 
 import com.crucialticketing.daos.WorkflowStatusChangeLogDao;
-import com.crucialticketing.entities.ActiveFlag;
+import com.crucialticketing.util.ActiveFlag;
 import com.crucialticketing.entities.Ticket;
 import com.crucialticketing.entities.User;
 import com.crucialticketing.entities.UserChangeLog;
@@ -37,7 +37,7 @@ public class WorkflowStatusChangeLogService extends JdbcDaoSupport implements Wo
 
     @Override
     public void insertChangeLog(WorkflowStatusChangeLog workflowStatusChangeLog) {
-        String sql = "INSERT user_change_log "
+        String sql = "INSERT workflow_status_change_log "
                 + "(workflow_status_id, workflow_status_name, ticket_id, requestor_user_id, stamp, active_flag) "
                 + "VALUES "
                 + "(?, ?, ?, ?, ?, ?)";
@@ -89,18 +89,9 @@ public class WorkflowStatusChangeLogService extends JdbcDaoSupport implements Wo
             if (retrievedWorkflowStatusList.containsKey((int) row.get("workflow_status_id"))) {
                 changeLog.setWorkflowStatus(retrievedWorkflowStatusList.get((int) row.get("workflow_status_id")));
             } else {
-                WorkflowStatus workflowStatus = workflowStatusService.getWorkflowStatusById((int) row.get("workflow_status_id"));
+                WorkflowStatus workflowStatus = workflowStatusService.getWorkflowStatus((int) row.get("workflow_status_id"));
                 changeLog.setWorkflowStatus(workflowStatus);
                 retrievedWorkflowStatusList.put((int) row.get("workflow_status_id"), workflowStatus);
-            }
-
-            // User List
-            if (retrievedUserList.containsKey((int) row.get("user_id"))) {
-                changeLog.setRequestor(retrievedUserList.get((int) row.get("user_id")));
-            } else {
-                User user = userService.getUserById((int) row.get("user_id"), false);
-                changeLog.setRequestor(user);
-                retrievedUserList.put((int) row.get("user_id"), user);
             }
 
             // Ticket checks
@@ -111,6 +102,15 @@ public class WorkflowStatusChangeLogService extends JdbcDaoSupport implements Wo
                         getTicketById((int) row.get("ticket_id"), false, false, false, false);
                 changeLog.setTicket(ticket);
                 retrievedTicketList.put((int) row.get("ticket_id"), ticket);
+            }
+            
+            // User List
+            if (retrievedUserList.containsKey((int) row.get("requestor_user_id"))) {
+                changeLog.setRequestor(retrievedUserList.get((int) row.get("requestor_user_id")));
+            } else {
+                User user = userService.getUserById((int) row.get("requestor_user_id"), false);
+                changeLog.setRequestor(user);
+                retrievedUserList.put((int) row.get("requestor_user_id"), user);
             }
 
             changeLog.getWorkflowStatus().setWorkflowStatusName((String) row.get("workflow_status_name"));

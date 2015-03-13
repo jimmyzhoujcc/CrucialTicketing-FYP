@@ -6,11 +6,9 @@
 package com.crucialticketing.daos.services;
 
 import com.crucialticketing.daos.UserRoleConChangeLogDao;
-import com.crucialticketing.entities.ActiveFlag;
-import com.crucialticketing.entities.Role;
+import com.crucialticketing.util.ActiveFlag;
 import com.crucialticketing.entities.Ticket;
 import com.crucialticketing.entities.User;
-import com.crucialticketing.entities.UserRoleCon;
 import com.crucialticketing.entities.UserRoleConChangeLog;
 import static com.crucialticketing.util.Timestamp.getTimestamp;
 import java.util.ArrayList;
@@ -35,15 +33,17 @@ public class UserRoleConChangeLogService extends JdbcDaoSupport implements UserR
     @Autowired
     TicketService ticketService;
 
+    @Autowired
+    UserRoleConService userRoleConService;
+
     @Override
     public void insertChangeLog(UserRoleConChangeLog changeLog) {
         String sql = "INSERT user_role_con_change_log "
-                + "(user_id, role_id, valid_from, valid_to, ticket_id, requestor_user_id, stamp, active_flag) "
+                + "(user_role_con_id, valid_from, valid_to, ticket_id, requestor_user_id, stamp, active_flag) "
                 + "VALUES "
-                + "(?, ?, ?, ?, ?, ?, ?, ?)";
+                + "(?, ?, ?, ?, ?, ?, ?)";
         this.getJdbcTemplate().update(sql, new Object[]{
-            changeLog.getUserRoleCon().getUser().getUserId(),
-            changeLog.getUserRoleCon().getRole().getRoleId(),
+            changeLog.getUserRoleCon().getUserRoleConId(), 
             changeLog.getUserRoleCon().getValidFrom(),
             changeLog.getUserRoleCon().getValidTo(),
             changeLog.getTicket().getTicketId(),
@@ -54,21 +54,10 @@ public class UserRoleConChangeLogService extends JdbcDaoSupport implements UserR
     }
 
     @Override
-    public List<UserRoleConChangeLog> getChangeLogByUserId(int userId) {
-        String sql = "SELECT * FROM user_role_con_change_log WHERE user_id=?";
+    public List<UserRoleConChangeLog> getChangeLogByUserRoleConId(int userRoleConId) {
+        String sql = "SELECT * FROM user_role_con_change_log WHERE user_role_con_id=?";
         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(
-                sql, new Object[]{userId});
-        if (rs.isEmpty()) {
-            return new ArrayList<>();
-        }
-        return rowMapper(rs);
-    }
-
-    @Override
-    public List<UserRoleConChangeLog> getChangeLogByRoleId(int roleId) {
-        String sql = "SELECT * FROM user_role_con_change_log WHERE role_id=?";
-        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(
-                sql, new Object[]{roleId});
+                sql, new Object[]{userRoleConId});
         if (rs.isEmpty()) {
             return new ArrayList<>();
         }
@@ -90,7 +79,6 @@ public class UserRoleConChangeLogService extends JdbcDaoSupport implements UserR
     public List<UserRoleConChangeLog> rowMapper(List<Map<String, Object>> resultSet) {
         List<UserRoleConChangeLog> changeLogList = new ArrayList<>();
         Map<Integer, User> retrievedUserList = new HashMap<>();
-        Map<Integer, Role> retrievedRoleList = new HashMap<>();
         Map<Integer, Ticket> retrievedTicketList = new HashMap<>();
 
         for (Map row : resultSet) {
@@ -98,32 +86,12 @@ public class UserRoleConChangeLogService extends JdbcDaoSupport implements UserR
 
             changeLog.setUserRoleConChangeLogId((int) row.get("user_role_con_change_log_id"));
 
-            // User Role Con retrieval via Role and User
-            // --- getting user
-            User user;
-            if (retrievedUserList.containsKey((int) row.get("user_id"))) {
-                user = retrievedUserList.get((int) row.get("user_id"));
-            } else {
-                user = userService.getUserById((int) row.get("user_id"), false);
-                retrievedUserList.put((int) row.get("user_id"), user);
-            }
+            // User Role Con retrieval
+            changeLog.setUserRoleCon(userRoleConService.getUserRoleConById((int) row.get("user_role_con_id")));
 
-            // --- getting role
-            Role role;
-            if (retrievedRoleList.containsKey((int) row.get("role_id"))) {
-                role = retrievedRoleList.get((int) row.get("role_id"));
-            } else {
-                role = roleService.getRoleById((int) row.get("role_id"));
-                retrievedRoleList.put((int) row.get("role_id"), role);
-            }
-
-            changeLog.setUserRoleCon(
-                    new UserRoleCon(
-                            user, role,
-                            (int) row.get("valid_from"),
-                            (int) row.get("valid_to"), 
-                            ActiveFlag.values()[((int) row.get("active_flag")) + 2]
-                    ));
+            changeLog.getUserRoleCon().setValidFrom((int) row.get("valid_from"));
+            changeLog.getUserRoleCon().setValidTo((int) row.get("valid_to"));
+            changeLog.getUserRoleCon().setActiveFlag(ActiveFlag.values()[((int) row.get("active_flag")) + 2]);
 
             // Ticket checks
             if (retrievedTicketList.containsKey((int) row.get("ticket_id"))) {
@@ -139,7 +107,7 @@ public class UserRoleConChangeLogService extends JdbcDaoSupport implements UserR
             if (retrievedUserList.containsKey((int) row.get("requestor_user_id"))) {
                 changeLog.setRequestor(retrievedUserList.get((int) row.get("requestor_user_id")));
             } else {
-                user = userService.getUserById((int) row.get("requestor_user_id"), false);
+                User user = userService.getUserById((int) row.get("requestor_user_id"), false);
                 changeLog.setRequestor(user);
                 retrievedUserList.put((int) row.get("requestor_user_id"), user);
             }

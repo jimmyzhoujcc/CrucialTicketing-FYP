@@ -43,5 +43,7 @@ public interface ApplicationDao {
 
     public void updateToOffline(int applicationId, Ticket ticket, User requestor);
 
+    public void removeApplication(int applicationId);
+    
     public List<Application> rowMapper(List<Map<String, Object>> resultSet);
 }

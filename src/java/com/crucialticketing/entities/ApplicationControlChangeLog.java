@@ -17,21 +17,17 @@ public class ApplicationControlChangeLog {
     private User requestor;
     
     private int stamp;
-
-    private ActiveFlag activeFlag;
     
     public ApplicationControlChangeLog() {
         this.applicationControl = new ApplicationControl();
         this.ticket = new Ticket();
         this.requestor = new User();
     }
-
-    public ApplicationControlChangeLog(ApplicationControl applicationControl, Ticket ticket, User requestor, int stamp, ActiveFlag activeFlag) {
+    
+    public ApplicationControlChangeLog(ApplicationControl applicationControl, Ticket ticket, User requestor) {
         this.applicationControl = applicationControl;
         this.ticket = ticket;
         this.requestor = requestor;
-        this.stamp = stamp;
-        this.activeFlag = activeFlag;
     }
 
     public int getApplicationControlChangeLogId() {
@@ -72,15 +68,5 @@ public class ApplicationControlChangeLog {
 
     public void setStamp(int stamp) {
         this.stamp = stamp;
-    }
-
-    public ActiveFlag getActiveFlag() {
-        return activeFlag;
-    }
-
-    public void setActiveFlag(ActiveFlag activeFlag) {
-        this.activeFlag = activeFlag;
-    }
-    
-    
+    }   
 }

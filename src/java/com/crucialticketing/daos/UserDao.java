@@ -44,7 +44,9 @@ public interface UserDao {
     
     public void updateToOffline(int userId, Ticket ticket, User requestor);
     
-    public void updateHash(User user, String hash);
+    public void updateHash(int userId, String hash);
+    
+    public void removeUser(int userId);
     
     public List<User> rowMapper(List<Map<String, Object>> resultSet, boolean populateInternal);
 }

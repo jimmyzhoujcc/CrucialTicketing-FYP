@@ -8,7 +8,7 @@ package com.crucialticketing.daos.services;
 import com.crucialticketing.entities.User;
 import com.crucialticketing.entities.UserRoleCon;
 import com.crucialticketing.daos.UserRoleConDao;
-import com.crucialticketing.entities.ActiveFlag;
+import com.crucialticketing.util.ActiveFlag;
 import com.crucialticketing.entities.Role;
 import com.crucialticketing.entities.Ticket;
 import com.crucialticketing.entities.UserRoleConChangeLog;
@@ -127,6 +127,16 @@ public class UserRoleConService extends JdbcDaoSupport implements UserRoleConDao
         int result = Integer.valueOf(rs.get(0).get("result").toString());
         return result != 0;
     }
+    
+    @Override
+    public boolean doesUserRoleConExistInOnlineOrOffline(int userId, int roleId) {
+        String sql = "SELECT COUNT(user_role_con_id) AS result FROM user_role_con "
+                + "WHERE user_id=? AND role_id=? AND active_flag>?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(
+                sql, new Object[]{userId, roleId, ActiveFlag.UNPROCESSED.getActiveFlag()});
+        int result = Integer.valueOf(rs.get(0).get("result").toString());
+        return result != 0;
+    }
 
     @Override
     public List<UserRoleCon> getIncompleteUserRoleConList(boolean newUserFlag) {
@@ -151,10 +161,21 @@ public class UserRoleConService extends JdbcDaoSupport implements UserRoleConDao
     }
 
     @Override
+    public List<UserRoleCon> getUnprocessedUserRoleConListByUserId(int userId, boolean newUserFlag) {
+        String sql = "SELECT * FROM user_role_con WHERE user_id=? AND active_flag=? AND new_user_flag=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(
+                sql, new Object[]{userId, ActiveFlag.UNPROCESSED.getActiveFlag(), (newUserFlag) ? 1 : 0});
+        if (rs.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return this.rowMapper(rs);
+    }
+    
+    @Override
     public List<UserRoleCon> getUnprocessedUserRoleConListByRoleId(int roleId, boolean newUserFlag) {
         String sql = "SELECT * FROM user_role_con WHERE role_id=? AND active_flag=? AND new_user_flag=?";
         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(
-                sql, new Object[]{roleId, ActiveFlag.INCOMPLETE.getActiveFlag(), (newUserFlag) ? 1 : 0});
+                sql, new Object[]{roleId, ActiveFlag.UNPROCESSED.getActiveFlag(), (newUserFlag) ? 1 : 0});
         if (rs.isEmpty()) {
             return new ArrayList<>();
         }
@@ -214,6 +235,13 @@ public class UserRoleConService extends JdbcDaoSupport implements UserRoleConDao
         changeLogService.insertChangeLog(
                 new UserRoleConChangeLog(this.getUserRoleConById(userRoleConId), ticket, requestor, getTimestamp())
         );
+    }
+    
+    @Override
+    public void removeUserRoleCon(int userRoleConId) {
+        String sql = "DELETE FROM user_role_con WHERE user_role_con_id=?";
+        this.getJdbcTemplate().update(
+                sql, new Object[]{userRoleConId});
     }
 
     @Override

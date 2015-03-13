@@ -20,11 +20,9 @@ public interface UserChangeLogDao {
 
     public List<UserChangeLog> getUserChangeLogList();
 
-    public List<UserChangeLog> getUserChangeLogList(User user);
+    public List<UserChangeLog> getUserChangeLogListByUserId(int userId);
 
-    public void removeUserChangeLogEntry(UserChangeLog userChangeLog);
-
-    public void removeAllUserChangeLogEntries(User user);
+    public void removeUserChangeLogEntryByUserId(int userId);
             
     public List<UserChangeLog> rowMapper(List<Map<String, Object>> resultSet);
 }

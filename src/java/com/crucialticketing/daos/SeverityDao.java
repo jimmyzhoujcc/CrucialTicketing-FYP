@@ -29,13 +29,13 @@ public interface SeverityDao {
 
     public boolean doesSeverityExistInOnlineOrOfflineByLevel(int severityLevel);
 
-    public List<Severity> getIncompleteQueueList();
+    public List<Severity> getIncompleteList();
 
-    public List<Severity> getUnprocessedQueueList();
+    public List<Severity> getUnprocessedList();
 
-    public List<Severity> getOnlineSeverityList();
+    public List<Severity> getOnlineList();
 
-    public List<Severity> getOfflineSeverityList();
+    public List<Severity> getOfflineList();
 
     public void updateToUnprocessed(int severityId, Ticket ticket, User requestor);
 
@@ -43,5 +43,7 @@ public interface SeverityDao {
 
     public void updateToOffline(int severityId, Ticket ticket, User requestor);
 
+    public void removeSeverity(int severityId);
+    
     public List<Severity> rowMapper(List<Map<String, Object>> resultSet);
 }

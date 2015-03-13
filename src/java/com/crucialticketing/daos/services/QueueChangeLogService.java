@@ -6,7 +6,7 @@
 package com.crucialticketing.daos.services;
 
 import com.crucialticketing.daos.QueueChangeLogDao;
-import com.crucialticketing.entities.ActiveFlag;
+import com.crucialticketing.util.ActiveFlag;
 import com.crucialticketing.entities.Queue;
 import com.crucialticketing.entities.QueueChangeLog;
 import com.crucialticketing.entities.Ticket;
@@ -61,9 +61,9 @@ public class QueueChangeLogService extends JdbcDaoSupport implements QueueChange
     }
 
     @Override
-    public List<QueueChangeLog> getQueueChangeLogListByQueueId(Queue queue) {
+    public List<QueueChangeLog> getQueueChangeLogListByQueueId(int queueId) {
         String sql = "SELECT * FROM queue_change_log WHERE queue_id=?";
-        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{queue.getQueueId()});
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{queueId});
         if (rs.isEmpty()) {
             return new ArrayList<>();
         }
@@ -78,18 +78,6 @@ public class QueueChangeLogService extends JdbcDaoSupport implements QueueChange
             return new ArrayList<>();
         }
         return rowMapper(rs);
-    }
-
-    @Override
-    public void removeQueueChangeLogEntry(QueueChangeLog queueChangeLog) {
-        String sql = "DELETE FROM queue_change_log WHERE queue_change_log_id=?";
-        this.getJdbcTemplate().update(sql, new Object[]{queueChangeLog.getQueueChangeLogId()});
-    }
-
-    @Override
-    public void removeAllQueueChangeLogEntries(Queue queue) {
-        String sql = "DELETE FROM queue_change_log WHERE queue_id=?";
-        this.getJdbcTemplate().update(sql, new Object[]{queue.getQueueId()});
     }
 
     @Override

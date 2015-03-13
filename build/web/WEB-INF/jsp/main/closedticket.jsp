@@ -44,11 +44,11 @@
                 <br />
                 Workflow: ${ticketObject.applicationControl.workflow.workflowName}
                 <br /><br />
-                Current status: ${ticketObject.currentWorkflowStep.status.statusName}<br />
+                Current status: ${ticketObject.currentWorkflowStep.workflowStatus.workflowStatusName}<br />
 
                 Current Queue: 
                 <c:choose>
-                    <c:when test="${ticketObject.currentWorkflowStep.queue.queueId == -1}">
+                    <c:when test="${ticketObject.currentWorkflowStep.queue.queueId == 1}">
                         <c:set var="basicInfoQueueName" value="Reporting User"/>
                     </c:when>
                     <c:otherwise>
@@ -205,20 +205,11 @@
                             <td>${changeLog.applicationControl.severity.severityName}</td>
                             <td>${changeLog.applicationControl.application.applicationName}</td>
                             <td>${changeLog.applicationControl.workflow.workflowName}</td>
-                            <td>${changeLog.workflowStatus.statusName}</td>
+                            <td>${changeLog.workflowStatus.workflowStatusName}</td>
 
-                            <c:set var="queue" value="${changeLog.applicationControl.workflow.workflowMap.getWorkflowStageByStatus(changeLog.workflowStatus.statusId)}" />
+                            <c:set var="queue" value="${changeLog.applicationControl.workflow.workflowMap.getWorkflowStageByStatus(changeLog.workflowStatus.workflowStatusId)}" />
 
-                            <c:choose>
-                                <c:when test="${queue.queue.queueId == -1}">
-                                    <c:set var="queueName" value="Reporting User"/>
-                                </c:when>
-                                <c:otherwise>
-                                    <c:set var="queueName" value="${queue.queue.queueName}"/>
-                                </c:otherwise>
-                            </c:choose>
-
-                            <td>${queueName}</td>
+                            <td>${queue.queue.queueName}</td>
                             <jsp:setProperty name="dateValue" property="time" value="${changeLog.stamp*1000}"/>
                             <td><fmt:formatDate type="both" dateStyle="long" timeStyle="long" value="${dateValue}" /></td>
                         </tr>

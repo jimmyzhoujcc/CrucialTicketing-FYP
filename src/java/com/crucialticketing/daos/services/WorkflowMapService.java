@@ -35,7 +35,7 @@ public class WorkflowMapService extends JdbcDaoSupport implements WorkflowMapDao
     @Override
     public void insertWorkflowStep(Workflow workflow) {
         String sql = "INSERT INTO workflow_structure "
-                + "(workflow_template_id, from_workflow_status_id, to_workflow_status_id, role_id, queue_id, clock_active) "
+                + "(workflow_id, from_workflow_status_id, to_workflow_status_id, role_id, queue_id, clock_active) "
                 + "VALUES(?, ?, ?, ?, ?, ?)";
 
         WorkflowMap workflowMap = workflow.getWorkflowMap();
@@ -48,7 +48,7 @@ public class WorkflowMapService extends JdbcDaoSupport implements WorkflowMapDao
                     workflowStep.getWorkflowStatus().getWorkflowStatusId(),
                     nextWorkflowStep.getWorkflowStatus().getWorkflowStatusId(), 
                     nextWorkflowStep.getRole().getRoleId(), 
-                    nextWorkflowStep.getQueue().getQueueId(), 
+                    workflowStep.getQueue().getQueueId(), 
                     workflowStep.getClockActive()
                 });
             }
@@ -58,7 +58,7 @@ public class WorkflowMapService extends JdbcDaoSupport implements WorkflowMapDao
 
     @Override
     public WorkflowMap getWorkflowMapById(int workflowMapId) {
-        String sql = "SELECT * FROM workflow_structure WHERE workflow_template_id=?";
+        String sql = "SELECT * FROM workflow_structure WHERE workflow_id=?";
         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{workflowMapId});
         if (rs.isEmpty()) {
             return null;
@@ -93,6 +93,12 @@ public class WorkflowMapService extends JdbcDaoSupport implements WorkflowMapDao
             WorkflowStep workflowStageEnd = workflowMap.getWorkflowStageByStatus((int) row.get("to_workflow_status_id"));
             workflowStageStart.addNextNode(workflowStageEnd);
         }
+        
+        for (Map row : resultSet) {
+            workflowMap.getWorkflowStageByStatus((int) row.get("from_workflow_status_id")).setClockActive((int) row.get("clock_active")); 
+            workflowMap.getWorkflowStageByStatus((int) row.get("from_workflow_status_id")).setQueue(queueService.getQueueById((int) row.get("queue_id"))); 
+        }
+        
         workflowMapList.add(workflowMap);
 
         return workflowMapList;

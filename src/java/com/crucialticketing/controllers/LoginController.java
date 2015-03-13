@@ -84,7 +84,7 @@ public class LoginController {
             user = userService.getUserByUsername(username, true);
 
             PasswordHash passwordHash = new PasswordHash();
-
+            
             if (!passwordHash.validatePassword(password, user.getSecure().getHash())) {
                 map.addAttribute("alert", "Invalid username or password");
                 return "/login/login";

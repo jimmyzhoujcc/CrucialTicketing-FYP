@@ -43,5 +43,7 @@ public interface QueueDao {
 
     public void updateToOffline(int queueId, Ticket ticket, User requestor);
 
+    public void removeQueue(int queueId);
+    
     public List<Queue> rowMapper(List<Map<String, Object>> resultSet);
 }

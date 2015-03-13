@@ -5,6 +5,7 @@
  */
 package com.crucialticketing.entities;
 
+import com.crucialticketing.util.ActiveFlag;
 import java.util.ArrayList;
 import java.util.List;
 

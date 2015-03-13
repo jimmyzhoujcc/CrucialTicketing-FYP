@@ -7,7 +7,7 @@ package com.crucialticketing.daos.services;
 
 import com.crucialticketing.entities.Queue;
 import com.crucialticketing.daos.QueueDao;
-import com.crucialticketing.entities.ActiveFlag;
+import com.crucialticketing.util.ActiveFlag;
 import com.crucialticketing.entities.QueueChangeLog;
 import com.crucialticketing.entities.Ticket;
 import static com.crucialticketing.util.Timestamp.getTimestamp;
@@ -31,6 +31,9 @@ import org.springframework.jdbc.support.KeyHolder;
  */
 public class QueueService extends JdbcDaoSupport implements QueueDao {
 
+    @Autowired
+    UserQueueConService userQueueConService;
+    
     @Autowired
     QueueChangeLogService queueChangeLogService;
  
@@ -116,7 +119,7 @@ public class QueueService extends JdbcDaoSupport implements QueueDao {
     public List<Queue> getIncompleteQueueList() {
         String sql = "SELECT * FROM queue WHERE active_flag=?";
         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{ActiveFlag.INCOMPLETE.getActiveFlag()});
-        if (rs.size() != 1) {
+        if (rs.isEmpty()) {
             return new ArrayList<>();
         }
         return this.rowMapper(rs);
@@ -126,7 +129,7 @@ public class QueueService extends JdbcDaoSupport implements QueueDao {
     public List<Queue> getUnprocessedQueueList() {
         String sql = "SELECT * FROM queue WHERE active_flag=?";
         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{ActiveFlag.UNPROCESSED.getActiveFlag()});
-        if (rs.size() != 1) {
+        if (rs.isEmpty()) {
             return new ArrayList<>();
         }
         return this.rowMapper(rs);
@@ -136,7 +139,7 @@ public class QueueService extends JdbcDaoSupport implements QueueDao {
     public List<Queue> getOfflineQueueList() {
         String sql = "SELECT * FROM queue WHERE active_flag=?";
         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{ActiveFlag.OFFLINE.getActiveFlag()});
-        if (rs.size() != 1) {
+        if (rs.isEmpty()) {
             return new ArrayList<>();
         }
         return this.rowMapper(rs);
@@ -146,7 +149,7 @@ public class QueueService extends JdbcDaoSupport implements QueueDao {
     public List<Queue> getOnlineQueueList() {
         String sql = "SELECT * FROM queue WHERE active_flag=?";
         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{ActiveFlag.ONLINE.getActiveFlag()});
-        if (rs.size() != 1) {
+        if (rs.isEmpty()) {
             return new ArrayList<>();
         }
         return this.rowMapper(rs);
@@ -180,6 +183,12 @@ public class QueueService extends JdbcDaoSupport implements QueueDao {
         queueChangeLogService.insertQueueChangeLog(
           new QueueChangeLog(this.getQueueById(queueId), ticket, requestor, getTimestamp())
         );
+    }
+    
+    @Override
+    public void removeQueue(int queueId) {
+        String sql = "DELETE FROM queue SET WHERE queue_id=?";
+        this.getJdbcTemplate().update(sql, new Object[]{queueId});
     }
 
     @Override

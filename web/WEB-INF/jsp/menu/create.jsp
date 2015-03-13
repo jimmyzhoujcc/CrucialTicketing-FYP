@@ -15,7 +15,7 @@
         <li><a href="<%=request.getContextPath()%>/home/create/application/">Application</a></li>
         <li><a href="<%=request.getContextPath()%>/home/create/severity/">Severity</a></li>
         <li><a href="<%=request.getContextPath()%>/home/create/configuration/">Ticket Configuration</a></li>
+        <li><a href="<%=request.getContextPath()%>/home/create/workflowstatus/">Workflow Status</a></li>
         <li><a href="<%=request.getContextPath()%>/home/create/workflow/">Workflow</a></li>
-        <li><a href="<%=request.getContextPath()%>/home/create/status/">Status</a></li>
     </ul>
 </div>

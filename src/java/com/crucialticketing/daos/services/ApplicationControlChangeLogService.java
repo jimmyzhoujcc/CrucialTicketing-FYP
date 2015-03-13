@@ -6,7 +6,7 @@
 package com.crucialticketing.daos.services;
 
 import com.crucialticketing.daos.ApplicationControlChangeLogDao;
-import com.crucialticketing.entities.ActiveFlag;
+import com.crucialticketing.util.ActiveFlag;
 import com.crucialticketing.entities.ApplicationControl;
 import com.crucialticketing.entities.ApplicationControlChangeLog;
 import com.crucialticketing.entities.Ticket;
@@ -45,7 +45,7 @@ public class ApplicationControlChangeLogService extends JdbcDaoSupport implement
             applicationControlChangeLog.getTicket().getTicketId(), 
             applicationControlChangeLog.getRequestor().getUserId(), 
             getTimestamp(), 
-            ActiveFlag.INCOMPLETE.getActiveFlag()
+            applicationControlChangeLog.getApplicationControl().getActiveFlag().getActiveFlag()
         });
     }
 
@@ -112,7 +112,7 @@ public class ApplicationControlChangeLogService extends JdbcDaoSupport implement
          
             applicationControlChangeLog.setStamp((int) row.get("stamp"));
             
-            applicationControlChangeLog.setActiveFlag(ActiveFlag.values()[((int) row.get("active_flag"))+2]);
+            applicationControlChangeLog.getApplicationControl().setActiveFlag(ActiveFlag.values()[((int) row.get("active_flag"))+2]);
             
             changeLogList.add(applicationControlChangeLog);
         }

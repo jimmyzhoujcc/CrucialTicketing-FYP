@@ -6,7 +6,7 @@
 package com.crucialticketing.daos.services;
 
 import com.crucialticketing.daos.UserQueueConDao;
-import com.crucialticketing.entities.ActiveFlag;
+import com.crucialticketing.util.ActiveFlag;
 import com.crucialticketing.entities.Queue;
 import com.crucialticketing.entities.Ticket;
 import com.crucialticketing.entities.User;
@@ -165,6 +165,12 @@ public class UserQueueConService extends JdbcDaoSupport implements UserQueueConD
           new UserQueueConChangeLog(this.getUserQueueConById(userQueueConId), ticket, requestor, getTimestamp())
         );
     }
+    
+    @Override
+    public void removeUserQueueConByQueueId(int queueId) {
+        String sql = "DELETE FROM user_queue_con WHERE queue_id=?";
+        this.queryUpdate(sql, new Object[]{queueId});    
+    }
 
     private UserQueueCon queryForSingle(String sql, Object[] objectList) {
         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, objectList);
@@ -219,6 +225,8 @@ public class UserQueueConService extends JdbcDaoSupport implements UserQueueConD
                 queueList.put((int) row.get("queue_id"), queue);
             }
 
+            userQueueCon.setActiveFlag(ActiveFlag.values()[((int)row.get("active_flag"))+2]);
+            
             userQueueConList.add(userQueueCon);
         }
         return userQueueConList;

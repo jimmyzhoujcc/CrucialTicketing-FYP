@@ -31,13 +31,13 @@ public interface WorkflowDao {
 
     public boolean doesWorkflowExistInOnlineOrOffline(String workflowName);
 
-    public List<Workflow> getIncompleteWorkflowList();
+    public List<Workflow> getIncompleteList();
 
-    public List<Workflow> getUnprocessedWorkflowList();
+    public List<Workflow> getUnprocessedList();
 
-    public List<Workflow> getOnlineWorkflowList();
+    public List<Workflow> getOnlineList();
 
-    public List<Workflow> getOfflineWorkflowList();
+    public List<Workflow> getOfflineList();
 
     public void updateToUnprocessed(int workflowId, Ticket ticket, User requestor);
 
@@ -45,5 +45,7 @@ public interface WorkflowDao {
 
     public void updateToOffline(int workflowId, Ticket ticket, User requestor);
 
+    public void removeWorkflow(int workflowId);
+    
     public List<Workflow> rowMapper(List<Map<String, Object>> resultSet);
 }

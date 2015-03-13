@@ -68,17 +68,6 @@
     <br class="clearfix" />
     <br class="clearfix" />
 
-    Queue responsible for progression from previous to next status: 
-    <select id="queueSelection">
-        <c:forEach var="queue" items="${queueList}">
-            <option value="${queue.queueId}">
-                ${queue.queueName}
-            </option>
-        </c:forEach>
-    </select>
-
-    <br class="clearfix" />
-
     <script>
         $().ready(function () {
 
@@ -106,7 +95,6 @@
                 }
 
                 var roleId = $("#roleSelection option:selected").val();
-                var queueId = $("#queueSelection option:selected").val();
                 var found = false;
                 var size = 0;
 
@@ -134,14 +122,12 @@
                 }
 
                 workflowList = document.getElementById('confirmedWorkflowList');
-                addNewHiddenWorkflowStep(indexArray[workflowFromId], size, workflowToId, roleId, queueId);
+                addNewHiddenWorkflowStep(indexArray[workflowFromId], size, workflowToId, roleId);
                 workflowList.options[workflowList.options.length] = new Option(
                         $("#workflowFromSelection option:selected").text()
                         + " --> "
                         + $("#workflowToSelection option:selected").text()
-                        + " (" + $("#roleSelection option:selected").text() + ")"
-                        + " - "
-                        + "(" + $("#queueSelection option:selected").text() + ")");
+                        + " (" + $("#roleSelection option:selected").text() + ")");
             });
 
             $('#workflowClear').click(function () {
@@ -165,17 +151,18 @@
     <script>
         function addNewBaseWorkflowStep(index, workflowFromId) {
             content = "<input type=\"hidden\" name=\"workflowMap.workflow[" + index + "].workflowStatus.workflowStatusId\" value=\"" + workflowFromId + "\" />";
+            content += "<input type=\"hidden\" name=\"workflowMap.workflow[" + index + "].clockActive\" value=\"" + document.getElementById(workflowFromId + "_sla_flag").innerText + "\" />";
+            content += "<input type=\"hidden\" name=\"workflowMap.workflow[" + index + "].queue.queueId\" value=\"" + document.getElementById(workflowFromId + "_queue").innerText + "\" />";
 
             newDiv = document.createElement('div');
             $(newDiv).html(content)
                     .appendTo($("#confirmedWorkflowList_hidden")); //main div
         }
 
-        function addNewHiddenWorkflowStep(index, count, workflowToId, roleId, queueId) {
+        function addNewHiddenWorkflowStep(index, count, workflowToId, roleId) {
 
             content = "<input type=\"hidden\" name=\"workflowMap.workflow[" + index + "].nextWorkflowStep[" + count + "].workflowStatus.workflowStatusId\" value=\"" + workflowToId + "\" />";
             content += "<input type=\"hidden\" name=\"workflowMap.workflow[" + index + "].nextWorkflowStep[" + count + "].role.roleId\" value=\"" + roleId + "\" />";
-            content += "<input type=\"hidden\" name=\"workflowMap.workflow[" + index + "].nextWorkflowStep[" + count + "].queue.queueId\" value=\"" + queueId + "\" />";
 
             newDiv = document.createElement('div');
             $(newDiv).html(content)
@@ -200,9 +187,14 @@
 
     <div id="confirmedWorkflowList_hidden">
     </div>
-    
+
     <br class="clearfix" />
     <br class="clearfix" />
+
+    <c:forEach var="workflowStep" items="${workflow.workflowMap.workflow}">
+        <div style="display:none" id="${workflowStep.workflowStatus.workflowStatusId}_sla_flag">${workflowStep.clockActive}</div>
+        <div style="display:none" id="${workflowStep.workflowStatus.workflowStatusId}_queue">${workflowStep.queue.queueId}</div>
+    </c:forEach>
 
     <div class="create-form-button-container">
         <input type="hidden" name="ticketId" value="${ticketId}" />
