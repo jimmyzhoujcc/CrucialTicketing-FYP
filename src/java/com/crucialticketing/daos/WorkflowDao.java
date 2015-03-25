@@ -31,6 +31,10 @@ public interface WorkflowDao {
 
     public boolean doesWorkflowExistInOnlineOrOffline(String workflowName);
 
+    public List<Workflow> getListByCriteria(String[] inputList, Object[] objectList, int count);
+    
+    public List<Workflow> getList();
+    
     public List<Workflow> getIncompleteList();
 
     public List<Workflow> getUnprocessedList();

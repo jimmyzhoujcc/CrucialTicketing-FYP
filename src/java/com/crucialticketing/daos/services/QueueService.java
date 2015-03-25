@@ -9,6 +9,7 @@ import com.crucialticketing.entities.Queue;
 import com.crucialticketing.daos.QueueDao;
 import com.crucialticketing.util.ActiveFlag;
 import com.crucialticketing.entities.QueueChangeLog;
+import com.crucialticketing.entities.Role;
 import com.crucialticketing.entities.Ticket;
 import static com.crucialticketing.util.Timestamp.getTimestamp;
 import com.crucialticketing.entities.User;
@@ -116,6 +117,25 @@ public class QueueService extends JdbcDaoSupport implements QueueDao {
     }
 
     @Override
+    public List<Queue> getQueueListByCriteria(String[] inputList, Object[] objectList, int count) {
+        String sql = "SELECT * FROM queue WHERE ";
+
+        for (int i = 0; i < count; i++) {
+            sql += inputList[i] + "='" + objectList[i] + "'";
+
+            if ((i + 1) < count) {
+                sql += " AND ";
+            }
+        }
+
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql);
+        if (rs.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return this.rowMapper(rs);
+    }
+    
+    @Override
     public List<Queue> getIncompleteQueueList() {
         String sql = "SELECT * FROM queue WHERE active_flag=?";
         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{ActiveFlag.INCOMPLETE.getActiveFlag()});
@@ -200,6 +220,7 @@ public class QueueService extends JdbcDaoSupport implements QueueDao {
 
             queue.setQueueId((int) row.get("queue_id"));
             queue.setQueueName((String) row.get("queue_name"));
+            queue.setProtectedFlag((int)row.get("protected") != 0);
             queue.setActiveFlag(ActiveFlag.values()[((int)row.get("active_flag"))+2]);
 
             queueList.add(queue);

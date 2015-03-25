@@ -8,6 +8,7 @@ package com.crucialticketing.daos.services;
 import com.crucialticketing.entities.ApplicationControl;
 import com.crucialticketing.entities.Workflow;
 import com.crucialticketing.daos.ApplicationControlDao;
+import com.crucialticketing.entities.Application;
 import com.crucialticketing.util.ActiveFlag;
 import com.crucialticketing.entities.ApplicationControlChangeLog;
 import com.crucialticketing.entities.Ticket;
@@ -49,7 +50,7 @@ public class ApplicationControlService extends JdbcDaoSupport implements Applica
 
     @Autowired
     WorkflowMapService workflowMapService;
-    
+
     @Autowired
     ApplicationControlChangeLogService applicationControlChangeLogService;
 
@@ -83,7 +84,7 @@ public class ApplicationControlService extends JdbcDaoSupport implements Applica
         int insertedApplicationControlId = holder.getKey().intValue();
         applicationControl.setApplicationControlId(insertedApplicationControlId);
         applicationControl.setActiveFlag(ActiveFlag.INCOMPLETE);
-        
+
         // Timestamp is set to 0 as it is generated on insert
         applicationControlChangeLogService.insertChangeLog(
                 new ApplicationControlChangeLog(applicationControl, ticket, requestor)
@@ -101,13 +102,13 @@ public class ApplicationControlService extends JdbcDaoSupport implements Applica
         }
         return (this.rowMapper(rs, populateWorkflowMap)).get(0);
     }
-    
+
     @Override
     public ApplicationControl getApplicationControlByCriteria(int ticketTypeId, int applicationId, int severityId, boolean populateWorkflowMap) {
         String sql = "SELECT * FROM application_control WHERE ticket_type_id=? AND application_id=? AND severity_id=?";
         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(
                 sql, new Object[]{ticketTypeId, applicationId, severityId});
-        if (rs.size()!= 1) {
+        if (rs.size() != 1) {
             return new ApplicationControl();
         }
         return (this.rowMapper(rs, populateWorkflowMap)).get(0);
@@ -141,6 +142,25 @@ public class ApplicationControlService extends JdbcDaoSupport implements Applica
                 sql, new Object[]{ticketTypeId, applicationId, severityId, ActiveFlag.UNPROCESSED.getActiveFlag()});
         int result = Integer.valueOf(rs.get(0).get("result").toString());
         return result != 0;
+    }
+
+    @Override
+    public List<ApplicationControl> getApplicationControlListByCriteria(String[] inputList, Object[] objectList, int count) {
+        String sql = "SELECT * FROM application_control WHERE ";
+
+        for (int i = 0; i < count; i++) {
+            sql += inputList[i] + "='" + objectList[i] + "'";
+
+            if ((i + 1) < count) {
+                sql += " AND ";
+            }
+        }
+
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql);
+        if (rs.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return this.rowMapper(rs, false);
     }
 
     @Override
@@ -182,15 +202,15 @@ public class ApplicationControlService extends JdbcDaoSupport implements Applica
         }
         return rowMapper(rs, populateWorkflowMap);
     }
-    
+
     @Override
     public void updateToUnprocessed(int applicationControlId, Ticket ticket, User requestor) {
         String sql = "UPDATE application_control SET active_flag=? WHERE application_control_id=?";
         this.getJdbcTemplate().update(sql, new Object[]{ActiveFlag.UNPROCESSED.getActiveFlag(), applicationControlId});
-        
+
         applicationControlChangeLogService.insertChangeLog(
-          new ApplicationControlChangeLog(this.getApplicationControlById(applicationControlId, false), 
-                  ticket, requestor)
+                new ApplicationControlChangeLog(this.getApplicationControlById(applicationControlId, false),
+                        ticket, requestor)
         );
     }
 
@@ -198,24 +218,24 @@ public class ApplicationControlService extends JdbcDaoSupport implements Applica
     public void updateToOnline(int applicationControlId, Ticket ticket, User requestor) {
         String sql = "UPDATE application_control SET active_flag=? WHERE application_control_id=?";
         this.getJdbcTemplate().update(sql, new Object[]{ActiveFlag.ONLINE.getActiveFlag(), applicationControlId});
-        
+
         applicationControlChangeLogService.insertChangeLog(
-          new ApplicationControlChangeLog(this.getApplicationControlById(applicationControlId, false), 
-                  ticket, requestor)
+                new ApplicationControlChangeLog(this.getApplicationControlById(applicationControlId, false),
+                        ticket, requestor)
         );
     }
-    
+
     @Override
     public void updateToOffline(int applicationControlId, Ticket ticket, User requestor) {
         String sql = "UPDATE application_control SET active_flag=? WHERE application_control_id=?";
         this.getJdbcTemplate().update(sql, new Object[]{ActiveFlag.OFFLINE.getActiveFlag(), applicationControlId});
-        
+
         applicationControlChangeLogService.insertChangeLog(
-          new ApplicationControlChangeLog(this.getApplicationControlById(applicationControlId, false), 
-                  ticket, requestor)
+                new ApplicationControlChangeLog(this.getApplicationControlById(applicationControlId, false),
+                        ticket, requestor)
         );
     }
-    
+
     @Override
     public void removeApplicationControl(int applicationControlId) {
         String sql = "DELETE FROM application_control SET WHERE application_control_id=?";
@@ -254,10 +274,9 @@ public class ApplicationControlService extends JdbcDaoSupport implements Applica
             applicationControl.setWorkflow(workflow);
 
             applicationControl.setSlaClock((int) row.get("sla_clock"));
-            
-            applicationControl.setActiveFlag(ActiveFlag.values()[((int) row.get("active_flag"))+2]);
-            
-            
+
+            applicationControl.setActiveFlag(ActiveFlag.values()[((int) row.get("active_flag")) + 2]);
+
             // 
             applicationControlList.add(applicationControl);
         }

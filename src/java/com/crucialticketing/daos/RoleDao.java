@@ -31,6 +31,10 @@ public interface RoleDao {
     
     public boolean doesRoleExistInOnlineOrOffline(String roleName);
 
+    public List<Role> getRoleListByCriteria(String[] inputList, Object[] objectList, int count);
+    
+    public List<Role> getList();
+    
     public List<Role> getIncompleteRoleList();
 
     public List<Role> getUnprocessedRoleList();

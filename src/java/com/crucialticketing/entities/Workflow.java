@@ -21,16 +21,9 @@ public class Workflow {
         workflowMap = new WorkflowMap();
     }
 
-    public Workflow(int workflowId, String workflowName) {
+    public Workflow(int workflowId) {
         this.workflowId = workflowId;
-        this.workflowName = workflowName;
         workflowMap = new WorkflowMap();
-    }
-
-    public Workflow(int workflowId, String workflowName, WorkflowMap workflowMap) {
-        this.workflowId = workflowId;
-        this.workflowName = workflowName;
-        this.workflowMap = workflowMap;
     }
 
     public Workflow(String workflowName, WorkflowMap workflowMap, ActiveFlag activeFlag) {

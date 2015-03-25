@@ -14,14 +14,14 @@ import com.crucialticketing.util.ActiveFlag;
 public class Application {
     private int applicationId;
     private String applicationName;
+    private boolean protectedFlag;
     private ActiveFlag activeFlag;
 
     public Application() {
     }
 
-    public Application(int applicationId, String applicationName) {
+    public Application(int applicationId) {
         this.applicationId = applicationId;
-        this.applicationName = applicationName;
     }
 
     public int getApplicationId() {
@@ -40,6 +40,14 @@ public class Application {
         this.applicationName = applicationName;
     }
 
+    public boolean isProtectedFlag() {
+        return protectedFlag;
+    }
+
+    public void setProtectedFlag(boolean protectedFlag) {
+        this.protectedFlag = protectedFlag;
+    }
+
     public ActiveFlag getActiveFlag() {
         return activeFlag;
     }
@@ -47,6 +55,6 @@ public class Application {
     public void setActiveFlag(ActiveFlag activeFlag) {
         this.activeFlag = activeFlag;
     }
-    
-    
+
+   
 }

@@ -16,14 +16,30 @@
     
     <context:component-scan base-package="com.crucialticketing" />
 
+    
+    <!-- start -->
+
+    <bean class="org.springframework.web.servlet.view.XmlViewResolver">
+        <property name="location">
+            <value>/WEB-INF/spring-excel-views.xml</value>
+        </property>
+        <property name="order" value="0" />
+    </bean>
+        
+    <!-- end -->
+    
+ 
+ 
+    
     <bean id="jspViewResolver"
           class="org.springframework.web.servlet.view.InternalResourceViewResolver">
         <property name="viewClass"
                   value="org.springframework.web.servlet.view.JstlView" />
         <property name="prefix" value="/WEB-INF/jsp/" />
         <property name="suffix" value=".jsp" />
+        <property name="order" value="1" />
     </bean>
-    
+ 
     <bean id="multipartResolver" 
           class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
     
@@ -36,10 +52,18 @@
         <property name="dataSource" ref="dataSource" />
     </bean>
     
+    <bean id="applicationControlLockRequestService" class="com.crucialticketing.daos.services.ApplicationControlLockRequestService">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    
     <bean id="applicationControlService" class="com.crucialticketing.daos.services.ApplicationControlService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     
+    <bean id="applicationLockRequestService" class="com.crucialticketing.daos.services.ApplicationLockRequestService">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+
     <bean id="applicationService" class="com.crucialticketing.daos.services.ApplicationService">
         <property name="dataSource" ref="dataSource" />
     </bean>
@@ -52,11 +76,19 @@
         <property name="dataSource" ref="dataSource" />
     </bean>
     
+    <bean id="queueLockRequestService" class="com.crucialticketing.daos.services.QueueLockRequestService">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    
     <bean id="queueService" class="com.crucialticketing.daos.services.QueueService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     
     <bean id="roleChangeLogService" class="com.crucialticketing.daos.services.RoleChangeLogService">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    
+    <bean id="roleLockRequestService" class="com.crucialticketing.daos.services.RoleLockRequestService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     
@@ -100,6 +132,10 @@
         <property name="dataSource" ref="dataSource" />
     </bean>
     
+    <bean id="userLockRequestService" class="com.crucialticketing.daos.services.UserLockRequestService">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    
     <bean id="userQueueConChangeLogService" class="com.crucialticketing.daos.services.UserQueueConChangeLogService">
         <property name="dataSource" ref="dataSource" />
     </bean>
@@ -124,6 +160,10 @@
         <property name="dataSource" ref="dataSource" />
     </bean>
     
+    <bean id="workflowLockRequestService" class="com.crucialticketing.daos.services.WorkflowLockRequestService">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    
     <bean id="workflowMapService" class="com.crucialticketing.daos.services.WorkflowMapService">
         <property name="dataSource" ref="dataSource" />
     </bean>
@@ -133,6 +173,10 @@
     </bean>
     
     <bean id="workflowStatusChangeLogService" class="com.crucialticketing.daos.services.WorkflowStatusChangeLogService">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    
+    <bean id="workflowStatusLockRequestService" class="com.crucialticketing.daos.services.WorkflowStatusLockRequestService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     
@@ -151,7 +195,7 @@
     
     <!-- Run every 2 seconds -->  
     <task:scheduled-tasks  scheduler="myScheduler">
-        <!--<task:scheduled ref="ticketAccessJob" method="executeTicketAccessJob" cron="*/2 * * * * *" />  -->
+        <task:scheduled ref="ticketAccessJob" method="executeTicketAccessJob" cron="*/2 * * * * *" />
         <task:scheduled ref="creationJob" method="executeJobList" cron="*/2 * * * * *" />   
     </task:scheduled-tasks>  
     <task:scheduler id="myScheduler" pool-size="1"/>

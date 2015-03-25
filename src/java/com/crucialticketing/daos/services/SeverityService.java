@@ -117,6 +117,17 @@ public class SeverityService extends JdbcDaoSupport implements SeverityDao {
     }
 
     @Override
+    public List<Severity> getList() {
+        String sql = "SELECT * FROM severity";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql);
+        if (rs.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return this.rowMapper(rs);
+    }
+       
+        
+    @Override
     public List<Severity> getIncompleteList() {
         String sql = "SELECT * FROM severity WHERE active_flag=?";
         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{ActiveFlag.INCOMPLETE.getActiveFlag()});

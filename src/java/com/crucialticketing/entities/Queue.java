@@ -17,19 +17,22 @@ public class Queue {
     private int queueId;
     private String queueName;
     private List<UserQueueCon> userList;
+    private boolean protectedFlag;
     private ActiveFlag activeFlag;
     
     public Queue() {
         userList = new ArrayList<>();
     }
 
+    public Queue(int queueId) {
+        this.queueId = queueId;
+    }
+    /*
     public Queue(String queueName, List<UserQueueCon> userList, ActiveFlag activeFlag) {
         this.queueName = queueName;
         this.userList = userList;
         this.activeFlag = activeFlag;
-    }
-
-    
+    }*/
 
     public int getQueueId() {
         return queueId;
@@ -55,6 +58,14 @@ public class Queue {
         this.userList = userList;
     }
 
+    public boolean isProtectedFlag() {
+        return protectedFlag;
+    }
+
+    public void setProtectedFlag(boolean protectedFlag) {
+        this.protectedFlag = protectedFlag;
+    }
+
     public ActiveFlag getActiveFlag() {
         return activeFlag;
     }
@@ -63,6 +74,5 @@ public class Queue {
         this.activeFlag = activeFlag;
     }
 
-   
     
 }

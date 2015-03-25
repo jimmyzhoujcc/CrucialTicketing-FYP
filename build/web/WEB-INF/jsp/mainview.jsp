@@ -5,7 +5,7 @@
 if included on the main header which services the login pages -->
 
 <!-- Self: CSS & JS for notification  -->
-<script src="<%=request.getContextPath()%>/js/notification.js"></script>
+<script src="<%=request.getContextPath()%>/js/autofunctions.js"></script>
 
 <div class="heading">
 
@@ -28,7 +28,6 @@ if included on the main header which services the login pages -->
 
 
             </li>
-            <li role="presentation"><a href="#">Help</a></li>
             <li role="presentation"><a href="<%=request.getContextPath()%>/home/login/logout/">Logout</a></li>
         </ul>
     </div>
@@ -58,16 +57,15 @@ if included on the main header which services the login pages -->
         }%>>
         <a href="<%=request.getContextPath()%>/home/main/update/">View</a>
     </li>
-    <li role="presentation"><a href="menu/reporting.jsp">Reporting</a></li>
-    <li role="presentation"><a href="menu/settings.jsp">Settings</a></li>
+    <li role="presentation"><a href="<%=request.getContextPath()%>/home/main/reporting/">Reporting</a></li>
 
 </ul>
 <div class="main">
     <c:if test="${fn:length(requestScope.alert) > 0}">
-        <div class="alert alert-danger" role="alert">${requestScope.alert}</div>
+        <div id="alertbox" class="alert alert-danger" role="alert">${requestScope.alert}</div>
     </c:if>
     <c:if test="${fn:length(requestScope.success) > 0}">
-        <div class="alert alert-success" role="alert">${requestScope.success}</div>
+        <div id="successbox" class="alert alert-success" role="alert">${requestScope.success}</div>
     </c:if>
 
     <jsp:include page="<%=pageName%>"/>

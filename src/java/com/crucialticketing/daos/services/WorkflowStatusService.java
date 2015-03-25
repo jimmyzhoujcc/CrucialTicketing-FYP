@@ -7,6 +7,7 @@ package com.crucialticketing.daos.services;
 
 import com.crucialticketing.entities.WorkflowStatus;
 import com.crucialticketing.daos.WorkflowStatusDao;
+import com.crucialticketing.entities.Application;
 import com.crucialticketing.util.ActiveFlag;
 import com.crucialticketing.entities.Ticket;
 import com.crucialticketing.entities.User;
@@ -120,6 +121,25 @@ public class WorkflowStatusService extends JdbcDaoSupport implements WorkflowSta
         return result != 0;
     }
 
+    @Override
+    public List<WorkflowStatus> getListByCriteria(String[] inputList, Object[] objectList, int count) {
+        String sql = "SELECT * FROM workflow_status WHERE ";
+
+        for (int i = 0; i < count; i++) {
+            sql += inputList[i] + "='" + objectList[i] + "'";
+
+            if ((i + 1) < count) {
+                sql += " AND ";
+            }
+        }
+
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql);
+        if (rs.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return this.rowMapper(rs);
+    }
+    
     @Override
     public List<WorkflowStatus> getIncompleteList() {
         String sql = "SELECT * FROM workflow_status WHERE active_flag=?";

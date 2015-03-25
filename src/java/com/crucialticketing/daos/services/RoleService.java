@@ -125,6 +125,35 @@ public class RoleService extends JdbcDaoSupport implements RoleDao {
     }
     
     @Override
+    public List<Role> getRoleListByCriteria(String[] inputList, Object[] objectList, int count) {
+        String sql = "SELECT * FROM role WHERE ";
+
+        for (int i = 0; i < count; i++) {
+            sql += inputList[i] + "='" + objectList[i] + "'";
+
+            if ((i + 1) < count) {
+                sql += " AND ";
+            }
+        }
+
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql);
+        if (rs.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return this.rowMapper(rs);
+    }
+    
+    @Override
+    public List<Role> getList() {
+        String sql = "SELECT * FROM role";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql);
+        if (rs.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return this.rowMapper(rs);
+    }
+    
+    @Override
     public List<Role> getIncompleteRoleList() {
         String sql = "SELECT * FROM role WHERE active_flag=?";
         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{ActiveFlag.INCOMPLETE.getActiveFlag()});
@@ -210,6 +239,7 @@ public class RoleService extends JdbcDaoSupport implements RoleDao {
 
             role.setRoleId((int) row.get("role_id"));
             role.setRoleName((String) row.get("role_name"));
+            role.setProtectedFlag((int)row.get("protected") != 0);
             role.setActiveFlag(ActiveFlag.values()[((int)row.get("active_flag"))+2]);
             roleList.add(role);
         }

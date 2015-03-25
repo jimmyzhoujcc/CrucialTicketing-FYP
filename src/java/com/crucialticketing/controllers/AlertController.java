@@ -5,6 +5,7 @@
  */
 package com.crucialticketing.controllers;
 
+import com.crucialticketing.daos.services.TicketLockRequestService;
 import com.crucialticketing.entities.User;
 import com.crucialticketing.entities.UserAlert;
 import com.crucialticketing.entities.UserAlertLog;
@@ -31,6 +32,9 @@ public class AlertController {
     @Autowired
     UserAlertService userAlertService;
 
+    @Autowired
+    TicketLockRequestService ticketLockRequestService;
+    
     @RequestMapping(value = "/", method = RequestMethod.POST)
     public @ResponseBody
     String getNotificationList(HttpServletRequest request) {
@@ -74,5 +78,13 @@ public class AlertController {
         map.addAttribute("userAlert", userAlert);
         map.addAttribute("page", "/main/alert/alertsingle.jsp");
         return "mainview";
+    }
+    
+    @RequestMapping(value = "/checkticket/", method = RequestMethod.POST)
+    public @ResponseBody
+    String checkTicketIsOpen(HttpServletRequest request, @RequestParam(value = "ticketId", required = true) String ticketId) {
+        User user = (User) request.getSession().getAttribute("user");
+        boolean open = ticketLockRequestService.ticketOpenForEditByUser(Integer.valueOf(ticketId), user.getUserId());
+        return String.valueOf((open) ? 1 : 0); 
     }
 }

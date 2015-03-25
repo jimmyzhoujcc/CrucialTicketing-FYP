@@ -30,15 +30,8 @@ public class ApplicationControl {
         this.role = new Role();
     }
 
-    public ApplicationControl(int applicationControlId, TicketType ticketType, Application application, Workflow workflow, Severity severity, Role role, int slaClock, ActiveFlag activeFlag) {
+    public ApplicationControl(int applicationControlId) {
         this.applicationControlId = applicationControlId;
-        this.ticketType = ticketType;
-        this.application = application;
-        this.workflow = workflow;
-        this.severity = severity;
-        this.role = role;
-        this.slaClock = slaClock;
-        this.activeFlag = activeFlag;
     }
 
     public int getApplicationControlId() {

@@ -29,6 +29,10 @@ public interface ApplicationDao {
 
     public boolean doesApplicationExistInOnlineOrOffline(String applicationName);
     
+    public List<Application> getApplicationListByCriteria(String[] inputList, Object[] objectList, int count);
+    
+    public List<Application> getApplicationList();
+    
     public List<Application> getIncompleteApplicationList();
 
     public List<Application> getUnprocessedApplicationList();

@@ -17,19 +17,14 @@ public class Role {
     private String roleName;
     private String roleDescription;
     private List<RoleChangeLog> roleChangeLog;
+    boolean protectedFlag;
     private ActiveFlag activeFlag;
     
     public Role() {}
 
-    public Role(int roleId, String roleName, String roleDescription, List<RoleChangeLog> roleChangeLog, ActiveFlag activeFlag) {
+    public Role(int roleId) {
         this.roleId = roleId;
-        this.roleName = roleName;
-        this.roleDescription = roleDescription;
-        this.roleChangeLog = roleChangeLog;
-        this.activeFlag = activeFlag;
     }
-
-   
     
     public Role(String roleName, String roleDescription, List<RoleChangeLog> roleChangeLog) {
         this.roleName = roleName;
@@ -69,6 +64,14 @@ public class Role {
         this.roleChangeLog = roleChangeLog;
     }
 
+    public boolean isProtectedFlag() {
+        return protectedFlag;
+    }
+
+    public void setProtectedFlag(boolean protectedFlag) {
+        this.protectedFlag = protectedFlag;
+    }
+
     public ActiveFlag getActiveFlag() {
         return activeFlag;
     }
@@ -76,7 +79,6 @@ public class Role {
     public void setActiveFlag(ActiveFlag activeFlag) {
         this.activeFlag = activeFlag;
     }
-    
-    
+
     
 }

@@ -7,12 +7,12 @@
     View / Update:
     <ul>
         <li><a href="<%=request.getContextPath()%>/home/update/ticketquery/">Ticket</a></li>
-        <li><a href="<%=request.getContextPath()%>/home/update/queue/">User</a></li>
-        <li><a href="<%=request.getContextPath()%>/home/update/queue/">Role</a></li>
-        <li><a href="<%=request.getContextPath()%>/home/update/queue/">Queue</a></li>
-        <li><a href="<%=request.getContextPath()%>/home/update/system/">System</a></li>
-        <li><a href="<%=request.getContextPath()%>/home/update/configuration/">Ticket Configuration</a></li>
-        <li><a href="<%=request.getContextPath()%>/home/update/workflow/">Workflow</a></li>
-        <li><a href="<%=request.getContextPath()%>/home/create/status/">Status</a></li>
+        <li><a href="<%=request.getContextPath()%>/home/update/query/user/">User</a></li>
+        <li><a href="<%=request.getContextPath()%>/home/update/query/role/">Role</a></li>
+        <li><a href="<%=request.getContextPath()%>/home/update/query/queue/">Queue</a></li>
+        <li><a href="<%=request.getContextPath()%>/home/update/query/application/">Application</a></li>
+        <li><a href="<%=request.getContextPath()%>/home/update/query/configuration/">Ticket Configuration</a></li>
+        <li><a href="<%=request.getContextPath()%>/home/update/query/workflow/">Workflow</a></li>
+        <li><a href="<%=request.getContextPath()%>/home/update/query/workflowstatus/">Workflow Status</a></li>
     </ul>
 </div>

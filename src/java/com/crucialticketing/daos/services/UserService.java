@@ -132,6 +132,25 @@ public class UserService extends JdbcDaoSupport implements UserDao {
     }
 
     @Override
+    public List<User> getUserListByCriteria(String[] inputList, Object[] objectList, int count, boolean populateInternal) {
+        String sql = "SELECT * FROM user WHERE ";
+
+        for (int i = 0; i < count; i++) {
+            sql += inputList[i] + "='" + objectList[i] + "'";
+
+            if ((i + 1) < count) {
+                sql += " AND ";
+            }
+        }
+
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql);
+        if (rs.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return this.rowMapper(rs, populateInternal);
+    }
+
+    @Override
     public List<User> getIncompleteUserList() {
         String sql = "SELECT * FROM user WHERE active_flag=?";
         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{ActiveFlag.INCOMPLETE.getActiveFlag()});
@@ -213,7 +232,31 @@ public class UserService extends JdbcDaoSupport implements UserDao {
         String sql = "UPDATE user SET hash=? WHERE user_id=?";
         this.getJdbcTemplate().update(sql, new Object[]{hash, userId});
     }
-    
+
+    @Override
+    public void updateFirstName(int userId, String firstName) {
+        String sql = "UPDATE user SET first_name=? WHERE user_id=?";
+        this.getJdbcTemplate().update(sql, new Object[]{firstName, userId});
+    }
+
+    @Override
+    public void updateLastName(int userId, String lastName) {
+        String sql = "UPDATE user SET last_name=? WHERE user_id=?";
+        this.getJdbcTemplate().update(sql, new Object[]{lastName, userId});
+    }
+
+    @Override
+    public void updateEmail(int userId, String email) {
+        String sql = "UPDATE user SET email_address=? WHERE user_id=?";
+        this.getJdbcTemplate().update(sql, new Object[]{email, userId});
+    }
+
+    @Override
+    public void updateContact(int userId, String contact) {
+        String sql = "UPDATE user SET contact=? WHERE user_id=?";
+        this.getJdbcTemplate().update(sql, new Object[]{contact, userId});
+    }
+
     @Override
     public void removeUser(int userId) {
         String sql = "DELETE FROM user WHERE user_id=?";
@@ -228,6 +271,7 @@ public class UserService extends JdbcDaoSupport implements UserDao {
             User user = new User();
 
             user.setUserId((int) row.get("user_id"));
+            user.setUsername((String) row.get("username"));
             user.setFirstName((String) row.get("first_name"));
             user.setLastName((String) row.get("last_name"));
 

@@ -116,6 +116,36 @@ public class ApplicationService extends JdbcDaoSupport implements ApplicationDao
         return result != 0;
     }
     
+     @Override
+    public List<Application> getApplicationListByCriteria(String[] inputList, Object[] objectList, int count) {
+        String sql = "SELECT * FROM application WHERE ";
+
+        for (int i = 0; i < count; i++) {
+            sql += inputList[i] + "='" + objectList[i] + "'";
+
+            if ((i + 1) < count) {
+                sql += " AND ";
+            }
+        }
+
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql);
+        if (rs.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return this.rowMapper(rs);
+    }
+    
+    @Override
+    public List<Application> getApplicationList() {
+        String sql = "SELECT * FROM application";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(
+                sql);
+        if (rs.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return this.rowMapper(rs);
+    }
+    
     @Override
     public List<Application> getIncompleteApplicationList() {
         String sql = "SELECT * FROM application WHERE active_flag=?";
@@ -209,7 +239,7 @@ public class ApplicationService extends JdbcDaoSupport implements ApplicationDao
 
             application.setApplicationId((int) row.get("application_id"));
             application.setApplicationName((String) row.get("application_name"));
-
+            application.setProtectedFlag((int)row.get("protected") != 0);
             application.setActiveFlag(ActiveFlag.values()[((int) row.get("active_flag")) + 2]); // +2 offset for array
 
             applicationList.add(application);

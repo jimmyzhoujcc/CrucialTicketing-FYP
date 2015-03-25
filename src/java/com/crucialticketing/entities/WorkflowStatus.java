@@ -20,6 +20,11 @@ public class WorkflowStatus {
     
     public WorkflowStatus() {}
 
+    public WorkflowStatus(int workflowStatusId) {
+        this.workflowStatusId = workflowStatusId;
+    }
+
+    
     public WorkflowStatus(String workflowStatusName, WorkflowStatusType workflowStatusType, ActiveFlag activeFlag) {
         this.workflowStatusName = workflowStatusName;
         this.workflowStatusType = workflowStatusType;

@@ -22,14 +22,16 @@ public interface ApplicationControlDao {
     public ApplicationControl getApplicationControlById(int applicationControlId, boolean populateWorkflowMap);
 
     public ApplicationControl getApplicationControlByCriteria(int ticketTypeId, int applicationId, int severityId, boolean populateWorkflowMap);
-    
+
     public boolean doesApplicationControlExist(int ticketTypeId, int applicationId, int severityId);
 
     public boolean doesApplicationControlExistInOnline(int ticketTypeId, int applicationId, int severityId);
 
     public boolean doesApplicationControlExistInOnlineOrOffline(int ticketTypeId, int applicationId, int severityId);
 
-     public List<ApplicationControl> getIncompleteList(boolean populateWorkflowMap);
+    public List<ApplicationControl> getApplicationControlListByCriteria(String[] inputList, Object[] objectList, int count);
+
+    public List<ApplicationControl> getIncompleteList(boolean populateWorkflowMap);
 
     public List<ApplicationControl> getUnprocessedList(boolean populateWorkflowMap);
 
@@ -44,6 +46,6 @@ public interface ApplicationControlDao {
     public void updateToOffline(int applicationControlId, Ticket ticket, User requestor);
 
     public void removeApplicationControl(int applicationControlId);
-    
+
     public List<ApplicationControl> rowMapper(List<Map<String, Object>> resultSet, boolean populateWorkflowMap);
 }

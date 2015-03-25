@@ -7,6 +7,7 @@ package com.crucialticketing.daos;
 
 import com.crucialticketing.entities.Ticket;
 import com.crucialticketing.entities.User;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -29,5 +30,15 @@ public interface TicketDao {
     
     public boolean doesTicketExist(int ticketId);
     
-    public List<Ticket> rowMapper(List<Map<String, Object>> resultSet, boolean popWorkflowMap, boolean popTicketLog, boolean popAttachments, boolean popChangeLog);
+    public List<Ticket> getListByCriteria(ArrayList<String> ticketArrayList, 
+                    ArrayList<String> applicationArrayList, 
+                    ArrayList<String> severityArrayList, 
+                    ArrayList<String> workflowArrayList, 
+                    ArrayList<String> workflowStatusArrayList, 
+                    ArrayList<String> reportedByUserArrayList, 
+                    ArrayList<String> createdByUserArrayList, 
+                    ArrayList<String> lastUpdatedByUserArrayList, 
+                    String dateCreatedFrom, String dateCreatedTo, 
+                    String dateLastUpdatedFrom, String dateLastUpdatedTo);
+   
 }

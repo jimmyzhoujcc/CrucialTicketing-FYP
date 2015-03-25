@@ -30,6 +30,8 @@ public interface UserDao {
     
     public boolean doesUserExistInOnlineOrOffline(String username);
     
+    public List<User> getUserListByCriteria(String[] inputList, Object[] objectList, int count, boolean populateInternal);
+    
     public List<User> getIncompleteUserList();
     
     public List<User> getUnprocessedUserList();
@@ -45,6 +47,14 @@ public interface UserDao {
     public void updateToOffline(int userId, Ticket ticket, User requestor);
     
     public void updateHash(int userId, String hash);
+    
+    public void updateFirstName(int userId, String firstName);
+    
+    public void updateLastName(int userId, String lastName);
+    
+    public void updateEmail(int userId, String email);
+    
+    public void updateContact(int userId, String contact);
     
     public void removeUser(int userId);
     

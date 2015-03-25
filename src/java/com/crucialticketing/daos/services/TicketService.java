@@ -8,12 +8,15 @@ package com.crucialticketing.daos.services;
 import com.crucialticketing.entities.ChangeLog;
 import com.crucialticketing.entities.Ticket;
 import com.crucialticketing.daos.TicketDao;
-import com.crucialticketing.entities.User;
+import com.crucialticketing.entities.ChangeLogEntry;
+import com.crucialticketing.entities.Role;
+import com.crucialticketing.util.QueryGenerator;
 import com.mysql.jdbc.PreparedStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,10 +50,7 @@ public class TicketService extends JdbcDaoSupport implements TicketDao {
     public int insertTicket(final Ticket ticket) {
         final String sql = "INSERT INTO ticket ("
                 + "short_description, "
-                + "application_control_id, "
-                + "created_by_id, "
-                + "reported_by_id, "
-                + "current_status_id) VALUES (?, ?, ?, ?, ?)";
+                + "reported_by_id) VALUES (?, ?)";
 
         KeyHolder holder = new GeneratedKeyHolder();
 
@@ -61,10 +61,7 @@ public class TicketService extends JdbcDaoSupport implements TicketDao {
                     throws SQLException {
                 PreparedStatement ps = (PreparedStatement) connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
                 ps.setString(1, ticket.getShortDescription());
-                ps.setInt(2, ticket.getApplicationControl().getApplicationControlId());
-                ps.setInt(3, ticket.getCreatedBy().getUserId());
-                ps.setInt(4, ticket.getReportedBy().getUserId());
-                ps.setInt(5, ticket.getCurrentWorkflowStep().getWorkflowStatus().getWorkflowStatusId());
+                ps.setInt(2, ticket.getReportedBy().getUserId());
                 return ps;
             }
         }, holder);
@@ -77,17 +74,17 @@ public class TicketService extends JdbcDaoSupport implements TicketDao {
                 ticket.getTicketId(),
                 ticket.getApplicationControl().getApplicationControlId(),
                 ticket.getApplicationControl().getWorkflow().getWorkflowMap()
-                .getWorkflow().get(0).getWorkflowStatus().getWorkflowStatusId(), 
+                .getWorkflow().get(0).getWorkflowStatus().getWorkflowStatusId(),
                 ticket.getLastProcessedBy().getUserId());
 
         if (ticket.getCurrentWorkflowStep().getWorkflowStatus().getWorkflowStatusId()
                 != ticket.getApplicationControl().getWorkflow().getWorkflowMap()
                 .getWorkflow().get(0).getWorkflowStatus().getWorkflowStatusId()) {
-            
+
             changeLogService.addChangeLogEntry(
                     ticket.getTicketId(),
                     ticket.getApplicationControl().getApplicationControlId(),
-                    ticket.getCurrentWorkflowStep().getWorkflowStatus().getWorkflowStatusId(), 
+                    ticket.getCurrentWorkflowStep().getWorkflowStatus().getWorkflowStatusId(),
                     ticket.getLastProcessedBy().getUserId());
         }
 
@@ -141,7 +138,39 @@ public class TicketService extends JdbcDaoSupport implements TicketDao {
     }
 
     @Override
-    public List<Ticket> rowMapper(List<Map<String, Object>> resultSet, boolean popWorkflowMap, boolean popTicketLog, boolean popAttachments, boolean popChangeLog) {
+    public List<Ticket> getListByCriteria(ArrayList<String> ticketArrayList,
+            ArrayList<String> applicationArrayList,
+            ArrayList<String> severityArrayList,
+            ArrayList<String> workflowArrayList,
+            ArrayList<String> workflowStatusArrayList,
+            ArrayList<String> reportedByUserArrayList,
+            ArrayList<String> createdByUserArrayList,
+            ArrayList<String> lastUpdatedByUserArrayList,
+            String dateCreatedFrom, String dateCreatedTo,
+            String dateLastUpdatedFrom, String dateLastUpdatedTo) {
+        String sql = "SELECT * FROM reporting_view WHERE ";
+
+        sql = QueryGenerator.amendQuery(sql, ticketArrayList, "ticket_id", false);
+        sql = QueryGenerator.amendQuery(sql, applicationArrayList, "application_id", true);
+        sql = QueryGenerator.amendQuery(sql, severityArrayList, "severity_id", true);
+        sql = QueryGenerator.amendQuery(sql, workflowArrayList, "workflow_id", true);
+        sql = QueryGenerator.amendQuery(sql, workflowStatusArrayList, "workflow_status_id", true);
+        sql = QueryGenerator.amendQuery(sql, reportedByUserArrayList, "reported_by_id", true);
+
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql);
+        if (rs.isEmpty()) {
+            return new ArrayList<>();
+        }
+        
+        List<Ticket> ticketList = new ArrayList<>();
+        
+        for (Map<String, Object> r : rs) {
+            ticketList.add(this.getTicketById((int)r.get("ticket_id"), true, true, true, true));
+        }
+        return ticketList;
+    }
+
+    private List<Ticket> rowMapper(List<Map<String, Object>> resultSet, boolean popWorkflowMap, boolean popTicketLog, boolean popAttachments, boolean popSLA) {
         List<Ticket> ticketList = new ArrayList<>();
 
         for (Map row : resultSet) {
@@ -151,11 +180,6 @@ public class TicketService extends JdbcDaoSupport implements TicketDao {
             ticket.setShortDescription((String) row.get("short_description"));
 
             ticket.setReportedBy(userService.getUserById((int) row.get("reported_by_id"), false));
-            ticket.setCreatedBy(userService.getUserById((int) row.get("created_by_id"), false));
-
-            ticket.setApplicationControl(applicationControlService.getApplicationControlById((int) row.get("application_control_id"), popWorkflowMap));
-
-            ticket.setCurrentWorkflowStep(ticket.getApplicationControl().getWorkflow().getWorkflowMap().getWorkflowStageByStatus(((int) row.get("current_status_id"))));
 
             if (popTicketLog) {
                 ticket.setTicketLog(ticketLogService.getTicketLogByTicketId((int) row.get("ticket_id")));
@@ -165,10 +189,18 @@ public class TicketService extends JdbcDaoSupport implements TicketDao {
                 ticket.setAttachmentList(attachmentService.getAttachmentListByTicketId((int) row.get("ticket_id")));
             }
 
-            if (popChangeLog) {
-                ChangeLog changeLog = changeLogService.getChangeLogByTicketId((int) row.get("ticket_id"));
+            ChangeLog changeLog = changeLogService.getChangeLogByTicketId((int) row.get("ticket_id"));
+            ticket.setChangeLog(changeLog);
+
+            ChangeLogEntry firstEntry = changeLog.getChangeLog().get(0);
+            ChangeLogEntry lastEntry = changeLog.getChangeLog().get(changeLog.getChangeLog().size() - 1);
+
+            ticket.setApplicationControl(firstEntry.getApplicationControl());
+
+            ticket.setCurrentWorkflowStep(lastEntry.getApplicationControl().getWorkflow().getWorkflowMap().getWorkflowStageByStatus(lastEntry.getWorkflowStatus().getWorkflowStatusId()));
+
+            if (popSLA) {
                 changeLog.setTimeElapsed();
-                ticket.setChangeLog(changeLog);
             }
 
             ticketList.add(ticket);

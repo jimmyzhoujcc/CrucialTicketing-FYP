@@ -29,6 +29,8 @@ public interface QueueDao {
 
     public boolean doesQueueExistInOnlineOrOffline(String queueName);
 
+    public List<Queue> getQueueListByCriteria(String[] inputList, Object[] objectList, int count);
+    
     public List<Queue> getIncompleteQueueList();
 
     public List<Queue> getUnprocessedQueueList();

@@ -7,6 +7,7 @@ package com.crucialticketing.daos.services;
 
 import com.crucialticketing.entities.Workflow;
 import com.crucialticketing.daos.WorkflowDao;
+import com.crucialticketing.entities.Application;
 import com.crucialticketing.util.ActiveFlag;
 import com.crucialticketing.entities.RoleChangeLog;
 import com.crucialticketing.entities.Ticket;
@@ -34,7 +35,7 @@ public class WorkflowService extends JdbcDaoSupport implements WorkflowDao {
 
     @Autowired
     WorkflowChangeLogService changeLogService;
-    
+
     @Override
     public int insertWorkflow(final Workflow workflow, Ticket ticket, User requestor) {
         final String sql = "INSERT INTO workflow "
@@ -123,6 +124,35 @@ public class WorkflowService extends JdbcDaoSupport implements WorkflowDao {
     }
 
     @Override
+    public List<Workflow> getListByCriteria(String[] inputList, Object[] objectList, int count) {
+        String sql = "SELECT * FROM workflow WHERE ";
+
+        for (int i = 0; i < count; i++) {
+            sql += inputList[i] + "='" + objectList[i] + "'";
+
+            if ((i + 1) < count) {
+                sql += " AND ";
+            }
+        }
+
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql);
+        if (rs.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return this.rowMapper(rs);
+    }
+
+    @Override
+    public List<Workflow> getList() {
+        String sql = "SELECT * FROM workflow";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql);
+        if (rs.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return this.rowMapper(rs);
+    }
+
+    @Override
     public List<Workflow> getIncompleteList() {
         String sql = "SELECT * FROM workflow WHERE active_flag=?";
         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{ActiveFlag.INCOMPLETE.getActiveFlag()});
@@ -161,14 +191,14 @@ public class WorkflowService extends JdbcDaoSupport implements WorkflowDao {
         }
         return this.rowMapper(rs);
     }
-    
+
     @Override
     public void updateToUnprocessed(int workflowId, Ticket ticket, User requestor) {
         String sql = "UPDATE workflow SET active_flag=? WHERE workflow_id=?";
         this.getJdbcTemplate().update(sql, new Object[]{ActiveFlag.UNPROCESSED.getActiveFlag(), workflowId});
-        
+
         changeLogService.insertChangeLog(
-          new WorkflowChangeLog(this.getWorkflow(workflowId), ticket, requestor, getTimestamp())
+                new WorkflowChangeLog(this.getWorkflow(workflowId), ticket, requestor, getTimestamp())
         );
     }
 
@@ -176,9 +206,9 @@ public class WorkflowService extends JdbcDaoSupport implements WorkflowDao {
     public void updateToOnline(int workflowId, Ticket ticket, User requestor) {
         String sql = "UPDATE workflow SET active_flag=? WHERE workflow_id=?";
         this.getJdbcTemplate().update(sql, new Object[]{ActiveFlag.ONLINE.getActiveFlag(), workflowId});
-        
+
         changeLogService.insertChangeLog(
-          new WorkflowChangeLog(this.getWorkflow(workflowId), ticket, requestor, getTimestamp())
+                new WorkflowChangeLog(this.getWorkflow(workflowId), ticket, requestor, getTimestamp())
         );
     }
 
@@ -186,18 +216,18 @@ public class WorkflowService extends JdbcDaoSupport implements WorkflowDao {
     public void updateToOffline(int workflowId, Ticket ticket, User requestor) {
         String sql = "UPDATE workflow SET active_flag=? WHERE workflow_id=?";
         this.getJdbcTemplate().update(sql, new Object[]{ActiveFlag.OFFLINE.getActiveFlag(), workflowId});
-        
+
         changeLogService.insertChangeLog(
-          new WorkflowChangeLog(this.getWorkflow(workflowId), ticket, requestor, getTimestamp())
+                new WorkflowChangeLog(this.getWorkflow(workflowId), ticket, requestor, getTimestamp())
         );
     }
-    
+
     @Override
     public void removeWorkflow(int workflowId) {
         String sql = "DELETE FROM workflow WHERE workflow_id=?";
-        this.getJdbcTemplate().update(sql, new Object[]{workflowId});       
+        this.getJdbcTemplate().update(sql, new Object[]{workflowId});
     }
-    
+
     @Override
     public List<Workflow> rowMapper(List<Map<String, Object>> resultSet) {
         List<Workflow> workflowList = new ArrayList<>();
@@ -207,8 +237,8 @@ public class WorkflowService extends JdbcDaoSupport implements WorkflowDao {
 
             workflow.setWorkflowId((int) row.get("workflow_id"));
             workflow.setWorkflowName((String) row.get("workflow_name"));
-            workflow.setActiveFlag(ActiveFlag.values()[((int)row.get("active_flag"))+2]);
-            
+            workflow.setActiveFlag(ActiveFlag.values()[((int) row.get("active_flag")) + 2]);
+
             workflowList.add(workflow);
         }
         return workflowList;
