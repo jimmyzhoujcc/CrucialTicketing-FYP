@@ -70,9 +70,9 @@ public class WorkflowLockRequestService extends JdbcDaoSupport implements Workfl
     }
 
     @Override
-    public void denyAccess(int workflowLockRequestId, int workflowId, int requestorUserId) {
+    public void denyAccess(int workflowLockRequestId, Workflow workflow, int requestorUserId) {
         this.getJdbcTemplate().update("UPDATE workflow_lock_request SET request_pass_time=? WHERE workflow_lock_request_id=?", new Object[]{-1, workflowLockRequestId});
-        userAlertService.insertUserAlert(requestorUserId, "Access denied to access workflow (" + workflowId + ")");
+        userAlertService.insertUserAlert(requestorUserId, "Access denied to access workflow (" + workflow.getWorkflowName() + ")");
     }
 
     @Override
@@ -82,6 +82,12 @@ public class WorkflowLockRequestService extends JdbcDaoSupport implements Workfl
             return new ArrayList<>();
         }
         return this.rowMapper(rs);
+    }
+    
+    @Override
+    public void closeRequest(int workflowId, int requestorUserId) {
+        String sql = "DELETE FROM workflow_lock_request WHERE workflow_id=? AND requestor_user_id=?";
+        this.getJdbcTemplate().update(sql, new Object[]{workflowId, requestorUserId});
     }
 
     @Override
@@ -93,7 +99,7 @@ public class WorkflowLockRequestService extends JdbcDaoSupport implements Workfl
         for (Map row : resultSet) {
             WorkflowLockRequest lockRequest = new WorkflowLockRequest();
 
-            lockRequest.setWorkflowLockRequestId((int) row.get("workflow_lock_request_id"));
+            lockRequest.setLockRequestId((int) row.get("workflow_lock_request_id"));
 
             // Workflow
             if (userList.containsKey((int) row.get("workflow_id"))) {

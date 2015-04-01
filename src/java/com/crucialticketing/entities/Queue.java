@@ -16,21 +16,21 @@ import java.util.List;
 public class Queue {
     private int queueId;
     private String queueName;
-    private List<UserQueueCon> userList;
+    private List<UserQueueCon> userQueueConList;
     private boolean protectedFlag;
     private ActiveFlag activeFlag;
     
     public Queue() {
-        userList = new ArrayList<>();
+        userQueueConList = new ArrayList<>();
     }
 
     public Queue(int queueId) {
         this.queueId = queueId;
     }
     /*
-    public Queue(String queueName, List<UserQueueCon> userList, ActiveFlag activeFlag) {
+    public Queue(String queueName, List<UserQueueCon> userQueueConList, ActiveFlag activeFlag) {
         this.queueName = queueName;
-        this.userList = userList;
+        this.userQueueConList = userQueueConList;
         this.activeFlag = activeFlag;
     }*/
 
@@ -50,12 +50,12 @@ public class Queue {
         this.queueName = queueName;
     }
 
-    public List<UserQueueCon> getUserList() {
-        return userList;
+    public List<UserQueueCon> getUserQueueConList() {
+        return userQueueConList;
     }
 
-    public void setUserList(List<UserQueueCon> userList) {
-        this.userList = userList;
+    public void setUserQueueConList(List<UserQueueCon> userQueueConList) {
+        this.userQueueConList = userQueueConList;
     }
 
     public boolean isProtectedFlag() {

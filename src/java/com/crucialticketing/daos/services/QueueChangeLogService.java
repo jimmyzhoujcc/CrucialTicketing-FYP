@@ -6,7 +6,6 @@
 package com.crucialticketing.daos.services;
 
 import com.crucialticketing.daos.QueueChangeLogDao;
-import com.crucialticketing.util.ActiveFlag;
 import com.crucialticketing.entities.Queue;
 import com.crucialticketing.entities.QueueChangeLog;
 import com.crucialticketing.entities.Ticket;
@@ -105,7 +104,7 @@ public class QueueChangeLogService extends JdbcDaoSupport implements QueueChange
                 queueChangeLog.setTicket(retrievedTicketList.get((int) row.get("ticket_id")));
             } else {
                 Ticket ticket = ticketService.
-                        getTicketById((int) row.get("ticket_id"), false, false, false, false);
+                        getTicketById((int) row.get("ticket_id"), false, false, false, false, false);
                 queueChangeLog.setTicket(ticket);
                 retrievedTicketList.put((int) row.get("ticket_id"), ticket);
             }

@@ -5,6 +5,7 @@
  */
 package com.crucialticketing.daos;
 
+import com.crucialticketing.entities.Role;
 import com.crucialticketing.entities.RoleLockRequest;
 import java.util.List;
 import java.util.Map;
@@ -14,17 +15,20 @@ import java.util.Map;
  * @author DanFoley
  */
 public interface RoleLockRequestDao {
+
     public void addLockRequest(RoleLockRequest lockRequest);
 
     public boolean checkIfOpen(int roleId, int requestorUserId);
 
     public boolean checkIfOutstanding(int roleId, int requestorUserId);
-    
-    public void grantAccess(int roleLockRequestId);
 
-    public void denyAccess(int roleLockRequestId, int roleId, int requestorUserId);
+    public void grantAccess(int lockRequestId);
+
+    public void denyAccess(int lockRequestId, Role role, int requestorUserId);
 
     public List<RoleLockRequest> getOpenRequestList();
+
+    public void closeRequest(int roleId, int requestorUserId);
 
     public List<RoleLockRequest> rowMapper(List<Map<String, Object>> resultSet);
 }

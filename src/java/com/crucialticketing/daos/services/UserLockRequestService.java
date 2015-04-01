@@ -66,9 +66,9 @@ public class UserLockRequestService extends JdbcDaoSupport implements UserLockRe
     }
 
     @Override
-    public void denyAccess(int userLockRequestId, int userId, int requestorUserId) {
-        this.getJdbcTemplate().update("UPDATE user_lock_request SET request_pass_time=? WHERE user_lock_request_id=?", new Object[]{-1, userLockRequestId});
-         userAlertService.insertUserAlert(requestorUserId, "Access denied to access user (" + userId + ")");
+    public void denyAccess(int lockRequestId, User user, int requestorUserId) {
+        this.getJdbcTemplate().update("UPDATE user_lock_request SET request_pass_time=? WHERE user_lock_request_id=?", new Object[]{-1, lockRequestId});
+         userAlertService.insertUserAlert(requestorUserId, "Access denied to access user (" + user.getUsername() + ")");
     }
 
     @Override
@@ -79,6 +79,12 @@ public class UserLockRequestService extends JdbcDaoSupport implements UserLockRe
         }
         return this.rowMapper(rs);
     }
+    
+    @Override
+    public void closeRequest(int userId, int requestorUserId) {
+        String sql = "DELETE FROM user_lock_request WHERE user_id=? AND requestor_user_id=?";
+        this.getJdbcTemplate().update(sql, new Object[]{userId, requestorUserId});
+    }
 
     @Override
     public List<UserLockRequest> rowMapper(List<Map<String, Object>> resultSet) {
@@ -88,7 +94,7 @@ public class UserLockRequestService extends JdbcDaoSupport implements UserLockRe
         for (Map row : resultSet) {
             UserLockRequest userLockRequest = new UserLockRequest();
 
-            userLockRequest.setUserLockRequestId((int) row.get("user_lock_request_id"));
+            userLockRequest.setLockRequestId((int) row.get("user_lock_request_id"));
             
             // User
             if (userList.containsKey((int) row.get("user_id"))) {

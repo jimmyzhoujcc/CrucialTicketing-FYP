@@ -238,11 +238,18 @@ public class UserRoleConService extends JdbcDaoSupport implements UserRoleConDao
     }
     
     @Override
+    public void updateValidity(int userRoleConId, int fromDate, int toDate) {
+        String sql = "UPDATE user_role_con SET valid_from=?, valid_to=? WHERE user_role_con_id=?";
+        this.getJdbcTemplate().update(sql, new Object[]{fromDate, toDate, userRoleConId});
+    }
+    
+    @Override
     public void removeUserRoleCon(int userRoleConId) {
         String sql = "DELETE FROM user_role_con WHERE user_role_con_id=?";
         this.getJdbcTemplate().update(
                 sql, new Object[]{userRoleConId});
     }
+
 
     @Override
     public List<UserRoleCon> rowMapper(List<Map<String, Object>> resultSet) {

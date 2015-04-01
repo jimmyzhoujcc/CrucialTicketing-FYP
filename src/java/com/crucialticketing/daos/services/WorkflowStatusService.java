@@ -141,6 +141,16 @@ public class WorkflowStatusService extends JdbcDaoSupport implements WorkflowSta
     }
     
     @Override
+    public List<WorkflowStatus> getList() {
+        String sql = "SELECT * FROM workflow_status";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql);
+        if (rs.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return this.rowMapper(rs);
+    }
+    
+    @Override
     public List<WorkflowStatus> getIncompleteList() {
         String sql = "SELECT * FROM workflow_status WHERE active_flag=?";
         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{ActiveFlag.INCOMPLETE.getActiveFlag()});

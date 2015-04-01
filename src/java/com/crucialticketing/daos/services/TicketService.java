@@ -9,14 +9,13 @@ import com.crucialticketing.entities.ChangeLog;
 import com.crucialticketing.entities.Ticket;
 import com.crucialticketing.daos.TicketDao;
 import com.crucialticketing.entities.ChangeLogEntry;
-import com.crucialticketing.entities.Role;
 import com.crucialticketing.util.QueryGenerator;
+import com.crucialticketing.util.Validation;
 import com.mysql.jdbc.PreparedStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,12 +44,15 @@ public class TicketService extends JdbcDaoSupport implements TicketDao {
 
     @Autowired
     TicketChangeLogService changeLogService;
+    
+    @Autowired
+    TicketLinkService ticketLinkService;
 
     @Override
     public int insertTicket(final Ticket ticket) {
         final String sql = "INSERT INTO ticket ("
                 + "short_description, "
-                + "reported_by_id) VALUES (?, ?)";
+                + "reported_by_user_id) VALUES (?, ?)";
 
         KeyHolder holder = new GeneratedKeyHolder();
 
@@ -75,7 +77,7 @@ public class TicketService extends JdbcDaoSupport implements TicketDao {
                 ticket.getApplicationControl().getApplicationControlId(),
                 ticket.getApplicationControl().getWorkflow().getWorkflowMap()
                 .getWorkflow().get(0).getWorkflowStatus().getWorkflowStatusId(),
-                ticket.getLastProcessedBy().getUserId());
+                ticket.getLastUpdatedBy().getUserId());
 
         if (ticket.getCurrentWorkflowStep().getWorkflowStatus().getWorkflowStatusId()
                 != ticket.getApplicationControl().getWorkflow().getWorkflowMap()
@@ -85,47 +87,124 @@ public class TicketService extends JdbcDaoSupport implements TicketDao {
                     ticket.getTicketId(),
                     ticket.getApplicationControl().getApplicationControlId(),
                     ticket.getCurrentWorkflowStep().getWorkflowStatus().getWorkflowStatusId(),
-                    ticket.getLastProcessedBy().getUserId());
+                    ticket.getLastUpdatedBy().getUserId());
         }
 
         return insertedId;
     }
 
     @Override
-    public Ticket getTicketById(int ticketId, boolean popWorkflowMap,
-            boolean popTicketLog, boolean popAttachments, boolean popChangeLog) {
+    public Ticket getTicketById(int ticketId, boolean popTicketLog, 
+            boolean popAttachments, boolean popTicketLinks, 
+            boolean populateAllChangeLog, boolean popSLA) {
         String sql = "SELECT * FROM ticket WHERE ticket.ticket_id=?";
         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{ticketId});
         if (rs.size() != 1) {
             return new Ticket();
         }
-        return (this.rowMapper(rs, popWorkflowMap, popTicketLog, popAttachments, popChangeLog)).get(0);
+        return (this.rowMapper(rs, popTicketLog, popAttachments, popTicketLinks, populateAllChangeLog, popSLA)).get(0);
     }
 
     @Override
-    public List<Ticket> getTicketList(boolean popWorkflowMap,
-            boolean popTicketLog, boolean popAttachments, boolean popChangeLog) {
-        String sql = "SELECT * FROM ticket WHERE ticket.ticket_id=?";
+    public List<Ticket> getListByCriteria(
+            ArrayList<String> ticketList,
+            ArrayList<String> ticketTypeList,
+            ArrayList<String> applicationList,
+            ArrayList<String> severityList,
+            ArrayList<String> workflowList,
+            ArrayList<String> workflowStatusList,
+            ArrayList<String> queueList,
+            ArrayList<String> reportedByUserList,
+            ArrayList<String> createdByUserList,
+            ArrayList<String> lastUpdatedByUserList,
+            String dateCreatedFrom, String dateCreatedTo,
+            String dateLastUpdatedFrom, String dateLastUpdatedTo) {
+
+        List<Ticket> retrievedTicketList = new ArrayList<>();
+
+        String sql = "SELECT * FROM ticket_complete_earliest_view WHERE 1=1 ";
+
+        sql = QueryGenerator.amendQuery(sql, ticketList, "ticket_complete_earliest_view.ticket_id", true);
+        sql = QueryGenerator.amendQuery(sql, ticketTypeList, "ticket_complete_earliest_view.ticket_type_id", true);
+        sql = QueryGenerator.amendQuery(sql, applicationList, "ticket_complete_earliest_view.application_id", true);
+        sql = QueryGenerator.amendQuery(sql, severityList, "ticket_complete_earliest_view.severity_id", true);
+        sql = QueryGenerator.amendQuery(sql, workflowList, "ticket_complete_earliest_view.workflow_id", true);
+        sql = QueryGenerator.amendQuery(sql, workflowStatusList, "ticket_complete_earliest_view.workflow_status_id", true);
+        sql = QueryGenerator.amendQuery(sql, queueList, "ticket_complete_earliest_view.queue_id", true);
+
+        // Reported by 
+        sql = QueryGenerator.amendQuery(sql, reportedByUserList, "ticket_complete_earliest_view.reported_by_id", true);
+
+        if (Validation.toInteger(dateCreatedFrom) != 0) {
+            if (Validation.toInteger(dateCreatedTo) == 0) {
+                dateCreatedTo = dateCreatedFrom;
+            }
+
+            sql = QueryGenerator.amendQueryRange(sql, "ticket_complete_earliest_view.stamp", dateCreatedFrom, dateCreatedTo, true);
+        }
+
+        // Created  *****************
+        String createdSql = sql;
+
+        createdSql = QueryGenerator.amendQuery(createdSql, createdByUserList, "ticket_complete_earliest_view.requestor_user_id", true);
+
+        if (Validation.toInteger(dateCreatedFrom) != 0) {
+            if (Validation.toInteger(dateCreatedTo) == 0) {
+                dateCreatedTo = dateCreatedFrom;
+            }
+
+            createdSql = QueryGenerator.amendQueryRange(createdSql, "ticket_complete_earliest_view.stamp", dateCreatedFrom, dateCreatedTo, true);
+        }
+
+        // Last Updated
+        String lastUpdatedSql = sql;
+
+        lastUpdatedSql = QueryGenerator.amendQuery(lastUpdatedSql, lastUpdatedByUserList, "ticket_complete_latest_view.requestor_user_id", true);
+
+        if (Validation.toInteger(dateLastUpdatedFrom) != 0) {
+            if (Validation.toInteger(dateLastUpdatedTo) == 0) {
+                dateLastUpdatedTo = dateLastUpdatedFrom;
+            }
+
+            lastUpdatedSql = QueryGenerator.amendQueryRange(lastUpdatedSql, "ticket_complete_latest_view.stamp", dateLastUpdatedFrom, dateLastUpdatedTo, true);
+        }
+
+        lastUpdatedSql = lastUpdatedSql.replaceAll("ticket_complete_earliest_view", "ticket_complete_latest_view");
+
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(createdSql + " UNION ALL " + lastUpdatedSql + " ORDER BY ticket_id ASC");
+        List<Integer> checkList = new ArrayList<>();
+        ArrayList<String> searchList = new ArrayList<>();
+
+        for (Map<String, Object> r : rs) {
+            if (!checkList.contains((int) r.get("ticket_id"))) {
+                checkList.add((int) r.get("ticket_id"));
+            } else {
+                if (!searchList.contains(String.valueOf((int) r.get("ticket_id")))) {
+                    searchList.add(String.valueOf((int) r.get("ticket_id")));
+                }
+            }
+        }
+
+        return this.getTicketListByTicketIdList(searchList);
+    }
+
+    private List<Ticket> getTicketListByTicketIdList(ArrayList<String> ticketIdList) {
+        String sql = "SELECT * FROM ticket WHERE ";
+
+        sql = QueryGenerator.amendQuery(sql, ticketIdList, "ticket_id", false);
+
         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql);
-        return this.rowMapper(rs, popWorkflowMap, popTicketLog, popAttachments, popChangeLog);
+
+        if (rs.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return this.rowMapper(rs, false, false, false, false, true);
     }
 
     @Override
     public void updateDescription(int ticketId, String newDescription) {
         String sql = "UPDATE ticket SET short_description=? WHERE ticket_id=?";
         this.getJdbcTemplate().update(sql, new Object[]{newDescription, ticketId});
-    }
-
-    @Override
-    public void updateStatus(int ticketId, int newStatusId) {
-        String sql = "UPDATE ticket SET current_status_id=? WHERE ticket_id=?";
-        this.getJdbcTemplate().update(sql, new Object[]{newStatusId, ticketId});
-    }
-
-    @Override
-    public void updateApplicationControl(int ticketId, int applicationControlId) {
-        String sql = "UPDATE ticket SET application_control_id=? WHERE ticket_id=?";
-        this.getJdbcTemplate().update(sql, new Object[]{applicationControlId, ticketId});
     }
 
     @Override
@@ -137,40 +216,7 @@ public class TicketService extends JdbcDaoSupport implements TicketDao {
         return result != 0;
     }
 
-    @Override
-    public List<Ticket> getListByCriteria(ArrayList<String> ticketArrayList,
-            ArrayList<String> applicationArrayList,
-            ArrayList<String> severityArrayList,
-            ArrayList<String> workflowArrayList,
-            ArrayList<String> workflowStatusArrayList,
-            ArrayList<String> reportedByUserArrayList,
-            ArrayList<String> createdByUserArrayList,
-            ArrayList<String> lastUpdatedByUserArrayList,
-            String dateCreatedFrom, String dateCreatedTo,
-            String dateLastUpdatedFrom, String dateLastUpdatedTo) {
-        String sql = "SELECT * FROM reporting_view WHERE ";
-
-        sql = QueryGenerator.amendQuery(sql, ticketArrayList, "ticket_id", false);
-        sql = QueryGenerator.amendQuery(sql, applicationArrayList, "application_id", true);
-        sql = QueryGenerator.amendQuery(sql, severityArrayList, "severity_id", true);
-        sql = QueryGenerator.amendQuery(sql, workflowArrayList, "workflow_id", true);
-        sql = QueryGenerator.amendQuery(sql, workflowStatusArrayList, "workflow_status_id", true);
-        sql = QueryGenerator.amendQuery(sql, reportedByUserArrayList, "reported_by_id", true);
-
-        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql);
-        if (rs.isEmpty()) {
-            return new ArrayList<>();
-        }
-        
-        List<Ticket> ticketList = new ArrayList<>();
-        
-        for (Map<String, Object> r : rs) {
-            ticketList.add(this.getTicketById((int)r.get("ticket_id"), true, true, true, true));
-        }
-        return ticketList;
-    }
-
-    private List<Ticket> rowMapper(List<Map<String, Object>> resultSet, boolean popWorkflowMap, boolean popTicketLog, boolean popAttachments, boolean popSLA) {
+    private List<Ticket> rowMapper(List<Map<String, Object>> resultSet, boolean popTicketLog, boolean popAttachments, boolean popTicketLinks, boolean populateAllChangeLog, boolean popSLA) {
         List<Ticket> ticketList = new ArrayList<>();
 
         for (Map row : resultSet) {
@@ -178,8 +224,7 @@ public class TicketService extends JdbcDaoSupport implements TicketDao {
 
             ticket.setTicketId((int) row.get("ticket_id"));
             ticket.setShortDescription((String) row.get("short_description"));
-
-            ticket.setReportedBy(userService.getUserById((int) row.get("reported_by_id"), false));
+            ticket.setReportedBy(userService.getUserById((int) row.get("reported_by_user_id"), false));
 
             if (popTicketLog) {
                 ticket.setTicketLog(ticketLogService.getTicketLogByTicketId((int) row.get("ticket_id")));
@@ -189,15 +234,25 @@ public class TicketService extends JdbcDaoSupport implements TicketDao {
                 ticket.setAttachmentList(attachmentService.getAttachmentListByTicketId((int) row.get("ticket_id")));
             }
 
-            ChangeLog changeLog = changeLogService.getChangeLogByTicketId((int) row.get("ticket_id"));
+            if (popTicketLinks) {
+                ticket.setTicketLinkList(ticketLinkService.getTicketLink((int) row.get("ticket_id")));
+            }
+
+            ChangeLog changeLog = changeLogService.getChangeLogByTicketId((int) row.get("ticket_id"), populateAllChangeLog);
             ticket.setChangeLog(changeLog);
 
-            ChangeLogEntry firstEntry = changeLog.getChangeLog().get(0);
+            // Self generated
+            ticket.setCreatedBy(ticket.getChangeLog().getChangeLog().get(0).getUser());
+            ticket.setLastUpdatedBy(ticket.getChangeLog().getChangeLog().get(ticket.getChangeLog().getChangeLog().size() - 1).getUser());
+
             ChangeLogEntry lastEntry = changeLog.getChangeLog().get(changeLog.getChangeLog().size() - 1);
 
-            ticket.setApplicationControl(firstEntry.getApplicationControl());
+            ticket.setApplicationControl(lastEntry.getApplicationControl());
 
-            ticket.setCurrentWorkflowStep(lastEntry.getApplicationControl().getWorkflow().getWorkflowMap().getWorkflowStageByStatus(lastEntry.getWorkflowStatus().getWorkflowStatusId()));
+            ticket.setCurrentWorkflowStep(lastEntry.getApplicationControl()
+                    .getWorkflow()
+                    .getWorkflowMap()
+                    .getWorkflowStageByStatus(lastEntry.getWorkflowStatus().getWorkflowStatusId()));
 
             if (popSLA) {
                 changeLog.setTimeElapsed();

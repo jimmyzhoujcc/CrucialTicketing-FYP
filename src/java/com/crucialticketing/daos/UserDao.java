@@ -32,6 +32,8 @@ public interface UserDao {
     
     public List<User> getUserListByCriteria(String[] inputList, Object[] objectList, int count, boolean populateInternal);
     
+    public List<User> getList();
+    
     public List<User> getIncompleteUserList();
     
     public List<User> getUnprocessedUserList();

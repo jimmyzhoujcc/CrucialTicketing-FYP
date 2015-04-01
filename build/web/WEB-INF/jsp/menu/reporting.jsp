@@ -3,6 +3,8 @@
     Created on : 23-Mar-2015, 21:30:11
     Author     : DanFoley
 --%>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 <div class="column1">
     <h3>Reporting</h3>
 
@@ -42,6 +44,28 @@
 
                 //
 
+                $('#moveTicketTypeToSelected').click(function () {
+                    var $options = $("#ticketTypeList > option:selected").clone();
+                    var value = $options[0].value;
+
+                    if ($("#ticketTypeSelectedList option[value='" + value + "']").length > 0) {
+                        alert("Ticket Type already selected");
+                    } else {
+                        $('#ticketTypeSelectedList').append($options);
+
+                        content = "<input type=\"hidden\" name=\"ticketTypeList\" value=\"" + value + "\" />";
+                        newDiv = document.createElement('div');
+                        $(newDiv).html(content)
+                                .appendTo($("#ticketTypeList")); //main div
+                    }
+                });
+
+                $('#clearTicketTypeToSelected').click(function () {
+                    $('#ticketTypeSelectedList').empty();
+                });
+
+                //
+
                 $('#moveApplicationToSelected').click(function () {
                     var $options = $("#applicationList > option:selected").clone();
                     var value = $options[0].value;
@@ -50,7 +74,7 @@
                         alert("Application already selected");
                     } else {
                         $('#applicationSelectedList').append($options);
-                        
+
                         content = "<input type=\"hidden\" name=\"applicationList\" value=\"" + value + "\" />";
                         newDiv = document.createElement('div');
                         $(newDiv).html(content)
@@ -73,7 +97,7 @@
                         alert("Severity already selected");
                     } else {
                         $('#severitySelectedList').append($options);
-                        
+
                         content = "<input type=\"hidden\" name=\"severityList\" value=\"" + value + "\" />";
                         newDiv = document.createElement('div');
                         $(newDiv).html(content)
@@ -95,7 +119,7 @@
                         alert("Workflow already selected");
                     } else {
                         $('#workflowSelectedList').append($options);
-                        
+
                         content = "<input type=\"hidden\" name=\"workflowList\" value=\"" + value + "\" />";
                         newDiv = document.createElement('div');
                         $(newDiv).html(content)
@@ -118,7 +142,7 @@
                         alert("Workflow Status already selected");
                     } else {
                         $('#workflowStatusSelectedList').append($options);
-                        
+
                         content = "<input type=\"hidden\" name=\"workflowStatusList\" value=\"" + value + "\" />";
                         newDiv = document.createElement('div');
                         $(newDiv).html(content)
@@ -140,7 +164,7 @@
                         alert("Workflow Status already selected");
                     } else {
                         $('#reportedByUserSelectedList').append($options);
-                        
+
                         content = "<input type=\"hidden\" name=\"reportedByUserList\" value=\"" + value + "\" />";
                         newDiv = document.createElement('div');
                         $(newDiv).html(content)
@@ -162,7 +186,7 @@
                         alert("Workflow Status already selected");
                     } else {
                         $('#createdByUserSelectedList').append($options);
-                        
+
                         content = "<input type=\"hidden\" name=\"createdByUserList\" value=\"" + value + "\" />";
                         newDiv = document.createElement('div');
                         $(newDiv).html(content)
@@ -184,7 +208,7 @@
                         alert("Workflow Status already selected");
                     } else {
                         $('#lastUpdatedByUserSelectedList').append($options);
-                        
+
                         content = "<input type=\"hidden\" name=\"lastUpdatedByUserList\" value=\"" + value + "\" />";
                         newDiv = document.createElement('div');
                         $(newDiv).html(content)
@@ -209,15 +233,15 @@
                             </td>
                         </tr>
                         <tr>
-                            <td>
+                             <td width="40%">
                                 <input type="text" id="ticketId" />
                             </td>
-                            <td>
+                            <td width="20%">
                                 <input id="clearTicketToSelected" type="button" value="Clear" />
                                 <br class="clearfix" />
                                 <input id="moveTicketToSelected" type="button" value="Move" />
                             </td>
-                            <td>
+                             <td width="40%">
                                 <select id="ticketSelectedList" size="10">
                                 </select>
                                 <div id="ticketList"></div>
@@ -237,20 +261,53 @@
                 <td width="25%">
                     <table>
                         <tr>
+                            <td colspan="3">
+                                Ticket Type
+                            </td>
+                        </tr>
+                        <tr>
+                           <td width="40%">
+                                <select id="ticketTypeList">
+                                    <option value="0">Select</option>
+                                    <c:forEach var="ticketType" items="${ticketTypeList}">
+                                        <option value="${ticketType.ticketTypeId}">${ticketType.ticketTypeName}</option>
+                                    </c:forEach>
+                                </select>
+                            </td>
+                            <td width="20%">
+                                <input id="clearTicketTypeToSelected" type="button" value="Clear" />
+                                <br class="clearfix" />
+                                <input id="moveTicketTypeToSelected" type="button" value="Move" />
+                            </td>
+                             <td width="40%">
+                                <select id="ticketTypeSelectedList" size="10">
+                                </select>
+                                <div id="ticketTypeList"></div>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+
+                <td width="25%">
+                    <table>
+                        <tr>
                             <td colspan="3">Application</td>
                         </tr>
                         <tr>
-                            <td>
+                             <td width="40%">
                                 <select id="applicationList">
-                                    <option value="1">option 1</option>
+                                    <option value="0">Select</option>
+                                    <c:forEach var="application" items="${applicationList}">
+                                        <option value="${application.applicationId}">${application.applicationName}</option>
+                                    </c:forEach>
                                 </select>
                             </td>
-                            <td>
+                            <td width="20%">
                                 <input id="clearApplicationToSelected" type="button" value="Clear" />
                                 <br class="clearfix" />
                                 <input id="moveApplicationToSelected" type="button" value="Move" />
                             </td>
-                            <td>
+                             <td width="40%">
                                 <select id="applicationSelectedList" size="10" multiple>
                                 </select>
                                 <div id="applicationList"></div>
@@ -265,17 +322,20 @@
                             <td colspan="3">Severity</td>
                         </tr>
                         <tr>
-                            <td>
+                            <td width="40%">
                                 <select id="severityList">
-                                    <option value="1">option 1</option>
+                                    <option value="0">Select</option>
+                                    <c:forEach var="severity" items="${severityList}">
+                                        <option value="${severity.severityId}">${severity.severityLevel}:${severity.severityName}</option>
+                                    </c:forEach>
                                 </select>
                             </td>
-                            <td>
+                            <td width="20%">
                                 <input id="clearSeverityToSelected" type="button" value="Clear" />
                                 <br class="clearfix" />
                                 <input id="moveSeverityToSelected" type="button" value="Move" />
                             </td>
-                            <td>
+                            <td width="40%">
                                 <select id="severitySelectedList" size="10" multiple>
                                 </select>
                                 <div id="severityList"></div>
@@ -290,46 +350,23 @@
                             <td colspan="3">Workflow</td>
                         </tr>
                         <tr>
-                            <td>
+                            <td width="40%">
                                 <select id="workflowList">
-                                    <option value="1">option 1</option>
+                                    <option value="0">Select</option>
+                                    <c:forEach var="workflow" items="${workflowList}">
+                                        <option value="${workflow.workflowId}">${workflow.workflowName}</option>
+                                    </c:forEach>
                                 </select>
                             </td>
-                            <td>
+                            <td width="20%">
                                 <input id="clearWorkflowToSelected" type="button" value="Clear" />
                                 <br class="clearfix" />
                                 <input id="moveWorkflowToSelected" type="button" value="Move" />
                             </td>
-                            <td>
+                            <td width="40%">
                                 <select id="workflowSelectedList" size="10" multiple>
                                 </select>
                                 <div id="workflowList"></div>
-                            </td>
-                        </tr>
-                    </table>
-                </td>
-
-                <td width="25%">
-                    <table>
-
-                        <tr>
-                            <td colspan="3">Workflow Status</td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <select id="workflowStatusList">
-                                    <option value="1">option 1</option>
-                                </select>
-                            </td>
-                            <td>
-                                <input id="clearWorkflowStatusToSelected" type="button" value="Clear" />
-                                <br class="clearfix" />
-                                <input id="moveWorkflowStatusToSelected" type="button" value="Move" />
-                            </td>
-                            <td>
-                                <select id="workflowStatusSelectedList" size="10" multiple>
-                                </select>
-                                <div id="workflowStatusList"></div>
                             </td>
                         </tr>
                     </table>
@@ -347,20 +384,52 @@
                     <table>
 
                         <tr>
+                            <td colspan="3">Workflow Status</td>
+                        </tr>
+                        <tr>
+                            <td width="40%">
+                                <select id="workflowStatusList">
+                                    <option value="0">Select</option>
+                                    <c:forEach var="workflowStatus" items="${workflowStatusList}">
+                                        <option value="${workflowStatus.workflowStatusId}">${workflowStatus.workflowStatusName}</option>
+                                    </c:forEach>
+                                </select>
+                            </td>
+                            <td width="20%">
+                                <input id="clearWorkflowStatusToSelected" type="button" value="Clear" />
+                                <br class="clearfix" />
+                                <input id="moveWorkflowStatusToSelected" type="button" value="Move" />
+                            </td>
+                            <td width="40%">
+                                <select id="workflowStatusSelectedList" size="10" multiple>
+                                </select>
+                                <div id="workflowStatusList"></div>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+
+                <td width="25%">
+                    <table>
+
+                        <tr>
                             <td colspan="3">Created By User</td>
                         </tr>
                         <tr>
-                            <td>
+                            <td width="40%">
                                 <select id="createdByUserList">
-                                    <option value="1">option 1</option>
+                                    <option value="0">Select</option>
+                                    <c:forEach var="user" items="${userList}">
+                                        <option value="${user.userId}">${user.username}</option>
+                                    </c:forEach>
                                 </select>
                             </td>
-                            <td>
+                            <td width="20%">
                                 <input id="clearCreatedByUserToSelected" type="button" value="Clear" />
                                 <br class="clearfix" />
                                 <input id="moveCreatedByUserToSelected" type="button" value="Move" />
                             </td>
-                            <td>
+                            <td width="40%">
                                 <select id="createdByUserSelectedList" size="10" multiple>
                                 </select>
                                 <div id="createdByUserList"></div>
@@ -376,17 +445,20 @@
                             <td colspan="3">Reported By User</td>
                         </tr>
                         <tr>
-                            <td>
+                            <td width="40%">
                                 <select id="reportedByUserList">
-                                    <option value="1">option 1</option>
+                                    <option value="0">Select</option>
+                                    <c:forEach var="user" items="${userList}">
+                                        <option value="${user.userId}">${user.username}</option>
+                                    </c:forEach>
                                 </select>
                             </td>
-                            <td>
+                            <td width="20%">
                                 <input id="clearReportedByUserToSelected" type="button" value="Clear" />
                                 <br class="clearfix" />
                                 <input id="moveReportedByUserToSelected" type="button" value="Move" />
                             </td>
-                            <td>
+                            <td width="40%">
                                 <select id="reportedByUserSelectedList" size="10" multiple>
                                 </select>
                                 <div id="reportedByUserList"></div>
@@ -402,17 +474,20 @@
                             <td colspan="3">Last Updated By User</td>
                         </tr>
                         <tr>
-                            <td>
+                            <td width="40%">
                                 <select id="lastUpdatedByUserList">
-                                    <option value="1">option 1</option>
+                                    <option value="0">Select</option>
+                                    <c:forEach var="user" items="${userList}">
+                                        <option value="${user.userId}">${user.username}</option>
+                                    </c:forEach>
                                 </select>
                             </td>
-                            <td>
+                            <td width="20%">
                                 <input id="clearLastUpdatedByUserToSelected" type="button" value="Clear" />
                                 <br class="clearfix" />
                                 <input id="moveLastUpdatedByUserToSelected" type="button" value="Move" />
                             </td>
-                            <td>
+                            <td width="40%">
                                 <select id="lastUpdatedByUserSelectedList" size="10" multiple>
                                 </select>
                                 <div id="lastUpdatedByUserList"></div>

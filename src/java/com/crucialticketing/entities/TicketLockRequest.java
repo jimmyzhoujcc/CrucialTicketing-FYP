@@ -10,44 +10,42 @@ package com.crucialticketing.entities;
  * @author DanFoley
  */
 public class TicketLockRequest {
-    private int lockId;
-    private int ticketId;
-    private int userId;
+    private int lockRequestId;
+    private Ticket ticket;
+    private User requestor;
     private int requestTime;
     private int requestPassTime;
     
     public TicketLockRequest() {}
 
-    public TicketLockRequest(int lockId, int ticketId, int userId, int requestTime, int requestPassTime) {
-        this.lockId = lockId;
-        this.ticketId = ticketId;
-        this.userId = userId;
-        this.requestTime = requestTime;
-        this.requestPassTime = requestPassTime;
+    public TicketLockRequest(Ticket ticket, User requestor) {
+        this.ticket = ticket;
+        this.requestor = requestor;
     }
 
-    public int getLockId() {
-        return lockId;
+    
+    public int getLockRequestId() {
+        return lockRequestId;
     }
 
-    public void setLockId(int lockId) {
-        this.lockId = lockId;
+    public void setLockRequestId(int lockRequestId) {
+        this.lockRequestId = lockRequestId;
     }
 
-    public int getTicketId() {
-        return ticketId;
+    public Ticket getTicket() {
+        return ticket;
     }
 
-    public void setTicketId(int ticketId) {
-        this.ticketId = ticketId;
+    public void setTicket(Ticket ticket) {
+        this.ticket = ticket;
     }
 
-    public int getUserId() {
-        return userId;
+    public User getRequestor() {
+        return requestor;
     }
 
-    public void setUserId(int userId) {
-        this.userId = userId;
+    public void setRequestor(User requestor) {
+        this.requestor = requestor;
     }
 
     public int getRequestTime() {
@@ -66,5 +64,6 @@ public class TicketLockRequest {
         this.requestPassTime = requestPassTime;
     }
 
+ 
   
 }

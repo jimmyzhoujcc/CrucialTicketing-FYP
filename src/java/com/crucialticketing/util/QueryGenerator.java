@@ -14,9 +14,9 @@ import java.util.ArrayList;
 public class QueryGenerator {
 
     public static String amendQuery(String sql, ArrayList<String> inputList, String field, boolean toAddAnd) {
-   
+
         for (int i = 0; i < inputList.size(); i++) {
-            if((toAddAnd) && (i == 0)) {
+            if ((toAddAnd) && (i == 0)) {
                 sql += "AND ";
             }
             sql += field + "=" + inputList.get(i) + " ";
@@ -24,6 +24,16 @@ public class QueryGenerator {
                 sql += "OR ";
             }
         }
+        return sql;
+    }
+
+    public static String amendQueryRange(String sql, String field, String from, String to, boolean toAddAnd) {
+
+        if (toAddAnd) {
+            sql += "AND ";
+        }
+        sql += field + ">=" + from + " AND " + field + "<=" + to;
+
         return sql;
     }
 }

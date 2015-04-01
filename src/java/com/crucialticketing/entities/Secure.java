@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
  */
 
 public class Secure {
+    private String textPassword;
     private String hash;
     
     public Secure() {
@@ -22,6 +23,14 @@ public class Secure {
 
     public Secure(String hash) {
         this.hash = hash;
+    }
+
+    public String getTextPassword() {
+        return textPassword;
+    }
+
+    public void setTextPassword(String textPassword) {
+        this.textPassword = textPassword;
     }
 
     public String getHash() {

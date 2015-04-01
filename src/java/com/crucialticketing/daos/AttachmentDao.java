@@ -14,12 +14,14 @@ import java.util.Map;
  * @author DanFoley
  */
 public interface AttachmentDao {
-    
+
     public void insertAttachment(int ticketId, int userId, String fileName, String name, String description);
-    
+
     public Attachment getAttachmentById(int fileUploadId);
-    
+
     public List<Attachment> getAttachmentListByTicketId(int ticketId);
+
+    public boolean doesFileUploadExist(String fileName, int ticketId);
 
     public List<Attachment> rowMapper(List<Map<String, Object>> resultSet);
 }

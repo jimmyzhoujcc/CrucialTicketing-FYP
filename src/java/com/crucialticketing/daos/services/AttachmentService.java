@@ -31,24 +31,33 @@ public class AttachmentService extends JdbcDaoSupport implements AttachmentDao {
 
     @Override
     public Attachment getAttachmentById(int fileUploadId) {
-         String sql = "SELECT * FROM file_upload WHERE file_upload_id=?";
+        String sql = "SELECT * FROM file_upload WHERE file_upload_id=?";
         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{fileUploadId});
-        
+
         if (rs.isEmpty()) {
             return new Attachment();
         }
         return this.rowMapper(rs).get(0);
     }
-    
+
     @Override
     public List<Attachment> getAttachmentListByTicketId(int ticketId) {
         String sql = "SELECT * FROM file_upload WHERE ticket_id=?";
         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{ticketId});
-        
+
         if (rs.isEmpty()) {
             return new ArrayList<>();
         }
         return this.rowMapper(rs);
+    }
+
+    @Override
+    public boolean doesFileUploadExist(String fileName, int ticketId) {
+        String sql = "SELECT COUNT(file_upload_id) AS result FROM file_upload "
+                + "WHERE file_name=? AND ticket_id=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{fileName, ticketId});
+        int result = Integer.valueOf(rs.get(0).get("result").toString());
+        return result != 0;
     }
 
     @Override

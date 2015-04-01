@@ -70,9 +70,9 @@ public class RoleLockRequestService extends JdbcDaoSupport implements RoleLockRe
     }
 
     @Override
-    public void denyAccess(int roleLockRequestId, int roleId, int requestorUserId) {
+    public void denyAccess(int roleLockRequestId, Role role, int requestorUserId) {
         this.getJdbcTemplate().update("UPDATE role_lock_request SET request_pass_time=? WHERE role_lock_request_id=?", new Object[]{-1, roleLockRequestId});
-        userAlertService.insertUserAlert(requestorUserId, "Access denied to access role (" + roleId + ")");
+        userAlertService.insertUserAlert(requestorUserId, "Access denied to access role (" + role.getRoleName() + ")");
     }
 
     @Override
@@ -85,6 +85,12 @@ public class RoleLockRequestService extends JdbcDaoSupport implements RoleLockRe
     }
 
     @Override
+    public void closeRequest(int roleId, int requestorUserId) {
+        String sql = "DELETE FROM role_lock_request WHERE role_id=? AND requestor_user_id=?";
+        this.getJdbcTemplate().update(sql, new Object[]{roleId, requestorUserId});
+    }
+    
+    @Override
     public List<RoleLockRequest> rowMapper(List<Map<String, Object>> resultSet) {
         List<RoleLockRequest> lockRequestList = new ArrayList<>();
         Map<Integer, User> userList = new HashMap<>();
@@ -93,7 +99,7 @@ public class RoleLockRequestService extends JdbcDaoSupport implements RoleLockRe
         for (Map row : resultSet) {
             RoleLockRequest lockRequest = new RoleLockRequest();
 
-            lockRequest.setRoleLockRequestId((int) row.get("role_lock_request_id"));
+            lockRequest.setLockRequestId((int) row.get("role_lock_request_id"));
 
             // Role
             if (userList.containsKey((int) row.get("role_id"))) {

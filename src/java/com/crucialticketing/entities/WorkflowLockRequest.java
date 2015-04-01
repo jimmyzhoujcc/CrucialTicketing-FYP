@@ -10,7 +10,7 @@ package com.crucialticketing.entities;
  * @author DanFoley
  */
 public class WorkflowLockRequest {
-    private int workflowLockRequestId;
+    private int lockRequestId;
     private Workflow workflow;
     private User requestor;
     private int requestTime;
@@ -26,12 +26,12 @@ public class WorkflowLockRequest {
         this.requestor = requestor;
     }
 
-    public int getWorkflowLockRequestId() {
-        return workflowLockRequestId;
+    public int getLockRequestId() {
+        return lockRequestId;
     }
 
-    public void setWorkflowLockRequestId(int workflowLockRequestId) {
-        this.workflowLockRequestId = workflowLockRequestId;
+    public void setLockRequestId(int lockRequestId) {
+        this.lockRequestId = lockRequestId;
     }
 
     public Workflow getWorkflow() {

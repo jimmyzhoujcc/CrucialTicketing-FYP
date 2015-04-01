@@ -7,10 +7,13 @@ package com.crucialticketing.controllers;
 
 import com.crucialticketing.daos.services.ApplicationControlService;
 import com.crucialticketing.daos.services.ApplicationService;
+import com.crucialticketing.daos.services.AttachmentService;
 import com.crucialticketing.daos.services.QueueService;
 import com.crucialticketing.entities.User;
 import com.crucialticketing.daos.services.RoleService;
 import com.crucialticketing.daos.services.SeverityService;
+import com.crucialticketing.daos.services.TicketLinkService;
+import com.crucialticketing.daos.services.TicketLogService;
 import com.crucialticketing.daos.services.TicketService;
 import com.crucialticketing.daos.services.TicketTypeService;
 import com.crucialticketing.daos.services.UserQueueConService;
@@ -25,13 +28,20 @@ import com.crucialticketing.entities.Queue;
 import com.crucialticketing.entities.Role;
 import com.crucialticketing.entities.Severity;
 import com.crucialticketing.entities.Ticket;
+import com.crucialticketing.entities.TicketLink;
+import com.crucialticketing.entities.UploadedFile;
+import com.crucialticketing.entities.UploadedFileLog;
 import com.crucialticketing.entities.UserQueueCon;
 import com.crucialticketing.entities.UserRoleCon;
 import com.crucialticketing.entities.Workflow;
 import com.crucialticketing.entities.WorkflowStatus;
 import com.crucialticketing.entities.WorkflowStep;
+import com.crucialticketing.logic.CheckLogicService;
+import com.crucialticketing.util.Timestamp;
 import com.crucialticketing.util.Validation;
 import com.crucialticketing.util.WorkflowStatusType;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -100,23 +110,268 @@ public class CreationController {
     @Autowired
     ApplicationControlService applicationControlService;
 
+    @Autowired
+    AttachmentService attachmentService;
+
+    @Autowired
+    TicketLogService ticketLogService;
+
+    @Autowired
+    TicketLinkService ticketLinkService;
+
+    //
+    @Autowired
+    CheckLogicService checkService;
+
+    @RequestMapping(value = "/ticket/p1/", method = RequestMethod.GET)
+    public String preTicketCreation(ModelMap map) {
+        map.addAttribute("ticketTypeList", ticketTypeService.getTicketTypeList());
+        map.addAttribute("applicationList", applicationService.getOnlineApplicationList());
+        map.addAttribute("severityList", severityService.getOnlineList());
+        this.setRoot("main/create/ticket/createticketselection.jsp", map);
+        return "mainview";
+    }
+
+    @RequestMapping(value = "/ticket/p2/", method = RequestMethod.POST)
+    public String ticketCreation(HttpServletRequest request,
+            @RequestParam(value = "ticketTypeId", required = false) String ticketTypeId,
+            @RequestParam(value = "severityId", required = false) String severityId,
+            @RequestParam(value = "applicationId", required = false) String applicationId,
+            ModelMap map) {
+
+        // Checks if fields are provided
+        if ((Validation.toInteger(ticketTypeId) == 0) || (Validation.toInteger(severityId) == 0) || (Validation.toInteger(severityId) == 0)) {
+            Validation.inputNotProvided(map, "Ticket Type, Severity or Application");
+            return this.preTicketCreation(map);
+        } else if ((ticketTypeId.isEmpty()) || (severityId.isEmpty()) || (applicationId.isEmpty())) {
+            Validation.inputNotProvided(map, "Ticket Type, Severity or Application");
+            return this.preTicketCreation(map);
+        }
+
+        // Pre checks
+        if (!ticketTypeService.doesTicketTypeExist(Validation.toInteger(ticketTypeId))) {
+            Validation.inputIsInvalid(map, "Ticket Type");
+            return preTicketCreation(map);
+        }
+
+        if (!severityService.doesSeverityExistInOnlineById(Integer.valueOf(severityId))) {
+            Validation.inputIsInvalid(map, "Severity");
+            return preTicketCreation(map);
+        }
+
+        if (!applicationService.doesApplicationExistInOnline(Integer.valueOf(applicationId))) {
+            Validation.inputIsInvalid(map, "Application");
+            return preTicketCreation(map);
+        }
+
+        if (!applicationControlService.doesApplicationControlExistInOnline(
+                Integer.valueOf(ticketTypeId),
+                Integer.valueOf(applicationId),
+                Integer.valueOf(severityId))) {
+            Validation.fieldDoesNotExist(map, "Configuration");
+            return preTicketCreation(map);
+        }
+
+        ApplicationControl applicationControl = applicationControlService.getApplicationControlByCriteria(
+                Integer.valueOf(ticketTypeId),
+                Integer.valueOf(applicationId),
+                Integer.valueOf(severityId), true);
+
+        User user = (User) request.getSession().getAttribute("user");
+
+        // Checks if correct role is maintained 
+        if (!userRoleConService.doesUserRoleConExistInOnline(user.getUserId(),
+                applicationControl.getRole().getRoleId())) {
+            Validation.userDoesntHaveRole(map);
+            return preTicketCreation(map);
+        }
+
+        map.addAttribute("userList", userService.getOnlineUserList(false));
+
+        Ticket ticket = new Ticket();
+        ticket.setApplicationControl(applicationControl);
+        ticket.setCurrentWorkflowStep(applicationControl.getWorkflow().getWorkflowMap().getWorkflow().get(0));
+
+        map.addAttribute("ticket", ticket);
+
+        map.addAttribute("newTicket", true);
+        map.addAttribute("view", false);
+        map.addAttribute("edit", false);
+
+        this.setRoot("main/update/updateticket.jsp", map);
+        return "mainview";
+    }
+
+    @RequestMapping(value = "/ticket/save/", method = RequestMethod.POST)
+    public String saveNewTicket(HttpServletRequest request,
+            @RequestParam(value = "shortDescription", required = false) String shortDescription,
+            @RequestParam(value = "applicationControlId", required = false) String applicationControlId,
+            @RequestParam(value = "ticketTypeId", required = false) String ticketTypeId,
+            @RequestParam(value = "applicationId", required = false) String applicationId,
+            @RequestParam(value = "severityId", required = false) String severityId,
+            @RequestParam(value = "workflowStatusId", required = false) String workflowStatusId,
+            @RequestParam(value = "reportedByUserId", required = false) String reportedByUserId,
+            @RequestParam(value = "logentry", required = false) String logEntry,
+            @RequestParam(value = "linkedTicketList", required = false) String[] linkedTicketList,
+            @ModelAttribute("uploadfilelist") UploadedFileLog uploadedFileLog,
+            ModelMap map) {
+
+        User user = (User) request.getSession().getAttribute("user");
+
+        Ticket ticket = new Ticket();
+
+        // Checks if the IDs provided match the application control ID details from DB
+        // This provides a level of security with the application control ID being correct
+        ApplicationControl applicationControl = applicationControlService.getApplicationControlById(Integer.valueOf(applicationControlId), true);
+
+        if ((applicationControl.getTicketType().getTicketTypeId() != Validation.toInteger(ticketTypeId))
+                || (applicationControl.getApplication().getApplicationId() != Validation.toInteger(applicationId))
+                || (applicationControl.getSeverity().getSeverityId() != Validation.toInteger(severityId))) {
+            Validation.inputIsInvalid(map, "Configuration");
+            return this.preTicketCreation(map);
+        }
+
+        ticket.setApplicationControl(applicationControl);
+
+        // Sets first workflow step
+        ticket.setCurrentWorkflowStep(ticket
+                .getApplicationControl()
+                .getWorkflow()
+                .getWorkflowMap()
+                .getWorkflow()
+                .get(0));
+
+        // Checks if the ticket has been moved from the opening status
+        if (Validation.toInteger(workflowStatusId) != 0) {
+            if (!ticket.getApplicationControl().getWorkflow().getWorkflowMap().doesStepExist(Validation.toInteger(workflowStatusId))) {
+                Validation.inputIsInvalid(map, "Workflow Status");
+                return this.preTicketCreation(map);
+            }
+
+            boolean found = false;
+            Role role = new Role();
+            int nextWorkflowStatusId = Validation.toInteger(workflowStatusId);
+
+            for (int i = 0; i < ticket.getApplicationControl().getWorkflow().getWorkflowMap().getWorkflow().get(0).getNextWorkflowStep().size(); i++) {
+
+                if (ticket.getApplicationControl().getWorkflow().getWorkflowMap().getWorkflow().get(0).getNextWorkflowStep().get(i).getWorkflowStatus().getWorkflowStatusId() == nextWorkflowStatusId) {
+
+                    ticket.setCurrentWorkflowStep(ticket.getApplicationControl().getWorkflow().getWorkflowMap().getWorkflow().get(0).getNextWorkflowStep().get(i));
+                    found = true;
+                    role = ticket.getCurrentWorkflowStep().getRole();
+                }
+            }
+
+            if (!found) {
+                Validation.pageError(map);
+                return this.preTicketCreation(map);
+            }
+
+            // Checks if correct role is maintained 
+            if (!userRoleConService.doesUserRoleConExistInOnline(user.getUserId(),
+                    role.getRoleId())) {
+                Validation.userDoesntHaveRole(map);
+                return this.preTicketCreation(map);
+            }
+        }
+
+        // Populates ticket information
+        if (!Validation.isStringSet(shortDescription, 50)) {
+            Validation.inputIsInvalid(map, "Short Description");
+            return this.preTicketCreation(map);
+        }
+
+        ticket.setShortDescription(shortDescription);
+
+        if ((Validation.toInteger(reportedByUserId) == 0)
+                || (!userService.doesUserExistInOnline(Validation.toInteger(reportedByUserId)))) {
+            Validation.inputIsInvalid(map, "Reported By User");
+            return this.preTicketCreation(map);
+        }
+
+        ticket.setReportedBy(new User(Validation.toInteger(reportedByUserId)));
+        ticket.setCreatedBy(user);
+        ticket.setLastUpdatedBy(user);
+
+        // Inserts ticket
+        ticketService.insertTicket(ticket);
+
+        map.addAttribute("newTicket", false);
+        map.addAttribute("view", true);
+        map.addAttribute("edit", false);
+
+        setRoot("main/update/updateticket.jsp", map);
+
+        // Checks if the log entry is valid - buffer for <br />
+        if (Validation.isStringSet(logEntry, (1000 - 200))) {
+            if ((logEntry.isEmpty()) || ((logEntry.replace(" ", "")).length() == 0)) {
+                Validation.inputIsInvalid(map, "Ticket Log Entry");
+                map.addAttribute("ticket", ticketService.getTicketById(ticket.getTicketId(), true, true, true, true, true));
+                return "mainview";
+            }
+        }
+
+        // Updates log entry if required
+        if (logEntry.length() > 0) {
+            logEntry = logEntry.replaceAll("(\r\n|\n)", "<br />");
+            ticketLogService.addTicketLog(ticket.getTicketId(), user.getUserId(), logEntry);
+        }
+
+        // Complete any uploads if reuqired
+        if (this.fileUploadHandler(request, uploadedFileLog, ticket.getTicketId(), user, map)) {
+            Validation.fieldAlreadyExists(map, "Upload");
+            map.addAttribute("ticket", ticketService.getTicketById(ticket.getTicketId(), true, true, true, true, true));
+            return "mainview";
+        }
+
+        // Adds any links
+        if (linkedTicketList != null) {
+            for (String link : linkedTicketList) {
+                int ticketLinkId = Validation.toInteger(link);
+
+                if (ticketLinkId == 0) {
+                    Validation.inputIsInvalid(map, "Ticket Link");
+                    map.addAttribute("ticket", ticketService.getTicketById(ticket.getTicketId(), true, true, true, true, true));
+                    return "mainview";
+                }
+
+                if (!ticketService.doesTicketExist(ticketLinkId)) {
+                    Validation.inputIsInvalid(map, "Ticket Link");
+                    map.addAttribute("ticket", ticketService.getTicketById(ticket.getTicketId(), true, true, true, true, true));
+                    return "mainview";
+                }
+
+                if (!ticketLinkService.doesTicketLinkExist(ticket.getTicketId(), ticketLinkId)) {
+                    ticketLinkService.insertTicketLink(new TicketLink(new Ticket(ticket.getTicketId()), new Ticket(ticketLinkId)));
+                }
+            }
+        }
+
+        ticket = ticketService.getTicketById(ticket.getTicketId(), true, true, true, true, true);
+
+        map.addAttribute("ticket", ticket);
+        return "mainview";
+    }
+
     @RequestMapping(value = "/user/", method = RequestMethod.GET)
     public String createUserForm(HttpServletRequest request,
             ModelMap map) {
 
         // Resets defaults - overriden if success
-        this.setRootFile(map);
+        this.setRoot("menu/create.jsp", map);
 
         // Basic checks
         User user = (User) request.getSession().getAttribute("user");
 
-        if (!doesRoleCheckPass("MAINT_USER_CREATION", user, map)) {
+        if (!checkService.doesRoleCheckPass("MAINT_USER_CREATION", user, map)) {
+            Validation.userDoesntHaveRole(map);
             return "mainview";
         }
 
         map.addAttribute("roleList", roleService.getOnlineRoleList());
         map.addAttribute("user", new User());
-        map.addAttribute("page", "main/create/createuser.jsp");
+
+        this.setRoot("main/create/createuser.jsp", map);
         return "mainview";
     }
 
@@ -133,8 +388,8 @@ public class CreationController {
         // Basic checks
         User user = (User) request.getSession().getAttribute("user");
 
-        if ((!doesRoleCheckPass("MAINT_USER_CREATION", user, map))
-                || (!doesTicketCheckPass(ticketId, map))) {
+        if (!checkService.doesTicketCheckPass(ticketId, map)) {
+            Validation.inputIsInvalid(map, "Ticket");
             return "mainview";
         }
 
@@ -169,8 +424,7 @@ public class CreationController {
         userService.updateToUnprocessed(userForCreation.getUserId(), new Ticket(Integer.valueOf(ticketId)), user);
 
         map.addAttribute("success", "Request submission received");
-        this.setRootFile(map);
-
+        this.setRoot("menu/create.jsp", map);
         return "mainview";
     }
 
@@ -178,12 +432,13 @@ public class CreationController {
     public String createRoleForm(HttpServletRequest request,
             ModelMap map) {
         // Resets defaults - overriden if success
-        this.setRootFile(map);
+        this.setRoot("menu/create.jsp", map);
 
         // Basic checks
         User user = (User) request.getSession().getAttribute("user");
 
-        if (!doesRoleCheckPass("MAINT_ROLE_CREATION", user, map)) {
+        if (!checkService.doesRoleCheckPass("MAINT_ROLE_CREATION", user, map)) {
+            Validation.userDoesntHaveRole(map);
             return "mainview";
         }
         map.addAttribute("role", new Role());
@@ -204,8 +459,8 @@ public class CreationController {
         // Basic checks
         User user = (User) request.getSession().getAttribute("user");
 
-        if ((!doesRoleCheckPass("MAINT_ROLE_CREATION", user, map))
-                || (!doesTicketCheckPass(ticketId, map))) {
+        if ((!checkService.doesTicketCheckPass(ticketId, map))) {
+            Validation.inputIsInvalid(map, "Ticket");
             return "mainview";
         }
 
@@ -219,8 +474,87 @@ public class CreationController {
         roleService.updateToUnprocessed(roleForCreation.getRoleId(), new Ticket(Integer.valueOf(ticketId)), user);
 
         map.addAttribute("success", "Request submission received");
-        this.setRootFile(map);
+        this.setRoot("menu/create.jsp", map);
+        return "mainview";
+    }
 
+    @RequestMapping(value = "/userrolecon/", method = RequestMethod.GET)
+    public String createUserRoleConForm(HttpServletRequest request,
+            ModelMap map) {
+        // Resets defaults - overriden if success
+        this.setRoot("menu/create.jsp", map);
+
+        // Basic checks
+        User user = (User) request.getSession().getAttribute("user");
+
+        if (!checkService.doesRoleCheckPass("MAINT_USER_CREATION", user, map)) {
+            Validation.userDoesntHaveRole(map);
+            return "mainview";
+        }
+
+        map.addAttribute("userList", userService.getOnlineUserList(false));
+        map.addAttribute("roleList", roleService.getOnlineRoleList());
+
+        UserRoleCon userRoleCon = new UserRoleCon();
+        userRoleCon.setValidFromStr(Timestamp.convTimestamp(Timestamp.getTimestamp()));
+
+        map.addAttribute("userRoleCon", userRoleCon);
+        setRoot("main/create/createuserrolecon.jsp", map);
+        return "mainview";
+    }
+
+    @RequestMapping(value = "/userrolecon/create/", method = RequestMethod.POST)
+    public String createUserRoleCon(HttpServletRequest request,
+            @ModelAttribute("userRoleCon") UserRoleCon userRoleCon,
+            @RequestParam(value = "ticketId", required = false) String ticketId,
+            ModelMap map) {
+        // Resets defaults - overriden if success
+        this.createUserRoleConForm(request, map);
+
+        // Basic checks
+        User user = (User) request.getSession().getAttribute("user");
+
+        if (!checkService.doesTicketCheckPass(ticketId, map)) {
+            Validation.inputIsInvalid(map, "Ticket");
+            return "mainview";
+        }
+
+        // Check if user role con already exists
+        if (userRoleConService.doesUserRoleConExistInOnline(userRoleCon.getUser().getUserId(), userRoleCon.getRole().getRoleId())) {
+            Validation.fieldAlreadyExists(map, "User Role Connection");
+            return "mainview";
+        }
+
+        // Checks user is valid and active
+        if (!userService.doesUserExistInOnline(userRoleCon.getUser().getUserId())) {
+            Validation.inputIsInvalid(map, "User");
+        }
+
+        // Checks role is valid and active
+        if (!roleService.doesRoleExistInOnline(userRoleCon.getRole().getRoleId())) {
+            Validation.inputIsInvalid(map, "Role");
+        }
+
+        // Checks if the validity dates are correct 
+        userRoleCon.setValidFrom(Timestamp.convTimestamp(userRoleCon.getValidFromStr()));
+        userRoleCon.setValidTo(Timestamp.convTimestamp(userRoleCon.getValidToStr()));
+
+        if (userRoleCon.getValidTo() == 0) {
+            userRoleCon.setValidTo(userRoleCon.getValidFrom());
+        }
+
+        if (userRoleCon.getValidFrom() > userRoleCon.getValidTo()) {
+            Validation.inputIsInvalid(map, "Validity");
+            return "mainview";
+        }
+
+        // Inserts user role connection 
+        userRoleConService.insertUserRoleCon(userRoleCon, false, new Ticket(Integer.valueOf(ticketId)), user);
+        userRoleConService.updateToUnprocessed(userRoleCon.getUserRoleConId(), new Ticket(Integer.valueOf(ticketId)), user);
+
+        // Success
+        map.addAttribute("success", "Request submission received");
+        this.setRoot("menu/create.jsp", map);
         return "mainview";
     }
 
@@ -228,18 +562,19 @@ public class CreationController {
     public String createQueueForm(HttpServletRequest request,
             ModelMap map) {
         // Resets defaults - overriden if success
-        this.setRootFile(map);
+        this.setRoot("menu/create.jsp", map);
 
         // Basic checks
         User user = (User) request.getSession().getAttribute("user");
 
-        if (!doesRoleCheckPass("MAINT_QUEUE_CREATION", user, map)) {
+        if (!checkService.doesRoleCheckPass("MAINT_QUEUE_CREATION", user, map)) {
+            Validation.userDoesntHaveRole(map);
             return "mainview";
         }
 
         map.addAttribute("userList", userService.getOnlineUserList(false));
         map.addAttribute("queue", new Queue());
-        map.addAttribute("page", "main/create/createqueue.jsp");
+        setRoot("main/create/createqueue.jsp", map);
         return "mainview";
     }
 
@@ -248,7 +583,6 @@ public class CreationController {
             @ModelAttribute("queue") Queue queue,
             @RequestParam(value = "ticketId", required = false) String ticketId,
             ModelMap map) {
-
         // Resets defaults - overriden if success
         this.createQueueForm(request, map);
         map.addAttribute("queue", queue);
@@ -256,8 +590,8 @@ public class CreationController {
         // Basic checks
         User user = (User) request.getSession().getAttribute("user");
 
-        if ((!doesRoleCheckPass("MAINT_QUEUE_CREATION", user, map))
-                || (!doesTicketCheckPass(ticketId, map))) {
+        if (!checkService.doesTicketCheckPass(ticketId, map)) {
+            Validation.inputIsInvalid(map, "Ticket");
             return "mainview";
         }
 
@@ -268,11 +602,11 @@ public class CreationController {
         }
 
         // If users have been selected, checks if they are valid
-        for (int i = 0, length = queue.getUserList().size(); i < length; i++) {
-            UserQueueCon userQueueCon = queue.getUserList().get(i);
+        for (int i = 0, length = queue.getUserQueueConList().size(); i < length; i++) {
+            UserQueueCon userQueueCon = queue.getUserQueueConList().get(i);
 
             if (!userService.doesUserExistInOnline(userQueueCon.getUser().getUserId())) {
-                queue.getUserList().remove(userQueueCon);
+                queue.getUserQueueConList().remove(userQueueCon);
                 i--;
                 length--;
             }
@@ -282,7 +616,7 @@ public class CreationController {
         queueService.insertQueue(queue, new Ticket(Integer.valueOf(ticketId)), user);
 
         // Inserts any user connection
-        for (UserQueueCon userQueueCon : queue.getUserList()) {
+        for (UserQueueCon userQueueCon : queue.getUserQueueConList()) {
             userQueueCon.getQueue().setQueueId(queue.getQueueId());
             userQueueCon.getQueue().setActiveFlag(queue.getActiveFlag());
 
@@ -294,8 +628,70 @@ public class CreationController {
 
         // Success
         map.addAttribute("success", "Request submission received");
-        this.setRootFile(map);
+        this.setRoot("menu/create.jsp", map);
+        return "mainview";
+    }
 
+    @RequestMapping(value = "/userqueuecon/", method = RequestMethod.GET)
+    public String createUserQueueConForm(HttpServletRequest request,
+            ModelMap map) {
+        // Resets defaults - overriden if success
+        this.setRoot("menu/create.jsp", map);
+
+        // Basic checks
+        User user = (User) request.getSession().getAttribute("user");
+
+        if (!checkService.doesRoleCheckPass("MAINT_QUEUE_CREATION", user, map)) {
+            Validation.userDoesntHaveRole(map);
+            return "mainview";
+        }
+
+        map.addAttribute("userList", userService.getOnlineUserList(false));
+        map.addAttribute("queueList", queueService.getOnlineQueueList());
+        map.addAttribute("userQueueCon", new UserQueueCon());
+        setRoot("main/create/createuserqueuecon.jsp", map);
+        return "mainview";
+    }
+
+    @RequestMapping(value = "/userqueuecon/create/", method = RequestMethod.POST)
+    public String createUserQueueCon(HttpServletRequest request,
+            @ModelAttribute("userQueueCon") UserQueueCon userQueueCon,
+            @RequestParam(value = "ticketId", required = false) String ticketId,
+            ModelMap map) {
+        // Resets defaults - overriden if success
+        this.createUserQueueConForm(request, map);
+
+        // Basic checks
+        User user = (User) request.getSession().getAttribute("user");
+
+        if (!checkService.doesTicketCheckPass(ticketId, map)) {
+            Validation.inputIsInvalid(map, "Ticket");
+            return "mainview";
+        }
+
+        // Check if user role con already exists
+        if (userQueueConService.doesUserQueueConExistInOnline(userQueueCon.getUser().getUserId(), userQueueCon.getQueue().getQueueId())) {
+            Validation.fieldAlreadyExists(map, "User Queue Connection");
+            return "mainview";
+        }
+
+        // Checks user is valid and active
+        if (!userService.doesUserExistInOnline(userQueueCon.getUser().getUserId())) {
+            Validation.inputIsInvalid(map, "User");
+        }
+
+        // Checks role is valid and active
+        if (!queueService.doesQueueExistInOnline(userQueueCon.getQueue().getQueueId())) {
+            Validation.inputIsInvalid(map, "Queue");
+        }
+
+        // Inserts user role connection 
+        userQueueConService.insertUserQueueCon(userQueueCon, false, new Ticket(Integer.valueOf(ticketId)), user);
+        userQueueConService.updateToUnprocessed(userQueueCon.getUserQueueConId(), new Ticket(Integer.valueOf(ticketId)), user);
+
+        // Success
+        map.addAttribute("success", "Request submission received");
+        this.setRoot("menu/create.jsp", map);
         return "mainview";
     }
 
@@ -303,17 +699,18 @@ public class CreationController {
     public String createApplicationForm(HttpServletRequest request,
             ModelMap map) {
         // Resets defaults - overriden if success
-        this.setRootFile(map);
+        this.setRoot("menu/create.jsp", map);
 
         // Basic checks
         User user = (User) request.getSession().getAttribute("user");
 
-        if (!doesRoleCheckPass("MAINT_APPLICATION_CREATION", user, map)) {
+        if (!checkService.doesRoleCheckPass("MAINT_APPLICATION_CREATION", user, map)) {
+            Validation.userDoesntHaveRole(map);
             return "mainview";
         }
 
         map.addAttribute("application", new Application());
-        map.addAttribute("page", "main/create/createapplication.jsp");
+        this.setRoot("main/create/createapplication.jsp", map);
         return "mainview";
     }
 
@@ -330,8 +727,8 @@ public class CreationController {
         // Basic checks
         User user = (User) request.getSession().getAttribute("user");
 
-        if ((!doesRoleCheckPass("MAINT_APPLICATION_CREATION", user, map))
-                || (!doesTicketCheckPass(ticketId, map))) {
+        if (!checkService.doesTicketCheckPass(ticketId, map)) {
+            Validation.inputIsInvalid(map, "Ticket");
             return "mainview";
         }
 
@@ -347,7 +744,7 @@ public class CreationController {
 
         // Success
         map.addAttribute("success", "Request submission received");
-        this.setRootFile(map);
+        this.setRoot("menu/create.jsp", map);
 
         return "mainview";
     }
@@ -356,17 +753,18 @@ public class CreationController {
     public String createSeverityForm(HttpServletRequest request,
             ModelMap map) {
         // Resets defaults - overriden if success
-        this.setRootFile(map);
+        this.setRoot("menu/create.jsp", map);
 
         // Basic checks
         User user = (User) request.getSession().getAttribute("user");
 
-        if (!doesRoleCheckPass("MAINT_SEVERITY_CREATION", user, map)) {
+        if (!checkService.doesRoleCheckPass("MAINT_SEVERITY_CREATION", user, map)) {
+            Validation.userDoesntHaveRole(map);
             return "mainview";
         }
 
         map.addAttribute("severity", new Severity());
-        map.addAttribute("page", "main/create/createseverity.jsp");
+        this.setRoot("main/create/createseverity.jsp", map);
         return "mainview";
     }
 
@@ -383,8 +781,8 @@ public class CreationController {
         // Basic checks
         User user = (User) request.getSession().getAttribute("user");
 
-        if ((!doesRoleCheckPass("MAINT_SEVERITY_CREATION", user, map))
-                || (!doesTicketCheckPass(ticketId, map))) {
+        if (!checkService.doesTicketCheckPass(ticketId, map)) {
+            Validation.inputIsInvalid(map, "Ticket");
             return "mainview";
         }
 
@@ -400,8 +798,7 @@ public class CreationController {
 
         // Success
         map.addAttribute("success", "Request submission received");
-        this.setRootFile(map);
-
+        this.setRoot("menu/create.jsp", map);
         return "mainview";
     }
 
@@ -410,12 +807,13 @@ public class CreationController {
             ModelMap map) {
 
         // Resets defaults - overriden if success
-        this.setRootFile(map);
+        this.setRoot("menu/create.jsp", map);
 
         // Basic checks
         User user = (User) request.getSession().getAttribute("user");
 
-        if (!doesRoleCheckPass("MAINT_CONFIGURATION_CREATION", user, map)) {
+        if (!checkService.doesRoleCheckPass("MAINT_CONFIGURATION_CREATION", user, map)) {
+            Validation.userDoesntHaveRole(map);
             return "mainview";
         }
 
@@ -426,7 +824,7 @@ public class CreationController {
         map.addAttribute("applicationControl", new ApplicationControl());
         map.addAttribute("roleList", roleService.getOnlineRoleList());
 
-        map.addAttribute("page", "main/create/createconfiguration.jsp");
+        this.setRoot("main/create/createconfiguration.jsp", map);
         return "mainview";
     }
 
@@ -443,8 +841,8 @@ public class CreationController {
         // Basic checks
         User user = (User) request.getSession().getAttribute("user");
 
-        if ((!doesRoleCheckPass("MAINT_CONFIGURATION_CREATION", user, map))
-                || (!doesTicketCheckPass(ticketId, map))) {
+        if (!checkService.doesTicketCheckPass(ticketId, map)) {
+            Validation.inputIsInvalid(map, "Ticket");
             return "mainview";
         }
 
@@ -483,7 +881,7 @@ public class CreationController {
 
         // Success
         map.addAttribute("success", "Request submission received");
-        this.setRootFile(map);
+        this.setRoot("menu/create.jsp", map);
         return "mainview";
     }
 
@@ -492,17 +890,18 @@ public class CreationController {
             ModelMap map) {
 
         // Set defaults - overriden if success
-        this.setRootFile(map);
+        this.setRoot("menu/create.jsp", map);
 
         // Basic checks
         User user = (User) request.getSession().getAttribute("user");
 
-        if (!doesRoleCheckPass("MAINT_WORKFLOWSTATUS_CREATION", user, map)) {
+        if (!checkService.doesRoleCheckPass("MAINT_WORKFLOWSTATUS_CREATION", user, map)) {
+            Validation.userDoesntHaveRole(map);
             return "mainview";
         }
 
         map.addAttribute("workflowStatus", new WorkflowStatus());
-        map.addAttribute("page", "main/create/createworkflowstatus.jsp");
+        this.setRoot("main/create/createworkflowstatus.jsp", map);
         return "mainview";
     }
 
@@ -519,8 +918,8 @@ public class CreationController {
         // Basic checks
         User user = (User) request.getSession().getAttribute("user");
 
-        if ((!doesRoleCheckPass("MAINT_WORKFLOWSTATUS_CREATION", user, map))
-                || (!doesTicketCheckPass(ticketId, map))) {
+        if (!checkService.doesTicketCheckPass(ticketId, map)) {
+            Validation.inputIsInvalid(map, "Ticket");
             return "mainview";
         }
 
@@ -533,7 +932,7 @@ public class CreationController {
         workflowStatusService.updateToUnprocessed(workflowStatus.getWorkflowStatusId(), new Ticket(Integer.valueOf(ticketId)), user);
 
         map.addAttribute("success", "Request submission received");
-        this.setRootFile(map);
+        this.setRoot("menu/create.jsp", map);
         return "mainview";
     }
 
@@ -544,7 +943,8 @@ public class CreationController {
         // Basic checks
         User user = (User) request.getSession().getAttribute("user");
 
-        if (!doesRoleCheckPass("MAINT_WORKFLOW_CREATION", user, map)) {
+        if (!checkService.doesRoleCheckPass("MAINT_WORKFLOW_CREATION", user, map)) {
+            Validation.userDoesntHaveRole(map);
             return "mainview";
         }
 
@@ -552,7 +952,7 @@ public class CreationController {
         map.addAttribute("workflowStatusList", workflowStatusService.getOnlineList());
         map.addAttribute("workflow", new Workflow());
 
-        map.addAttribute("page", "main/create/workflow/createworkflowp1.jsp");
+        this.setRoot("main/create/workflow/createworkflowp1.jsp", map);
         return "mainview";
     }
 
@@ -567,10 +967,8 @@ public class CreationController {
         map.addAttribute("workflow", workflow);
 
         // Basic checks
-        User user = (User) request.getSession().getAttribute("user");
-
-        if ((!doesRoleCheckPass("MAINT_WORKFLOW_CREATION", user, map))
-                || (!doesTicketCheckPass(ticketId, map))) {
+        if (!checkService.doesTicketCheckPass(ticketId, map)) {
+            Validation.inputIsInvalid(map, "Ticket");
             return "mainview";
         }
 
@@ -593,7 +991,7 @@ public class CreationController {
         map.addAttribute("queueList", queueService.getOnlineQueueList());
 
         map.addAttribute("workflow", workflow);
-        map.addAttribute("page", "main/create/workflow/createworkflowp2.jsp");
+        this.setRoot("main/create/workflow/createworkflowp2.jsp", map);
         return "mainview";
     }
 
@@ -610,8 +1008,8 @@ public class CreationController {
         // Basic checks
         User user = (User) request.getSession().getAttribute("user");
 
-        if ((!doesRoleCheckPass("MAINT_WORKFLOW_CREATION", user, map))
-                || (!doesTicketCheckPass(ticketId, map))) {
+        if (!checkService.doesTicketCheckPass(ticketId, map)) {
+            Validation.inputIsInvalid(map, "Ticket");
             return "mainview";
         }
 
@@ -794,53 +1192,63 @@ public class CreationController {
         // Adds workflow steps
         // Sets workflow template to unprocessed
         map.addAttribute("success", "Request submission received");
-        this.setRootFile(map);
+        this.setRoot("menu/create.jsp", map);
         return "mainview";
     }
 
     // Sub-controller - set default file return
-    private void setRootFile(ModelMap map) {
-        map.addAttribute("page", "menu/create.jsp");
+    private void setRoot(String file, ModelMap map) {
+        map.addAttribute("page", file);
     }
 
-    // Sub-controller -  check role
-    private boolean doesRoleCheckPass(String role, User user, ModelMap map) {
-        // Checks if the role is active
-        if (!roleService.doesRoleExistInOnline(role)) {
-            Validation.databaseError(map);
-            return false;
-        }
-
-        // Checks if the user has this role
-        if (!userRoleConService.doesUserRoleConExistInOnline(user.getUserId(),
-                roleService.getRoleByRoleName(role).getRoleId())) {
-            Validation.userDoesntHaveRole(map);
-            return false;
-        }
-        return true;
-    }
-
-    // Sub-controller - check ticket Id
-    private boolean doesTicketCheckPass(String ticketId, ModelMap map) {
-        // Checks if ticket is set
-        if (ticketId == null) {
-            Validation.inputNotProvided(map, "Ticket");
-            return false;
-        }
-
-        // Checks if ticket is valid
-        int convTicketId;
+    private boolean fileUploadHandler(
+            HttpServletRequest request,
+            UploadedFileLog uploadedFileLog,
+            int ticketId,
+            User user,
+            ModelMap map) {
         try {
-            convTicketId = Integer.valueOf(ticketId);
+            for (UploadedFile uploadedFile : uploadedFileLog.getFiles()) {
 
-            if (!ticketService.doesTicketExist(convTicketId)) {
-                Validation.fieldAlreadyExists(map, "Ticket");
-                return false;
+                if (!uploadedFile.getFile().isEmpty()) {
+                    byte[] bytes = uploadedFile.getFile().getBytes();
+
+                    String fileName = uploadedFile.getFile().getOriginalFilename();
+
+                    if (attachmentService.doesFileUploadExist(fileName, ticketId)) {
+                        return true;
+                    }
+                    String extension = "unknown";
+
+                    int i = fileName.lastIndexOf('.');
+
+                    if (i > 0) {
+                        extension = fileName.substring(i + 1);
+                        fileName = fileName.substring(0, i);
+                    }
+
+                    String saveFile = request.getServletContext().getRealPath("/WEB-INF/upload/" + ticketId + "/" + fileName + "." + extension);
+
+                    File fileDirectory = new File(request.getServletContext().getRealPath("/WEB-INF/upload/" + ticketId + "/"));
+
+                    if (!fileDirectory.exists()) {
+                        fileDirectory.mkdir();
+                    }
+
+                    try (FileOutputStream output = new FileOutputStream(new File(saveFile))) {
+                        output.write(bytes);
+
+                        attachmentService.insertAttachment(
+                                ticketId,
+                                user.getUserId(), fileName + "." + extension,
+                                uploadedFile.getName(),
+                                uploadedFile.getDescription());
+                    }
+                }
             }
         } catch (Exception e) {
-            Validation.inputIsInvalid(map, "Ticket");
-            return false;
         }
-        return true;
+
+        return false;
     }
 }

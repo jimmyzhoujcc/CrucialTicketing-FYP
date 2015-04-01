@@ -16,7 +16,9 @@ public class UserRoleCon {
     private User user;
     private Role role;
     private int validFrom;
+    private String validFromStr;
     private int validTo;
+    private String validToStr;
     
     private ActiveFlag activeFlag;
 
@@ -65,12 +67,28 @@ public class UserRoleCon {
         this.validFrom = validFrom;
     }
 
+    public String getValidFromStr() {
+        return validFromStr;
+    }
+
+    public void setValidFromStr(String validFromStr) {
+        this.validFromStr = validFromStr;
+    }
+
     public int getValidTo() {
         return validTo;
     }
 
     public void setValidTo(int validTo) {
         this.validTo = validTo;
+    }
+
+    public String getValidToStr() {
+        return validToStr;
+    }
+
+    public void setValidToStr(String validToStr) {
+        this.validToStr = validToStr;
     }
 
     public ActiveFlag getActiveFlag() {
@@ -81,5 +99,6 @@ public class UserRoleCon {
         this.activeFlag = activeFlag;
     }
 
+  
     
 }

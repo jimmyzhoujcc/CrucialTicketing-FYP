@@ -43,15 +43,16 @@ public class ReportView extends AbstractExcelView {
         header.createCell(5).setCellValue("Workflow");
         header.createCell(6).setCellValue("Role");
         header.createCell(7).setCellValue("Workflow Status");
-        header.createCell(8).setCellValue("SLA Clock");
-        header.createCell(9).setCellValue("SLA Elapsed");
-        header.createCell(10).setCellValue("SLA Status");
-        header.createCell(11).setCellValue("Created By");
-        header.createCell(12).setCellValue("Created On");
-        header.createCell(13).setCellValue("Reported By");
-        header.createCell(14).setCellValue("Reported On");
-        header.createCell(15).setCellValue("Last Updated By");
-        header.createCell(16).setCellValue("Last Updated On");
+        header.createCell(8).setCellValue("Queue");
+        header.createCell(9).setCellValue("SLA Clock");
+        header.createCell(10).setCellValue("SLA Elapsed");
+        header.createCell(11).setCellValue("SLA Status");
+        header.createCell(12).setCellValue("Created By");
+        header.createCell(13).setCellValue("Created On");
+        header.createCell(14).setCellValue("Reported By");
+        header.createCell(15).setCellValue("Reported On");
+        header.createCell(16).setCellValue("Last Updated By");
+        header.createCell(17).setCellValue("Last Updated On");
 
         int rowNum = 1;
         for (Ticket ticket : ticketList) {
@@ -65,29 +66,24 @@ public class ReportView extends AbstractExcelView {
             row.createCell(5).setCellValue(ticket.getApplicationControl().getWorkflow().getWorkflowName());
             row.createCell(6).setCellValue(ticket.getApplicationControl().getRole().getRoleName());
             row.createCell(7).setCellValue(ticket.getCurrentWorkflowStep().getWorkflowStatus().getWorkflowStatusName());
-            row.createCell(8).setCellValue(ticket.getApplicationControl().getSlaClock());
-            row.createCell(9).setCellValue(ticket.getChangeLog().getTimeElapsed());
+            row.createCell(8).setCellValue(ticket.getCurrentWorkflowStep().getQueue().getQueueName());
+            row.createCell(9).setCellValue(ticket.getApplicationControl().getSlaClock());
+            row.createCell(10).setCellValue(ticket.getChangeLog().getTimeElapsed());
 
             if (ticket.getApplicationControl().getSlaClock() >= ticket.getChangeLog().getTimeElapsed()) {
-                row.createCell(10).setCellValue("Not Violated");
+                row.createCell(11).setCellValue("Not Violated");
             } else {
-                row.createCell(10).setCellValue("Violated");
+                row.createCell(11).setCellValue("Violated");
             }
 
-            row.createCell(11).setCellValue(ticket.getChangeLog().getChangeLog().get(0).getUser().getUsername());
-
-            Date date = new Date(ticket.getChangeLog().getChangeLog().get(0).getStamp() * 1000);
-            String formattedDate = sdf.format(date);
-
-            row.createCell(12).setCellValue(formattedDate);
-            row.createCell(13).setCellValue(ticket.getChangeLog().getChangeLog().get(0).getUser().getUsername());
-            row.createCell(14).setCellValue(formattedDate);
-            row.createCell(15).setCellValue(ticket.getChangeLog().getChangeLog().get(ticket.getChangeLog().getChangeLog().size() - 1).getUser().getUsername());
+            row.createCell(12).setCellValue(ticket.getChangeLog().getChangeLog().get(0).getUser().getUsername());
+            row.createCell(13).setCellValue(Timestamp.convTimestamp(ticket.getChangeLog().getChangeLog().get(0).getStamp()));
             
-            date = new Date(ticket.getChangeLog().getChangeLog().get(ticket.getChangeLog().getChangeLog().size() - 1).getStamp() * 1000);
-            formattedDate = sdf.format(date);
+            row.createCell(14).setCellValue(ticket.getChangeLog().getChangeLog().get(0).getUser().getUsername());
+            row.createCell(15).setCellValue(Timestamp.convTimestamp(ticket.getChangeLog().getChangeLog().get(0).getStamp()));
             
-            row.createCell(16).setCellValue(formattedDate);
+            row.createCell(16).setCellValue(ticket.getChangeLog().getChangeLog().get(ticket.getChangeLog().getChangeLog().size() - 1).getUser().getUsername());
+            row.createCell(17).setCellValue(Timestamp.convTimestamp(ticket.getChangeLog().getChangeLog().get(ticket.getChangeLog().getChangeLog().size() - 1).getStamp()));
         }
     }
 }

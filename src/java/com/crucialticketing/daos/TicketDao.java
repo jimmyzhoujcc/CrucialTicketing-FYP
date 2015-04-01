@@ -16,29 +16,29 @@ import java.util.Map;
  * @author DanFoley
  */
 public interface TicketDao {
+
     public int insertTicket(final Ticket ticket);
-    
-    public Ticket getTicketById(int ticketId, boolean popWorkflowMap, boolean popTicketLog, boolean popAttachments, boolean popChangeLog);
-    
-    public List<Ticket> getTicketList(boolean popWorkflowMap, boolean popTicketLog, boolean popAttachments, boolean popChangeLog);
-    
+
+    public Ticket getTicketById(int ticketId, 
+            boolean popTicketLog, boolean popAttachments, 
+            boolean popTicketLinks, boolean populateAllChangeLog, 
+            boolean popSLA);
+
+    public List<Ticket> getListByCriteria(
+            ArrayList<String> ticketList,
+            ArrayList<String> ticketTypeList,
+            ArrayList<String> applicationList,
+            ArrayList<String> severityList,
+            ArrayList<String> workflowList,
+            ArrayList<String> workflowStatusList,
+            ArrayList<String> queueList,
+            ArrayList<String> reportedByUserList,
+            ArrayList<String> createdByUserList,
+            ArrayList<String> lastUpdatedByUserList,
+            String dateCreatedFrom, String dateCreatedTo,
+            String dateLastUpdatedFrom, String dateLastUpdatedTo);
+
     public void updateDescription(int ticketId, String newDescription);
-    
-    public void updateStatus(int ticketId, int newStatusId);
-    
-    public void updateApplicationControl(int ticketId, int applicationControlId);
-    
+
     public boolean doesTicketExist(int ticketId);
-    
-    public List<Ticket> getListByCriteria(ArrayList<String> ticketArrayList, 
-                    ArrayList<String> applicationArrayList, 
-                    ArrayList<String> severityArrayList, 
-                    ArrayList<String> workflowArrayList, 
-                    ArrayList<String> workflowStatusArrayList, 
-                    ArrayList<String> reportedByUserArrayList, 
-                    ArrayList<String> createdByUserArrayList, 
-                    ArrayList<String> lastUpdatedByUserArrayList, 
-                    String dateCreatedFrom, String dateCreatedTo, 
-                    String dateLastUpdatedFrom, String dateLastUpdatedTo);
-   
 }

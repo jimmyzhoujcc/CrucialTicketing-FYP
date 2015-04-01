@@ -84,7 +84,7 @@ public class LoginController {
             user = userService.getUserByUsername(username, true);
 
             PasswordHash passwordHash = new PasswordHash();
-            
+
             if (!passwordHash.validatePassword(password, user.getSecure().getHash())) {
                 map.addAttribute("alert", "Invalid username or password");
                 return "/login/login";
@@ -117,8 +117,10 @@ public class LoginController {
     @RequestMapping(value = "/logout/",
             method = RequestMethod.GET)
     public String logout(HttpServletRequest request, ModelMap map) {
+
         request.getSession().removeAttribute("user");
-        map.addAttribute("login", new Secure());
+        request.getSession().removeAttribute("active");
+
         return "/login/login";
     }
 }

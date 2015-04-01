@@ -16,7 +16,7 @@ import java.util.Map;
 public interface UserAlertDao {
     public void insertUserAlert(int userId, String message);
     
-    public UserAlert getUserAlertById(int userAlertId);
+    public UserAlert getUserAlertById(int userAlertId, int userId);
     
     public int getAlertCountByUserId(int userId);
     

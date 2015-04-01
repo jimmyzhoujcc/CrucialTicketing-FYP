@@ -73,9 +73,9 @@ public class QueueLockRequestService extends JdbcDaoSupport implements QueueLock
     }
 
     @Override
-    public void denyAccess(int queueLockRequestId, int queueId, int requestorUserId) {
+    public void denyAccess(int queueLockRequestId, Queue queue, int requestorUserId) {
         this.getJdbcTemplate().update("UPDATE queue_lock_request SET request_pass_time=? WHERE queue_lock_request_id=?", new Object[]{-1, queueLockRequestId});
-        userAlertService.insertUserAlert(requestorUserId, "Access denied to access queue (" + queueId + ")");
+        userAlertService.insertUserAlert(requestorUserId, "Access denied to access queue (" + queue.getQueueName() + ")");
     }
 
     @Override
@@ -85,6 +85,12 @@ public class QueueLockRequestService extends JdbcDaoSupport implements QueueLock
             return new ArrayList<>();
         }
         return this.rowMapper(rs);
+    }
+    
+    @Override
+    public void closeRequest(int queueId, int requestorUserId) {
+        String sql = "DELETE FROM queue_lock_request WHERE queue_id=? AND requestor_user_id=?";
+        this.getJdbcTemplate().update(sql, new Object[]{queueId, requestorUserId});
     }
 
     @Override
@@ -96,7 +102,7 @@ public class QueueLockRequestService extends JdbcDaoSupport implements QueueLock
         for (Map row : resultSet) {
             QueueLockRequest lockRequest = new QueueLockRequest();
 
-            lockRequest.setQueueLockRequestId((int) row.get("queue_lock_request_id"));
+            lockRequest.setLockRequestId((int) row.get("queue_lock_request_id"));
 
             // Queue
             if (userList.containsKey((int) row.get("queue_id"))) {

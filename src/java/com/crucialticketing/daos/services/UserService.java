@@ -151,6 +151,17 @@ public class UserService extends JdbcDaoSupport implements UserDao {
     }
 
     @Override
+    public List<User> getList() {
+        String sql = "SELECT * FROM user";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql);
+        if (rs.isEmpty()) {
+            return new ArrayList<>();
+        }
+        List<User> userList = this.rowMapper(rs, false);
+        return userList;
+    }
+    
+    @Override
     public List<User> getIncompleteUserList() {
         String sql = "SELECT * FROM user WHERE active_flag=?";
         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{ActiveFlag.INCOMPLETE.getActiveFlag()});

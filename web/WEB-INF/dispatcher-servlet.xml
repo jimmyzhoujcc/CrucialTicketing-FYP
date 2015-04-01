@@ -100,11 +100,19 @@
         <property name="dataSource" ref="dataSource" />
     </bean>
     
+    <bean id="severityLockRequestService" class="com.crucialticketing.daos.services.SeverityLockRequestService">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    
     <bean id="severityService" class="com.crucialticketing.daos.services.SeverityService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     
     <bean id="ticketChangeLogService" class="com.crucialticketing.daos.services.TicketChangeLogService">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    
+    <bean id="ticketLinkService" class="com.crucialticketing.daos.services.TicketLinkService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     
@@ -184,6 +192,10 @@
         <property name="dataSource" ref="dataSource" />
     </bean>
     
+    <!-- -->
+    <bean id="checkLogicService" class="com.crucialticketing.logic.CheckLogicService"></bean>
+    <bean id="userLogicService" class="com.crucialticketing.logic.UserLogicService"></bean>
+
     <!-- declare datasource bean -->  
     <bean id="dataSource"  
           class="org.springframework.jdbc.datasource.DriverManagerDataSource">  
@@ -195,7 +207,7 @@
     
     <!-- Run every 2 seconds -->  
     <task:scheduled-tasks  scheduler="myScheduler">
-        <task:scheduled ref="ticketAccessJob" method="executeTicketAccessJob" cron="*/2 * * * * *" />
+        <task:scheduled ref="accessJob" method="executeAccessList" cron="*/2 * * * * *" />
         <task:scheduled ref="creationJob" method="executeJobList" cron="*/2 * * * * *" />   
     </task:scheduled-tasks>  
     <task:scheduler id="myScheduler" pool-size="1"/>

@@ -8,10 +8,12 @@
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <jsp:useBean id="dateValue" class="java.util.Date"/>
 
-<script src="<%=request.getContextPath()%>/js/auto/ticket.js"></script>
+<!-- Auto edit functionality -->
+<script src="<%=request.getContextPath()%>/js/auto/autoedit.js"></script>
 <script>
-    ticketId = ${ticketObject.ticketId};
-    var checkTicketIsOpenInterval = setInterval(checkTicketIsOpen, timeForNotificationInterval);
+    var id = ${ticketObject.ticketId};
+    var item = "ticket";
+    var checkIdIsOpenInterval = setInterval(checkItemIsOpen, timeForNotificationInterval); 
 </script>
 
 <div class="row">
@@ -248,7 +250,7 @@
                 <h3 class="panel-title">Ticket Control</h3>
             </div>
             <div class="panel-body">
-                <form method="POST" id="ticketeditrequest" action="<%=request.getContextPath()%>/home/update/editticket/">
+                <form method="POST" id="editRequestForm" action="<%=request.getContextPath()%>/home/update/editticket/">
                     <input type="submit" value="Edit" class="btn btn-warning" />
                     <input type="hidden" name="ticketid" value="${ticketObject.ticketId}" />
                 </form>

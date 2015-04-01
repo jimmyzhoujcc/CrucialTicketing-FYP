@@ -11,7 +11,7 @@ package com.crucialticketing.entities;
  */
 public class UserLockRequest {
 
-    private int userLockRequestId;
+    private int lockRequestId;
     private User user;
     private Ticket ticket;
     private User requestor;
@@ -29,12 +29,12 @@ public class UserLockRequest {
         this.requestor = requestor;
     }
 
-    public int getUserLockRequestId() {
-        return userLockRequestId;
+    public int getLockRequestId() {
+        return lockRequestId;
     }
 
-    public void setUserLockRequestId(int userLockRequestId) {
-        this.userLockRequestId = userLockRequestId;
+    public void setLockRequestId(int lockRequestId) {
+        this.lockRequestId = lockRequestId;
     }
 
     public User getUser() {

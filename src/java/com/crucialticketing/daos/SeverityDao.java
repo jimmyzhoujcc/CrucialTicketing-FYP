@@ -29,6 +29,8 @@ public interface SeverityDao {
 
     public boolean doesSeverityExistInOnlineOrOfflineByLevel(int severityLevel);
 
+    public List<Severity> getListByCriteria(String[] inputList, Object[] objectList, int count);
+    
     public List<Severity> getList();
     
     public List<Severity> getIncompleteList();

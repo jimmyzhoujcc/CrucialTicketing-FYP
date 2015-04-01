@@ -32,9 +32,14 @@ public class Validation {
         }
     }
 
-    public static boolean isStringSet(String input) {
+    public static boolean isStringSet(String input, int maxSize) {
         try {
-            return input.length() != 0;
+            boolean stringSet = input.length() != 0;
+
+            if (input.length() > maxSize) {
+                return false;
+            }
+            return stringSet;
         } catch (Exception e) {
             return false;
         }
@@ -45,7 +50,7 @@ public class Validation {
     }
 
     public static void inputIsInvalid(ModelMap map, String field) {
-        map.addAttribute("alert", "The " + field + " provided is invalid, please check and try again");
+        map.addAttribute("alert", "The " + field + " provided is invalid (e.g. incorrect or too long), please check and try again");
     }
 
     public static void databaseError(ModelMap map) {
@@ -61,11 +66,19 @@ public class Validation {
     }
 
     public static void fieldAlreadyExists(ModelMap map, String field) {
-        map.addAttribute("alert", "A " + field + " with this name already exists");
+        map.addAttribute("alert", "A \"" + field + "\" with this criteria already exists");
+    }
+
+    public static void fieldDoesNotExist(ModelMap map, String field) {
+        map.addAttribute("alert", "A \"" + field + "\" with this criteria does not exists");
     }
 
     public static void illegalWorkflow(ModelMap map) {
         map.addAttribute("alert", "The workflow contained either a invalid base node or a invalid closure node");
+    }
+
+    public static void noOpenRequest(ModelMap map, String field) {
+        map.addAttribute("alert", "Exclusive access cannot be granted as you do not have an approved request to edit this " + field);
     }
 
     public static void requestAlreadyOustanding(ModelMap map, String field) {

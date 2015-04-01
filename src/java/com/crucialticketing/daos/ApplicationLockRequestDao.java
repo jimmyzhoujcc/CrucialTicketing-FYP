@@ -5,6 +5,7 @@
  */
 package com.crucialticketing.daos;
 
+import com.crucialticketing.entities.Application;
 import com.crucialticketing.entities.ApplicationLockRequest;
 import java.util.List;
 import java.util.Map;
@@ -21,11 +22,13 @@ public interface ApplicationLockRequestDao {
 
     public boolean checkIfOutstanding(int applicationId, int requestorUserId);
 
-    public void grantAccess(int applicationLockRequestId);
+    public void grantAccess(int lockRequestId);
 
-    public void denyAccess(int applicationLockRequestId, int applicationId, int requestorUserId);
+    public void denyAccess(int lockRequestId, Application application, int requestorUserId);
 
     public List<ApplicationLockRequest> getOpenRequestList();
+
+    public void closeRequest(int applicationId, int requestorUserId);
 
     public List<ApplicationLockRequest> rowMapper(List<Map<String, Object>> resultSet);
 }

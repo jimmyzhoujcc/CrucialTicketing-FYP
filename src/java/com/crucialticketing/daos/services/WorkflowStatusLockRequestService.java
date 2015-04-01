@@ -70,9 +70,9 @@ public class WorkflowStatusLockRequestService extends JdbcDaoSupport implements 
     }
 
     @Override
-    public void denyAccess(int workflowStatusLockRequestId, int workflowStatusId, int requestorUserId) {
+    public void denyAccess(int workflowStatusLockRequestId, WorkflowStatus workflowStatus, int requestorUserId) {
         this.getJdbcTemplate().update("UPDATE workflow_status_lock_request SET request_pass_time=? WHERE workflow_status_lock_request_id=?", new Object[]{-1, workflowStatusLockRequestId});
-        userAlertService.insertUserAlert(requestorUserId, "Access denied to access workflow status (" + workflowStatusId + ")");
+        userAlertService.insertUserAlert(requestorUserId, "Access denied to access workflow status (" + workflowStatus.getWorkflowStatusName() + ")");
     }
 
     @Override
@@ -85,6 +85,12 @@ public class WorkflowStatusLockRequestService extends JdbcDaoSupport implements 
     }
 
     @Override
+    public void closeRequest(int workflowStatusId, int requestorUserId) {
+        String sql = "DELETE FROM workflow_status_lock_request WHERE workflow_status_id=? AND requestor_user_id=?";
+        this.getJdbcTemplate().update(sql, new Object[]{workflowStatusId, requestorUserId});
+    }
+    
+    @Override
     public List<WorkflowStatusLockRequest> rowMapper(List<Map<String, Object>> resultSet) {
         List<WorkflowStatusLockRequest> lockRequestList = new ArrayList<>();
         Map<Integer, User> userList = new HashMap<>();
@@ -93,7 +99,7 @@ public class WorkflowStatusLockRequestService extends JdbcDaoSupport implements 
         for (Map row : resultSet) {
             WorkflowStatusLockRequest lockRequest = new WorkflowStatusLockRequest();
 
-            lockRequest.setWorkflowStatusLockRequestId((int) row.get("workflow_status_lock_request_id"));
+            lockRequest.setLockRequestId((int) row.get("workflow_status_lock_request_id"));
 
             // Workflow status
             if (userList.containsKey((int) row.get("workflow_status_id"))) {

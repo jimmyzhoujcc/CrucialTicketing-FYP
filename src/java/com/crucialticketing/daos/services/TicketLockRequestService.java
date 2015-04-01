@@ -7,8 +7,11 @@ package com.crucialticketing.daos.services;
 
 import com.crucialticketing.entities.TicketLockRequest;
 import com.crucialticketing.daos.TicketLockRequestDao;
+import com.crucialticketing.entities.Ticket;
+import com.crucialticketing.entities.User;
 import static com.crucialticketing.util.Timestamp.getTimestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,37 +24,55 @@ import org.springframework.jdbc.core.support.JdbcDaoSupport;
 public class TicketLockRequestService extends JdbcDaoSupport implements TicketLockRequestDao {
 
     @Autowired
-    UserAlertService userAlertService;
+    TicketService ticketService;
     
+    @Autowired
+    UserService userService;
+    
+    @Autowired
+    UserAlertService userAlertService;
+
     private final int buffer = (20 * 60); // 20*60 for 20 minutes of editing
-
-    @Override
-    public void addTicketLockRequest(int ticketId, int userId) {
+    
+  @Override
+    public void addLockRequest(TicketLockRequest lockRequest) {
         this.getJdbcTemplate().update("INSERT INTO ticket_lock_request "
-                + "(ticket_id, user_id, request_time, request_pass_time) "
+                + "(ticket_id, requestor_user_id, request_time, request_pass_time) "
                 + "VALUES "
-                + "(?, ?, ?, ?)", new Object[]{ticketId, userId, getTimestamp(), 0});
+                + "(?, ?, ?, ?)", new Object[]{
+                    lockRequest.getTicket().getTicketId(),
+                    lockRequest.getRequestor().getUserId(),
+                    getTimestamp(),
+                    0});
     }
 
     @Override
-    public boolean ticketOpenForEditByUser(int ticketId, int userId) {
-        String sql = "SELECT * FROM ticket_lock_request WHERE "
-                + "ticket_id=? AND user_id=? AND request_pass_time+" + buffer + " > " + getTimestamp();
-
-        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{ticketId, userId});
-        return !rs.isEmpty();
+    public boolean checkIfOpen(int ticketId, int requestorUserId) {
+        String sql = "SELECT COUNT(ticket_lock_request_id) AS result FROM ticket_lock_request "
+                + "WHERE ticket_id=? AND  requestor_user_id=? AND request_pass_time+" + buffer + " > " + getTimestamp();
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{ticketId, requestorUserId});
+        int result = Integer.valueOf(rs.get(0).get("result").toString());
+        return result != 0;
     }
 
     @Override
-    public void grantAccess(int ticketId, int userId) {
-        this.getJdbcTemplate().update("UPDATE ticket_lock_request SET request_pass_time=? WHERE ticket_id=? AND user_id=?", new Object[]{getTimestamp(), ticketId, userId});
-         userAlertService.insertUserAlert(userId, "(" + ticketId + ") Access granted for edit");
+    public boolean checkIfOutstanding(int ticketId, int requestorUserId) {
+        String sql = "SELECT COUNT(ticket_lock_request_id) AS result FROM ticket_lock_request "
+                + "WHERE ticket_id=? AND  requestor_user_id=? AND request_pass_time=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{ticketId, requestorUserId, 0});
+        int result = Integer.valueOf(rs.get(0).get("result").toString());
+        return result != 0;
     }
 
     @Override
-    public void denyAccess(int ticketId, int userId) {
-        this.getJdbcTemplate().update("UPDATE ticket_lock_request SET request_pass_time=? WHERE ticket_id=? AND user_id=?", new Object[]{-1, ticketId, userId});
-        userAlertService.insertUserAlert(userId, "(" + ticketId + ") Access denied for edit (in use)");
+    public void grantAccess(int lockRequestId) {
+        this.getJdbcTemplate().update("UPDATE ticket_lock_request SET request_pass_time=? WHERE ticket_lock_request_id=?", new Object[]{getTimestamp(), lockRequestId});
+    }
+
+    @Override
+    public void denyAccess(int lockRequestId, Ticket ticket, int requestorUserId) {
+        this.getJdbcTemplate().update("UPDATE ticket_lock_request SET request_pass_time=? WHERE ticket_lock_request_id=?", new Object[]{-1, lockRequestId});
+        userAlertService.insertUserAlert(requestorUserId, "Access denied to access ticket (" + ticket.getTicketId() + ")");
     }
 
     @Override
@@ -64,20 +85,43 @@ public class TicketLockRequestService extends JdbcDaoSupport implements TicketLo
     }
 
     @Override
-    public List<TicketLockRequest> rowMapper(List<Map<String, Object>> resultSet) {
-        List<TicketLockRequest> ticketLockRequestList = new ArrayList<>();
+    public void closeRequest(int ticketId, int requestorUserId) {
+        String sql = "DELETE FROM ticket_lock_request WHERE ticket_id=? AND requestor_user_id=?";
+        this.getJdbcTemplate().update(sql, new Object[]{ticketId, requestorUserId});
+    }
+    
+    private List<TicketLockRequest> rowMapper(List<Map<String, Object>> resultSet) {
+        List<TicketLockRequest> lockRequestList = new ArrayList<>();
+        Map<Integer, User> userList = new HashMap<>();
+        Map<Integer, Ticket> ticketList = new HashMap<>();
 
         for (Map row : resultSet) {
-            TicketLockRequest ticketLockRequest = new TicketLockRequest();
+            TicketLockRequest lockRequest = new TicketLockRequest();
 
-            ticketLockRequest.setLockId((int) row.get("lock_id"));
-            ticketLockRequest.setTicketId((int) row.get("ticket_id"));
-            ticketLockRequest.setUserId((int) row.get("user_id"));
-            ticketLockRequest.setRequestTime((int) row.get("request_time"));
-            ticketLockRequest.setRequestPassTime((int) row.get("request_pass_time"));
+            lockRequest.setLockRequestId((int) row.get("ticket_lock_request_id"));
 
-            ticketLockRequestList.add(ticketLockRequest);
+            // ticket
+            if (userList.containsKey((int) row.get("ticket_id"))) {
+                lockRequest.setTicket(ticketList.get((int) row.get("ticket_id")));
+            } else {
+                lockRequest.setTicket(ticketService.getTicketById((int) row.get("ticket_id"), false, false, false, false, false));
+                ticketList.put((int) row.get("ticket_id"), lockRequest.getTicket());
+            }
+
+            // User
+            if (userList.containsKey((int) row.get("requestor_user_id"))) {
+                lockRequest.setRequestor(userList.get((int) row.get("requestor_user_id")));
+            } else {
+                User user = userService.getUserById((int) row.get("requestor_user_id"), false);
+                lockRequest.setRequestor(user);
+                userList.put((int) row.get("requestor_user_id"), user);
+            }
+
+            lockRequest.setRequestTime((int) row.get("request_time"));
+            lockRequest.setRequestPassTime((int) row.get("request_pass_time"));
+
+            lockRequestList.add(lockRequest);
         }
-        return ticketLockRequestList;
+        return lockRequestList;
     }
 }

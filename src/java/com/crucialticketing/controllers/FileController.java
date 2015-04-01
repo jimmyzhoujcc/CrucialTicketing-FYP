@@ -38,17 +38,17 @@ public class FileController {
     public void fileDispatcher(
             @PathVariable(value = "filename") String fileUploadId,
             HttpServletRequest request, HttpServletResponse response,
-            ModelMap map) {
+            ModelMap map) throws Exception {
 
         String fileName = request.getServletContext().getRealPath("/WEB-INF/upload/");
 
         Attachment attachment = attachmentService.getAttachmentById(Integer.valueOf(fileUploadId));
 
         if (attachment.getFileUploadId() == 0) {
-
+                throw new Exception();
         }
 
-        fileName += "\\" + attachment.getFileName();
+        fileName += "\\" + attachment.getTicket().getTicketId() + "\\" + attachment.getFileName();
 
         try {
             InputStream in = new BufferedInputStream(new FileInputStream(new File(fileName)));
@@ -67,6 +67,7 @@ public class FileController {
             ServletOutputStream out = response.getOutputStream();
             IOUtils.copy(in, out);
             response.flushBuffer();
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        }
     }
 }

@@ -40,6 +40,7 @@
             <td>Workflow</td>
             <td>Role</td>
             <td>Workflow Status</td>
+            <td>Queue</td>
             <td>SLA Clock</td>
             <td>SLA Elapsed</td>
             <td>SLA Status</td>
@@ -63,6 +64,7 @@
                     <td>${ticket.applicationControl.workflow.workflowName}</td>
                     <td>${ticket.applicationControl.role.roleName}</td>
                     <td>${ticket.currentWorkflowStep.workflowStatus.workflowStatusName}</td>
+                    <td>${ticket.currentWorkflowStep.queue.queueName}</td>
                     <td>${ticket.applicationControl.slaClock}</td>
 
                     <td>${ticket.changeLog.timeElapsed}</td>

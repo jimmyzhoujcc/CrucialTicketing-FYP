@@ -50,6 +50,8 @@ public interface UserRoleConDao {
 
     public void updateToOffline(int userRoleConId, Ticket ticket, User requestor);
 
+    public void updateValidity(int userRoleConId, int fromDate, int toDate);
+    
     public void removeUserRoleCon(int userRoleConId);
 
     public List<UserRoleCon> rowMapper(List<Map<String, Object>> resultSet);

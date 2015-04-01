@@ -5,6 +5,7 @@
  */
 package com.crucialticketing.daos;
 
+import com.crucialticketing.entities.Ticket;
 import com.crucialticketing.entities.TicketLockRequest;
 import java.util.List;
 import java.util.Map;
@@ -14,14 +15,18 @@ import java.util.Map;
  * @author DanFoley
  */
 public interface TicketLockRequestDao {
-    public void addTicketLockRequest(int ticketId, int userId);
-    
-    public boolean ticketOpenForEditByUser(int ticketId, int userId);
-    
-    public void grantAccess(int ticketId, int userId);
-    public void denyAccess(int ticketId, int userId);
-    
+
+    public void addLockRequest(TicketLockRequest lockRequest);
+
+    public boolean checkIfOpen(int ticketId, int requestorUserId);
+
+    public boolean checkIfOutstanding(int ticketId, int requestorUserId);
+
+    public void grantAccess(int lockRequestId);
+
+    public void denyAccess(int lockRequestId, Ticket ticket, int requestorUserId);
+
     public List<TicketLockRequest> getOpenRequestList();
-    
-    public List<TicketLockRequest> rowMapper(List<Map<String, Object>> resultSet);
+
+    public void closeRequest(int roleId, int requestorUserId);
 }

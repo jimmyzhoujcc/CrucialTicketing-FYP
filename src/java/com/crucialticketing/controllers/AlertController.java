@@ -5,11 +5,18 @@
  */
 package com.crucialticketing.controllers;
 
+import com.crucialticketing.daos.services.ApplicationLockRequestService;
+import com.crucialticketing.daos.services.QueueLockRequestService;
+import com.crucialticketing.daos.services.RoleLockRequestService;
+import com.crucialticketing.daos.services.SeverityLockRequestService;
 import com.crucialticketing.daos.services.TicketLockRequestService;
 import com.crucialticketing.entities.User;
 import com.crucialticketing.entities.UserAlert;
 import com.crucialticketing.entities.UserAlertLog;
 import com.crucialticketing.daos.services.UserAlertService;
+import com.crucialticketing.daos.services.UserLockRequestService;
+import com.crucialticketing.daos.services.WorkflowLockRequestService;
+import com.crucialticketing.daos.services.WorkflowStatusLockRequestService;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -35,9 +42,29 @@ public class AlertController {
     @Autowired
     TicketLockRequestService ticketLockRequestService;
     
-    @RequestMapping(value = "/", method = RequestMethod.POST)
-    public @ResponseBody
-    String getNotificationList(HttpServletRequest request) {
+    @Autowired
+    UserLockRequestService userLockRequestService;
+    
+    @Autowired
+    RoleLockRequestService roleLockRequestService;
+    
+    @Autowired
+    QueueLockRequestService queueLockRequestService;
+    
+    @Autowired
+    SeverityLockRequestService severityLockRequestService;
+    
+    @Autowired
+    ApplicationLockRequestService applicationLockRequestService;
+
+    @Autowired
+    WorkflowStatusLockRequestService workflowStatusLockRequestService;
+    
+    @Autowired
+    WorkflowLockRequestService workflowLockRequestService;
+    
+    private UserAlertLog getAlertList(HttpServletRequest request) {
+
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpSession sessionInfo = httpRequest.getSession();
 
@@ -46,6 +73,13 @@ public class AlertController {
         UserAlertLog userAlertLog = new UserAlertLog(
                 userAlertService.getUserAlertListByUserId(user.getUserId()),
                 (int) (System.currentTimeMillis() / 1000));
+        return userAlertLog;
+    }
+
+    @RequestMapping(value = "/", method = RequestMethod.POST)
+    public @ResponseBody
+    String getNotificationListJson(HttpServletRequest request) {
+        UserAlertLog userAlertLog = this.getAlertList(request);
 
         ObjectMapper mapper = new ObjectMapper();
 
@@ -58,6 +92,33 @@ public class AlertController {
 
         return jsonConversion;
     }
+    
+    @RequestMapping(value = "/all/", method = RequestMethod.GET)
+    public String getNotificationList(HttpServletRequest request, ModelMap map) {
+        UserAlertLog userAlertLog = this.getAlertList(request);
+        
+        map.addAttribute("userAlertLog", userAlertLog);
+        map.addAttribute("page", "main/alert/alertall.jsp");
+        return "mainview";
+    }
+    
+    @RequestMapping(value = "/single", method = RequestMethod.GET)
+    public String getSingleAlert(HttpServletRequest request, 
+            @RequestParam(value = "alert", required = true) String userAlertId, 
+            ModelMap map) {
+        // Basic checks
+        User user = (User) request.getSession().getAttribute("user");
+
+        UserAlert userAlert = userAlertService.getUserAlertById(Integer.valueOf(userAlertId), user.getUserId());
+        
+        UserAlertLog userAlertLog = new UserAlertLog();
+        userAlertLog.getUserAlertLog().add(userAlert);
+        
+        map.addAttribute("userAlertLog", userAlertLog);
+        map.addAttribute("page", "main/alert/alertall.jsp");
+        return "mainview";
+    }
+
 
     @RequestMapping(value = "/clear/", method = RequestMethod.POST)
     public @ResponseBody
@@ -72,19 +133,67 @@ public class AlertController {
         return "complete";
     }
 
-    @RequestMapping(value = "/singlealert/", method = RequestMethod.GET)
-    public String getSingleAlert(@RequestParam(value = "useralertid", required = true) String userAlertId, ModelMap map) {
-        UserAlert userAlert = userAlertService.getUserAlertById(Integer.valueOf(userAlertId));
-        map.addAttribute("userAlert", userAlert);
-        map.addAttribute("page", "/main/alert/alertsingle.jsp");
-        return "mainview";
-    }
-    
     @RequestMapping(value = "/checkticket/", method = RequestMethod.POST)
     public @ResponseBody
-    String checkTicketIsOpen(HttpServletRequest request, @RequestParam(value = "ticketId", required = true) String ticketId) {
+    String checkTicketIsOpen(HttpServletRequest request, @RequestParam(value = "id", required = true) String ticketId) {
         User user = (User) request.getSession().getAttribute("user");
-        boolean open = ticketLockRequestService.ticketOpenForEditByUser(Integer.valueOf(ticketId), user.getUserId());
-        return String.valueOf((open) ? 1 : 0); 
+        boolean open = ticketLockRequestService.checkIfOpen(Integer.valueOf(ticketId), user.getUserId());
+        return String.valueOf((open) ? 1 : 0);
+    }
+    
+    @RequestMapping(value = "/checkuser/", method = RequestMethod.POST)
+    public @ResponseBody
+    String checkUserIsOpen(HttpServletRequest request, @RequestParam(value = "id", required = true) String userId) {
+        User user = (User) request.getSession().getAttribute("user");
+        boolean open = userLockRequestService.checkIfOpen(Integer.valueOf(userId), user.getUserId());
+        return String.valueOf((open) ? 1 : 0);
+    }
+    
+    @RequestMapping(value = "/checkrole/", method = RequestMethod.POST)
+    public @ResponseBody
+    String checkRoleIsOpen(HttpServletRequest request, @RequestParam(value = "id", required = true) String roleId) {
+        User user = (User) request.getSession().getAttribute("user");
+        boolean open = roleLockRequestService.checkIfOpen(Integer.valueOf(roleId), user.getUserId());
+        return String.valueOf((open) ? 1 : 0);
+    }
+    
+    @RequestMapping(value = "/checkqueue/", method = RequestMethod.POST)
+    public @ResponseBody
+    String checkQueueIsOpen(HttpServletRequest request, @RequestParam(value = "id", required = true) String queueId) {
+        User user = (User) request.getSession().getAttribute("user");
+        boolean open = queueLockRequestService.checkIfOpen(Integer.valueOf(queueId), user.getUserId());
+        return String.valueOf((open) ? 1 : 0);
+    }
+    
+    @RequestMapping(value = "/checkseverity/", method = RequestMethod.POST)
+    public @ResponseBody
+    String checkSeverityIsOpen(HttpServletRequest request, @RequestParam(value = "id", required = true) String severityId) {
+        User user = (User) request.getSession().getAttribute("user");
+        boolean open = severityLockRequestService.checkIfOpen(Integer.valueOf(severityId), user.getUserId());
+        return String.valueOf((open) ? 1 : 0);
+    }
+    
+    @RequestMapping(value = "/checkapplication/", method = RequestMethod.POST)
+    public @ResponseBody
+    String checkApplicationIsOpen(HttpServletRequest request, @RequestParam(value = "id", required = true) String applicationId) {
+        User user = (User) request.getSession().getAttribute("user");
+        boolean open = applicationLockRequestService.checkIfOpen(Integer.valueOf(applicationId), user.getUserId());
+        return String.valueOf((open) ? 1 : 0);
+    }
+    
+    @RequestMapping(value = "/checkworkflowstatus/", method = RequestMethod.POST)
+    public @ResponseBody
+    String checkWorkflowStatusIsOpen(HttpServletRequest request, @RequestParam(value = "id", required = true) String workflowStatusId) {
+        User user = (User) request.getSession().getAttribute("user");
+        boolean open = workflowStatusLockRequestService.checkIfOpen(Integer.valueOf(workflowStatusId), user.getUserId());
+        return String.valueOf((open) ? 1 : 0);
+    }
+    
+    @RequestMapping(value = "/checkworkflow/", method = RequestMethod.POST)
+    public @ResponseBody
+    String checkWorkflowIsOpen(HttpServletRequest request, @RequestParam(value = "id", required = true) String workflowId) {
+        User user = (User) request.getSession().getAttribute("user");
+        boolean open = workflowLockRequestService.checkIfOpen(Integer.valueOf(workflowId), user.getUserId());
+        return String.valueOf((open) ? 1 : 0);
     }
 }

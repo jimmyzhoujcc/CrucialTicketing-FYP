@@ -11,7 +11,7 @@ package com.crucialticketing.entities;
  */
 public class QueueLockRequest {
 
-    private int queueLockRequestId;
+    private int lockRequestId;
     private Queue queue;
     private User requestor;
     private int requestTime;
@@ -27,12 +27,12 @@ public class QueueLockRequest {
         this.requestor = requestor;
     }
 
-    public int getQueueLockRequestId() {
-        return queueLockRequestId;
+    public int getLockRequestId() {
+        return lockRequestId;
     }
 
-    public void setQueueLockRequestId(int queueLockRequestId) {
-        this.queueLockRequestId = queueLockRequestId;
+    public void setLockRequestId(int lockRequestId) {
+        this.lockRequestId = lockRequestId;
     }
 
     public Queue getQueue() {

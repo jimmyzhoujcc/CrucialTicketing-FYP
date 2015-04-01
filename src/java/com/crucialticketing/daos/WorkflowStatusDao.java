@@ -30,6 +30,8 @@ public interface WorkflowStatusDao {
 
     public List<WorkflowStatus> getListByCriteria(String[] inputList, Object[] objectList, int count);
     
+    public List<WorkflowStatus> getList();
+    
     public List<WorkflowStatus> getIncompleteList();
 
     public List<WorkflowStatus> getUnprocessedList();

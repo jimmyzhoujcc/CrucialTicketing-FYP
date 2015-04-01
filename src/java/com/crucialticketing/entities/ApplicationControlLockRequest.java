@@ -10,7 +10,7 @@ package com.crucialticketing.entities;
  * @author DanFoley
  */
 public class ApplicationControlLockRequest {
-    private int applicationControlLockRequestId;
+    private int lockRequestId;
     private ApplicationControl applicationControl;
     private User requestor;
     private int requestTime;
@@ -26,12 +26,12 @@ public class ApplicationControlLockRequest {
         this.requestor = requestor;
     }
 
-    public int getApplicationControlLockRequestId() {
-        return applicationControlLockRequestId;
+    public int getLockRequestId() {
+        return lockRequestId;
     }
 
-    public void setApplicationControlLockRequestId(int applicationControlLockRequestId) {
-        this.applicationControlLockRequestId = applicationControlLockRequestId;
+    public void setLockRequestId(int lockRequestId) {
+        this.lockRequestId = lockRequestId;
     }
 
     public ApplicationControl getApplicationControl() {

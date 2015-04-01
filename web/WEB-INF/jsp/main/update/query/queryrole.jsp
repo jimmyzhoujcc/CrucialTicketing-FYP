@@ -12,7 +12,7 @@
         <br class="clearfix" />
         <input type="submit" />
     </form>
-        
+
     <br class="clearfix" />
     <hr />
     <br class="clearfix" />
@@ -39,7 +39,7 @@
                 document.getElementById('roleHiddenInput').value = roleId;
                 $("#queryRole").submit();
             }
-            </script>
+        </script>
         <form id="queryRole" action="<%=request.getContextPath()%>/home/update/role/update/" method="POST">
             <input id="roleHiddenInput" type="hidden" name="roleId" />
         </form>

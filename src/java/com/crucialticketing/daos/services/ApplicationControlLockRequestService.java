@@ -65,14 +65,17 @@ public class ApplicationControlLockRequestService extends JdbcDaoSupport impleme
     }
 
     @Override
-    public void grantAccess(int applicationControlLockRequestId) {
-        this.getJdbcTemplate().update("UPDATE application_control_lock_request SET request_pass_time=? WHERE application_control_lock_request_id=?", new Object[]{getTimestamp(), applicationControlLockRequestId});
+    public void grantAccess(int lockRequestId) {
+        this.getJdbcTemplate().update("UPDATE application_control_lock_request SET request_pass_time=? WHERE application_control_lock_request_id=?", new Object[]{getTimestamp(), lockRequestId});
     }
 
     @Override
-    public void denyAccess(int applicationControlLockRequestId, int applicationControlId, int requestorUserId) {
-        this.getJdbcTemplate().update("UPDATE application_control_lock_request SET request_pass_time=? WHERE application_control_lock_request_id=?", new Object[]{-1, applicationControlLockRequestId});
-        userAlertService.insertUserAlert(requestorUserId, "Access denied to access configuration (" + applicationControlId + ")");
+    public void denyAccess(int lockRequestId, ApplicationControl applicationControl, int requestorUserId) {
+        this.getJdbcTemplate().update("UPDATE application_control_lock_request SET request_pass_time=? WHERE application_control_lock_request_id=?", new Object[]{-1, lockRequestId});
+        userAlertService.insertUserAlert(requestorUserId, "Access denied to access configuration ("
+                + applicationControl.getTicketType().getTicketTypeName() + "-"
+                + applicationControl.getApplication().getApplicationName() + "-"
+                + applicationControl.getSeverity().getSeverityLevel() + ":" + applicationControl.getSeverity().getSeverityName() + " )");
     }
 
     @Override
@@ -85,6 +88,12 @@ public class ApplicationControlLockRequestService extends JdbcDaoSupport impleme
     }
 
     @Override
+    public void closeRequest(int applicationControlId, int requestorUserId) {
+        String sql = "DELETE FROM application_control_lock_request WHERE application_control_id=? AND requestor_user_id=?";
+        this.getJdbcTemplate().update(sql, new Object[]{applicationControlId, requestorUserId});
+    }
+
+    @Override
     public List<ApplicationControlLockRequest> rowMapper(List<Map<String, Object>> resultSet) {
         List<ApplicationControlLockRequest> lockRequestList = new ArrayList<>();
         Map<Integer, User> userList = new HashMap<>();
@@ -93,7 +102,7 @@ public class ApplicationControlLockRequestService extends JdbcDaoSupport impleme
         for (Map row : resultSet) {
             ApplicationControlLockRequest lockRequest = new ApplicationControlLockRequest();
 
-            lockRequest.setApplicationControlLockRequestId((int) row.get("application_control_lock_request_id"));
+            lockRequest.setLockRequestId((int) row.get("application_control_lock_request_id"));
 
             // ApplicationControl
             if (userList.containsKey((int) row.get("application_control_id"))) {

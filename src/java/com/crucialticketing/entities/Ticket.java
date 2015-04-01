@@ -12,20 +12,21 @@ import java.util.List;
  * @author Owner
  */
 public class Ticket {
+    // DAO items
     private int ticketId;
-    
-    private ApplicationControl applicationControl;
-    
     private String shortDescription;
-    
     private WorkflowStep currentWorkflowStep;
-    
-    private User lastProcessedBy;
-    private User createdBy;
+
+    // Generated from creation
+    private ApplicationControl applicationControl;
     private User reportedBy;
-    
+    private User createdBy;
+    private User lastUpdatedBy;
+
+    // Logs
     private TicketLog ticketLog;
     private List<Attachment> attachmentList;
+    private List<TicketLink> ticketLinkList;
     private ChangeLog changeLog;
     
     public Ticket() {}
@@ -40,14 +41,6 @@ public class Ticket {
 
     public void setTicketId(int ticketId) {
         this.ticketId = ticketId;
-    }
-
-    public ApplicationControl getApplicationControl() {
-        return applicationControl;
-    }
-
-    public void setApplicationControl(ApplicationControl applicationControl) {
-        this.applicationControl = applicationControl;
     }
 
     public String getShortDescription() {
@@ -66,12 +59,20 @@ public class Ticket {
         this.currentWorkflowStep = currentWorkflowStep;
     }
 
-    public User getLastProcessedBy() {
-        return lastProcessedBy;
+    public ApplicationControl getApplicationControl() {
+        return applicationControl;
     }
 
-    public void setLastProcessedBy(User lastProcessedBy) {
-        this.lastProcessedBy = lastProcessedBy;
+    public void setApplicationControl(ApplicationControl applicationControl) {
+        this.applicationControl = applicationControl;
+    }
+
+    public User getReportedBy() {
+        return reportedBy;
+    }
+
+    public void setReportedBy(User reportedBy) {
+        this.reportedBy = reportedBy;
     }
 
     public User getCreatedBy() {
@@ -82,12 +83,12 @@ public class Ticket {
         this.createdBy = createdBy;
     }
 
-    public User getReportedBy() {
-        return reportedBy;
+    public User getLastUpdatedBy() {
+        return lastUpdatedBy;
     }
 
-    public void setReportedBy(User reportedBy) {
-        this.reportedBy = reportedBy;
+    public void setLastUpdatedBy(User lastUpdatedBy) {
+        this.lastUpdatedBy = lastUpdatedBy;
     }
 
     public TicketLog getTicketLog() {
@@ -106,6 +107,14 @@ public class Ticket {
         this.attachmentList = attachmentList;
     }
 
+    public List<TicketLink> getTicketLinkList() {
+        return ticketLinkList;
+    }
+
+    public void setTicketLinkList(List<TicketLink> ticketLinkList) {
+        this.ticketLinkList = ticketLinkList;
+    }
+
     public ChangeLog getChangeLog() {
         return changeLog;
     }
@@ -113,6 +122,6 @@ public class Ticket {
     public void setChangeLog(ChangeLog changeLog) {
         this.changeLog = changeLog;
     }
-    
+
     
 }

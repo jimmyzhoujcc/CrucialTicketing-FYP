@@ -42,57 +42,71 @@ public class TicketChangeLogService extends JdbcDaoSupport implements ChangeLogD
     }
 
     @Override
-    public ChangeLog getChangeLogByTicketId(int ticketId) {
+    public ChangeLog getChangeLogByTicketId(int ticketId, boolean populateAll) {
         String sql = "SELECT * FROM ticket_change_log WHERE ticket_id=? ORDER BY stamp ASC";
         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{ticketId});
         if (rs.isEmpty()) {
             return new ChangeLog();
         }
-        return this.rowMapper(rs);
+        return this.rowMapper(rs, populateAll);
     }
 
     @Override
-    public ChangeLog rowMapper(List<Map<String, Object>> resultSet) {
+    public ChangeLog rowMapper(List<Map<String, Object>> resultSet, boolean populateAll) {
         Map<Integer, User> userList = new HashMap<>();
         Map<Integer, ApplicationControl> applicationControlList = new HashMap<>();
         Map<Integer, WorkflowStatus> workflowStatusList = new HashMap<>();
 
         ChangeLog changeLog = new ChangeLog();
+        int i = 0;
+        boolean populateWorkflow = false;
 
         for (Map row : resultSet) {
-            ChangeLogEntry changeLogEntry = new ChangeLogEntry();
+            if ((populateAll) || (i == 0) || (i == (resultSet.size() - 1))) {
+                if (i == (resultSet.size() - 1)) {
+                    populateWorkflow = true;
+                }
 
-            changeLogEntry.setChangeLogEntryId((int) row.get("ticket_change_log_id"));
-            changeLogEntry.setTicket(new Ticket((int) row.get("ticket_id")));
+                ChangeLogEntry changeLogEntry = new ChangeLogEntry();
 
-            // Application control 
-            if (applicationControlList.containsKey((int) row.get("application_control_id"))) {
-                changeLogEntry.setApplicationControl(applicationControlList.get((int) row.get("application_control_id")));
-            } else {
-                changeLogEntry.setApplicationControl(
-                        applicationControlService.getApplicationControlById((int) row.get("application_control_id"), true));
-                applicationControlList.put((int) row.get("application_control_id"), changeLogEntry.getApplicationControl());
+                changeLogEntry.setChangeLogEntryId((int) row.get("ticket_change_log_id"));
+                changeLogEntry.setTicket(new Ticket((int) row.get("ticket_id")));
+
+                // Application control 
+                if ((populateWorkflow) || (populateAll)) {
+                    changeLogEntry.setApplicationControl(
+                            applicationControlService.getApplicationControlById((int) row.get("application_control_id"), true));
+                } else {
+                    if (applicationControlList.containsKey((int) row.get("application_control_id"))) {
+                        changeLogEntry.setApplicationControl(applicationControlList.get((int) row.get("application_control_id")));
+                    } else {
+                        changeLogEntry.setApplicationControl(
+                                applicationControlService.getApplicationControlById((int) row.get("application_control_id"), false));
+                        applicationControlList.put((int) row.get("application_control_id"), changeLogEntry.getApplicationControl());
+                    }
+                }
+
+                // Workflow status
+                if (workflowStatusList.containsKey((int) row.get("workflow_status_id"))) {
+                    changeLogEntry.setWorkflowStatus(workflowStatusList.get((int) row.get("workflow_status_id")));
+                } else {
+                    changeLogEntry.setWorkflowStatus(workflowStatusService.getWorkflowStatus((int) row.get("workflow_status_id")));
+                    workflowStatusList.put((int) row.get("workflow_status_id"), changeLogEntry.getWorkflowStatus());
+                }
+
+                // User list 
+                if (userList.containsKey((int) row.get("requestor_user_id"))) {
+                    changeLogEntry.setUser(userList.get((int) row.get("requestor_user_id")));
+                } else {
+                    changeLogEntry.setUser(userService.getUserById((int) row.get("requestor_user_id"), false));
+                    userList.put((int) row.get("requestor_user_id"), changeLogEntry.getUser());
+                }
+
+                changeLogEntry.setStamp((int) row.get("stamp"));
+
+                changeLog.getChangeLog().add(changeLogEntry);
             }
-
-            // Workflow status
-            if (workflowStatusList.containsKey((int) row.get("workflow_status_id"))) {
-                changeLogEntry.setWorkflowStatus(workflowStatusList.get((int) row.get("workflow_status_id")));
-            } else {
-                changeLogEntry.setWorkflowStatus(workflowStatusService.getWorkflowStatus((int) row.get("workflow_status_id")));
-                workflowStatusList.put((int) row.get("workflow_status_id"), changeLogEntry.getWorkflowStatus());
-            }
-            
-            // User list 
-            if (userList.containsKey((int) row.get("requestor_user_id"))) {
-                changeLogEntry.setUser(userList.get((int) row.get("requestor_user_id")));
-            } else {
-                changeLogEntry.setUser(userService.getUserById((int) row.get("requestor_user_id"), false));
-                userList.put((int) row.get("requestor_user_id"), changeLogEntry.getUser());
-            }
-
-            changeLogEntry.setStamp((int) row.get("stamp"));
-
-            changeLog.getChangeLog().add(changeLogEntry);
+            i++;
         }
         return changeLog;
     }

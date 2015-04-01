@@ -16,7 +16,7 @@ import java.util.Map;
 public interface ChangeLogDao {
     public void addChangeLogEntry(int ticketId, int applicationControlId, int userId, int statusId);
     
-    public ChangeLog getChangeLogByTicketId(int ticketId);
+    public ChangeLog getChangeLogByTicketId(int ticketId, boolean populateAll);
 
-    public ChangeLog rowMapper(List<Map<String, Object>> resultSet);
+    public ChangeLog rowMapper(List<Map<String, Object>> resultSet, boolean populateAll);
 }

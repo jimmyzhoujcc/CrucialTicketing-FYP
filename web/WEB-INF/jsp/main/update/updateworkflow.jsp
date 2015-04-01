@@ -7,20 +7,41 @@
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 <%@taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
 
+<!-- Auto edit functionality -->
+<script src="<%=request.getContextPath()%>/js/auto/autoedit.js"></script>
+<script>
+    var id = ${workflow.workflowId};
+    var item = "workflow";
+    var checkIdIsOpenInterval = setInterval(checkItemIsOpen, timeForNotificationInterval);
+</script>
+
+<c:choose>
+    <c:when test="${edit}">
+        <c:set var="formLink" value="/home/update/workflow/save/" />
+        <c:set var="formName" value="saveRequestForm" />
+        <script>
+            clearInterval(checkIdIsOpenInterval);
+        </script>
+    </c:when>
+    <c:otherwise>
+        <c:set var="formLink" value="/home/update/workflow/edit/" />
+        <c:set var="formName" value="editRequestForm" />
+    </c:otherwise>
+</c:choose>
+
 <div class="create-form-button-container">
-    <c:choose>
-        <c:when test="${edit}">
-            <form action="<%=request.getContextPath()%>/home/update/workflow/save/" method="POST">
+    <form:form action="${pageContext.request.contextPath}${formLink}" id="${formName}" method="POST" commandName="queue">
+
+        <c:choose>
+            <c:when test="${edit}">
                 <input type="submit" value="Save" />
                 <input type="hidden" value="${workflow.workflowId}" name="workflowId" />
                 <br class="clearfix" />
                 Ticket ID: <input type="text" name="ticketId" /> (for request)
             </c:when>
             <c:otherwise>
-                <form action="<%=request.getContextPath()%>/home/update/workflow/edit/" method="POST">
-                    <input type="submit" value="Edit" />
-                    <input type="hidden" value="${workflow.workflowId}" name="workflowId" />
-                </form>
+                <input type="submit" value="Edit" />
+                <input type="hidden" value="${workflow.workflowId}" name="workflowId" />
             </c:otherwise>
         </c:choose>
 
@@ -55,7 +76,7 @@
                         <c:when test="${fn:length(workflowStep.nextWorkflowStep) gt 0}">
                             <c:forEach var="nextWorkflowStep" items="${workflowStep.nextWorkflowStep}">
                                 <td>${workflowStep.workflowStatus.workflowStatusName}</td>
-                                
+
                                 <td>${nextWorkflowStep.workflowStatus.workflowStatusName}</td>
                                 <td>${nextWorkflowStep.role.roleName}</td>
                                 <td>${nextWorkflowStep.queue.queueName}</td>
@@ -93,4 +114,6 @@
                 ${workflow.activeFlag}
             </c:otherwise>
         </c:choose>
+
+    </form:form>
 </div>

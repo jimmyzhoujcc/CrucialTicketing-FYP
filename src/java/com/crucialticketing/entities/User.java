@@ -22,17 +22,20 @@ public class User {
     private String emailAddress;
     private String contact;
     private List<UserRoleCon> userRoleConList;
+    private List<UserQueueCon> userQueueConList;
     private ActiveFlag activeFlag;
 
     public User() {
         this.secure = new Secure();
-        userRoleConList = new ArrayList<>();
+        this.userRoleConList = new ArrayList<>();
+        this.userQueueConList = new ArrayList<>();
     }
 
     public User(int userId) {
         this.secure = new Secure();
         this.userId = userId;
-        userRoleConList = new ArrayList<>();
+        this.userRoleConList = new ArrayList<>();
+        this.userQueueConList = new ArrayList<>();
     }
     
     public User(int userId, String firstName, String lastName) {
@@ -40,7 +43,8 @@ public class User {
         this.userId = userId;
         this.firstName = firstName;
         this.lastName = lastName;
-        userRoleConList = new ArrayList<>();
+        this.userRoleConList = new ArrayList<>();
+        this.userQueueConList = new ArrayList<>();
     }
 
     public int getUserId() {
@@ -106,7 +110,15 @@ public class User {
     public void setUserRoleConList(List<UserRoleCon> userRoleConList) {
         this.userRoleConList = userRoleConList;
     }
-    
+
+    public List<UserQueueCon> getUserQueueConList() {
+        return userQueueConList;
+    }
+
+    public void setUserQueueConList(List<UserQueueCon> userQueueConList) {
+        this.userQueueConList = userQueueConList;
+    }
+
     public ActiveFlag getActiveFlag() {
         return activeFlag;
     }

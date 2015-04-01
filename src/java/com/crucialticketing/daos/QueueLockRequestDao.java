@@ -5,6 +5,7 @@
  */
 package com.crucialticketing.daos;
 
+import com.crucialticketing.entities.Queue;
 import com.crucialticketing.entities.QueueLockRequest;
 import java.util.List;
 import java.util.Map;
@@ -14,17 +15,20 @@ import java.util.Map;
  * @author DanFoley
  */
 public interface QueueLockRequestDao {
- public void addLockRequest(QueueLockRequest lockRequest);
+
+    public void addLockRequest(QueueLockRequest lockRequest);
 
     public boolean checkIfOpen(int queueId, int requestorUserId);
 
     public boolean checkIfOutstanding(int queueId, int requestorUserId);
-    
-    public void grantAccess(int queueLockRequestId);
 
-    public void denyAccess(int queueLockRequestId, int queueId, int requestorUserId);
+    public void grantAccess(int lockRequestId);
+
+    public void denyAccess(int lockRequestId, Queue queue, int requestorUserId);
 
     public List<QueueLockRequest> getOpenRequestList();
+
+    public void closeRequest(int queueId, int requestorUserId);
 
     public List<QueueLockRequest> rowMapper(List<Map<String, Object>> resultSet);
 }

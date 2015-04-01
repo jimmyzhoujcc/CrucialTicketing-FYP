@@ -5,6 +5,7 @@
  */
 package com.crucialticketing.daos;
 
+import com.crucialticketing.entities.WorkflowStatus;
 import com.crucialticketing.entities.WorkflowStatusLockRequest;
 import java.util.List;
 import java.util.Map;
@@ -21,11 +22,13 @@ public interface WorkflowStatusLockRequestDao {
 
     public boolean checkIfOutstanding(int workflowStatusId, int requestorUserId);
 
-    public void grantAccess(int workflowStatusLockRequestId);
+    public void grantAccess(int lockRequestId);
 
-    public void denyAccess(int workflowStatusLockRequestId, int workflowStatusId, int requestorUserId);
+    public void denyAccess(int lockRequestId, WorkflowStatus workflowStatus, int requestorUserId);
 
     public List<WorkflowStatusLockRequest> getOpenRequestList();
+
+    public void closeRequest(int workflowStatusId, int requestorUserId);
 
     public List<WorkflowStatusLockRequest> rowMapper(List<Map<String, Object>> resultSet);
 }

@@ -15,10 +15,10 @@
             var homeURI = "<%=request.getContextPath()%>";
         </script>
 
-         <link rel="icon" 
+        <link rel="icon" 
               type="image/png" 
               href="<%=request.getContextPath()%>/img/ticket.png">
-         
+
         <!-- jQuery -->
         <script src="<%=request.getContextPath()%>/js/jquery-1.11.2.min.js"></script>
 
@@ -37,5 +37,11 @@
         <!-- Self: notification JS -->
         <link href="<%=request.getContextPath()%>/css/notification.css" rel="stylesheet" type="text/css"/>
 
+        <!-- Date picker code -->
+        <!-- http://jqueryui.com/datepicker/ -->
+        <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+        <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+
+       
     </head>
     <body>

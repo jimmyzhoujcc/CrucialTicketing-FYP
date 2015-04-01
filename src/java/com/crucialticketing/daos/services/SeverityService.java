@@ -115,6 +115,25 @@ public class SeverityService extends JdbcDaoSupport implements SeverityDao {
         int result = Integer.valueOf(rs.get(0).get("result").toString());
         return result != 0;
     }
+    
+    @Override
+    public List<Severity> getListByCriteria(String[] inputList, Object[] objectList, int count) {
+        String sql = "SELECT * FROM severity WHERE ";
+
+        for (int i = 0; i < count; i++) {
+            sql += inputList[i] + "='" + objectList[i] + "'";
+
+            if ((i + 1) < count) {
+                sql += " AND ";
+            }
+        }
+
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql);
+        if (rs.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return this.rowMapper(rs);
+    }
 
     @Override
     public List<Severity> getList() {

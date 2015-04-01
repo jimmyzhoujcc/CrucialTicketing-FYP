@@ -12,6 +12,7 @@ if included on the main header which services the login pages -->
     <div class="title"><h3>Crucial Ticketing</h3></div>
     <div class="titletabbox">
         <ul class="nav nav-pills" role="tablist">
+            <li role="presentation"><a href="<%=request.getContextPath()%>/home/main/profile/">My Profile</a></li>
             <li role="presentation">  
 
 
@@ -19,11 +20,12 @@ if included on the main header which services the login pages -->
 
                 <div id="notificationContainer">
                     <div id="notificationTitle">Notifications</div>
+                    
                     <div id="notificationsBody" class="notifications">
 
                     </div>
 
-                    <div id="notificationFooter"><a href="#">See All</a></div>
+                    <div id="notificationFooter"><a href="<%=request.getContextPath()%>/home/alert/all/">See All</a></div>
                 </div>
 
 
@@ -46,6 +48,11 @@ if included on the main header which services the login pages -->
             out.print("class=\"active\"");
         }%>>
         <a href="<%=request.getContextPath()%>/home/main/main/">Home</a>
+    </li>
+    <li role="presentation" <% if (pageName.equals("menu/hub.jsp")) {
+            out.print("class=\"active\"");
+        }%>>
+        <a href="<%=request.getContextPath()%>/home/main/hub/">Hub</a>
     </li>
     <li role="presentation" <% if (pageName.equals("menu/create.jsp")) {
             out.print("class=\"active\"");

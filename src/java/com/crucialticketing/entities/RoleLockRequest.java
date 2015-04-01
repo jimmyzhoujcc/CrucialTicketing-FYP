@@ -10,7 +10,8 @@ package com.crucialticketing.entities;
  * @author DanFoley
  */
 public class RoleLockRequest {
-        private int roleLockRequestId;
+
+    private int lockRequestId;
     private Role role;
     private User requestor;
     private int requestTime;
@@ -26,12 +27,12 @@ public class RoleLockRequest {
         this.requestor = requestor;
     }
 
-    public int getRoleLockRequestId() {
-        return roleLockRequestId;
+    public int getLockRequestId() {
+        return lockRequestId;
     }
 
-    public void setRoleLockRequestId(int roleLockRequestId) {
-        this.roleLockRequestId = roleLockRequestId;
+    public void setLockRequestId(int lockRequestId) {
+        this.lockRequestId = lockRequestId;
     }
 
     public Role getRole() {
@@ -66,9 +67,4 @@ public class RoleLockRequest {
         this.requestPassTime = requestPassTime;
     }
 
-    
-    
-    
-    
-    
 }

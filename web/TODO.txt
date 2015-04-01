@@ -1,17 +1,10 @@
-() Automatic scheduled task
-    - validate and execute timeout
-
-() Complete and configure role checks
-    - viewing tickets
-    - editing tickets
-    - saving tickets
-
-() Adding attachments 
-    - Verify size
-
-
-() Style notification body
-
-() Linking tickets
-
-() Root cause
+- Upon save delete lock request         DONE            NEEDS TESTING
+- Exclusive access tasks                DONE            NEEDS TESTING
+- 2 creation forms                      
+- 1 view/update items                   DONE            NEEDS TESTING
+- reporting                             DONE            NEEDS TESTING (problem with dates, field and value need swapping)
+- linked tickets                        
+- styling                               NOT REQUIRED ATM   
+- Profile page
+- upload profile photos                 
+- upload documents into ticket folder   

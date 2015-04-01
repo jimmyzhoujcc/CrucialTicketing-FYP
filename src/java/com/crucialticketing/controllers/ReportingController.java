@@ -7,6 +7,7 @@ package com.crucialticketing.controllers;
 
 import com.crucialticketing.daos.services.TicketService;
 import com.crucialticketing.entities.Ticket;
+import com.crucialticketing.util.Timestamp;
 import com.crucialticketing.util.Validation;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,11 +34,13 @@ public class ReportingController {
 
     @RequestMapping(value = "/execute/", method = RequestMethod.POST)
     public String executeQuery(HttpServletRequest request,
-            @RequestParam(value = "ticketList", required = false) String[] ticketList,
+            @RequestParam(value = "ticketList", required = false) String[] ticketList, 
+            @RequestParam(value = "ticketTypeList", required = false) String[] ticketTypeList,
             @RequestParam(value = "applicationList", required = false) String[] applicationList,
             @RequestParam(value = "severityList", required = false) String[] severityList,
             @RequestParam(value = "workflowList", required = false) String[] workflowList,
-            @RequestParam(value = "workflowStatusList", required = false) String[] workflowStatusList,
+            @RequestParam(value = "workflowStatusList", required = false) String[] workflowStatusList, 
+            @RequestParam(value = "queueList", required = false) String[] queueList,
             @RequestParam(value = "createdByUserList", required = false) String[] createdByUserList,
             @RequestParam(value = "reportedByUserList", required = false) String[] reportedByUserList,
             @RequestParam(value = "lastUpdatedByUserList", required = false) String[] lastUpdatedByUserList,
@@ -48,32 +51,40 @@ public class ReportingController {
             ModelMap map) {
 
         ArrayList<String> ticketArrayList = Validation.convertList(ticketList);
+        ArrayList<String> ticketTypeArrayList = Validation.convertList(ticketTypeList);
+        
         ArrayList<String> applicationArrayList = Validation.convertList(applicationList);
         ArrayList<String> severityArrayList = Validation.convertList(severityList);
         ArrayList<String> workflowArrayList = Validation.convertList(workflowList);
         ArrayList<String> workflowStatusArrayList = Validation.convertList(workflowStatusList);
-
+        ArrayList<String> queueArrayList = Validation.convertList(queueList);
+        
         ArrayList<String> reportedByUserArrayList = Validation.convertList(reportedByUserList);
         ArrayList<String> createdByUserArrayList = Validation.convertList(createdByUserList);
         ArrayList<String> lastUpdatedByUserArrayList = Validation.convertList(lastUpdatedByUserList);
 
-        List<Ticket> returnTicketList = ticketService.getListByCriteria(ticketArrayList,
+        List<Ticket> returnTicketList = ticketService.getListByCriteria(
+                ticketArrayList,
+                ticketTypeArrayList, 
                 applicationArrayList,
                 severityArrayList,
                 workflowArrayList,
                 workflowStatusArrayList,
+                queueArrayList, 
                 reportedByUserArrayList,
                 createdByUserArrayList,
                 lastUpdatedByUserArrayList,
-                dateCreatedFrom, dateCreatedTo,
-                dateLastUpdatedFrom, dateLastUpdatedTo);
+                String.valueOf(Timestamp.convTimestamp(dateCreatedFrom)), 
+                String.valueOf(Timestamp.convTimestamp(dateCreatedTo)), 
+                String.valueOf(Timestamp.convTimestamp(dateLastUpdatedFrom)), 
+                String.valueOf(Timestamp.convTimestamp(dateLastUpdatedTo)));
 
         map.addAttribute("ticketList", returnTicketList);
         map.addAttribute("page", "main/reporting/reportingresult.jsp");
         return "mainview";
     }
-
-    @RequestMapping(value = "/crucialreport/", method = RequestMethod.POST)
+    
+     @RequestMapping(value = "/crucialreport/", method = RequestMethod.POST)
     public ModelAndView handleRequestInternal(HttpServletRequest request,
             HttpServletResponse response, @RequestParam(value = "ticketList", required = false) String[] ticketList) throws Exception {
 
@@ -82,6 +93,8 @@ public class ReportingController {
         ticketArrayList.addAll(Arrays.asList(ticketList));
 
         List<Ticket> returnTicketList = ticketService.getListByCriteria(ticketArrayList,
+                new ArrayList<String>(), 
+                new ArrayList<String>(),
                 new ArrayList<String>(),
                 new ArrayList<String>(),
                 new ArrayList<String>(),
@@ -95,5 +108,4 @@ public class ReportingController {
         return new ModelAndView("ExcelRevenueSummary","ticketList", returnTicketList);
 
     }
-
 }

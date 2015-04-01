@@ -97,7 +97,7 @@ public class WorkflowChangeLogService extends JdbcDaoSupport implements Workflow
                 changeLog.setTicket(retrievedTicketList.get((int) row.get("ticket_id")));
             } else {
                 Ticket ticket = ticketService.
-                        getTicketById((int) row.get("ticket_id"), false, false, false, false);
+                        getTicketById((int) row.get("ticket_id"), false, false, false, false, false);
                 changeLog.setTicket(ticket);
                 retrievedTicketList.put((int) row.get("ticket_id"), ticket);
             }

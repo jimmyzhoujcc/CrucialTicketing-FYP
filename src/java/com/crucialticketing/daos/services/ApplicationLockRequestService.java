@@ -70,9 +70,9 @@ public class ApplicationLockRequestService extends JdbcDaoSupport implements App
     }
 
     @Override
-    public void denyAccess(int applicationLockRequestId, int applicationId, int requestorUserId) {
+    public void denyAccess(int applicationLockRequestId, Application application, int requestorUserId) {
         this.getJdbcTemplate().update("UPDATE application_lock_request SET request_pass_time=? WHERE application_lock_request_id=?", new Object[]{-1, applicationLockRequestId});
-        userAlertService.insertUserAlert(requestorUserId, "Access denied to access application (" + applicationId + ")");
+        userAlertService.insertUserAlert(requestorUserId, "Access denied to access application (" + application.getApplicationName() + ")");
     }
 
     @Override
@@ -82,6 +82,12 @@ public class ApplicationLockRequestService extends JdbcDaoSupport implements App
             return new ArrayList<>();
         }
         return this.rowMapper(rs);
+    }
+    
+    @Override
+    public void closeRequest(int applicationId, int requestorUserId) {
+        String sql = "DELETE FROM application_lock_request WHERE application_id=? AND requestor_user_id=?";
+        this.getJdbcTemplate().update(sql, new Object[]{applicationId, requestorUserId});
     }
 
     @Override
@@ -93,7 +99,7 @@ public class ApplicationLockRequestService extends JdbcDaoSupport implements App
         for (Map row : resultSet) {
             ApplicationLockRequest lockRequest = new ApplicationLockRequest();
 
-            lockRequest.setApplicationLockRequestId((int) row.get("application_lock_request_id"));
+            lockRequest.setLockRequestId((int) row.get("application_lock_request_id"));
 
             // Application
             if (userList.containsKey((int) row.get("application_id"))) {

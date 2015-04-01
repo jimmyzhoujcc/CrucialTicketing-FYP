@@ -20,6 +20,11 @@ public class Severity {
     
     public Severity() {}
 
+    public Severity(int severityId) {
+        this.severityId = severityId;
+    }
+
+    
     public int getSeverityId() {
         return severityId;
     }

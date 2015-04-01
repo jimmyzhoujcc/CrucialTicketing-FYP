@@ -1,5 +1,7 @@
+var timeForNotificationInterval = 3000; // GLOBAL
+
+// For notification
 var marker = 0;
-var timeForNotificationInterval = 3000;
 var pageDefaultTitle = document.title;
 
 $(document).ready(function ()
@@ -22,11 +24,6 @@ $(document).ready(function ()
     $(document).click(function ()
     {
         $("#notificationContainer").hide();
-    });
-    //Popup Click
-    $("#notificationContainer").click(function ()
-    {
-        return false
     });
 
 });
@@ -60,7 +57,7 @@ function checkForNotification() {
             }
 
             $('#notificationsBody')
-                    .append("<div class=\"notification-text\" id=\"notification_" + (i + 1) + "\">" + sliceString + " <span class=\"notification_stamp\">" + formatted + " UTC</span></div><br />");
+                    .append("<div class=\"notification-text\" id=\"notification_" + (i + 1) + "\"><a href=\"" + homeURI + "/home/alert/single?alert="+ obj.userAlertLog[i].userAlertId +"\">" + sliceString + "</a> <span class=\"notification_stamp\">" + formatted + " UTC</span></div><br />");
 
             $('.notification_' + (i + 1)).addClass('notification');
         }

@@ -10,7 +10,7 @@ package com.crucialticketing.entities;
  * @author DanFoley
  */
 public class WorkflowStatusLockRequest {
-    private int workflowStatusLockRequestId;
+    private int lockRequestId;
     private WorkflowStatus workflowStatus;
     private User requestor;
     private int requestTime;
@@ -26,12 +26,12 @@ public class WorkflowStatusLockRequest {
         this.requestor = requestor;
     }
 
-    public int getWorkflowStatusLockRequestId() {
-        return workflowStatusLockRequestId;
+    public int getLockRequestId() {
+        return lockRequestId;
     }
 
-    public void setWorkflowStatusLockRequestId(int workflowStatusLockRequestId) {
-        this.workflowStatusLockRequestId = workflowStatusLockRequestId;
+    public void setLockRequestId(int lockRequestId) {
+        this.lockRequestId = lockRequestId;
     }
 
     public WorkflowStatus getWorkflowStatus() {

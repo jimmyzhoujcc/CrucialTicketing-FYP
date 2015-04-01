@@ -27,9 +27,9 @@ public class UserAlertService extends JdbcDaoSupport implements UserAlertDao {
     }
     
     @Override
-    public UserAlert getUserAlertById(int userAlertId) {
-        String sql = "SELECT * FROM user_alert WHERE user_alert_id=?";
-        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{userAlertId});
+    public UserAlert getUserAlertById(int userAlertId, int userId) {
+        String sql = "SELECT * FROM user_alert WHERE user_alert_id=? AND user_id=?";
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{userAlertId, userId});
         if (rs.isEmpty()) {
             return new UserAlert();
         }

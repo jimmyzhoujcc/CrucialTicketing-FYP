@@ -9,7 +9,7 @@
 <%@taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
 
 <div class="row">
-    <form:form method="POST" action="${pageContext.servletContext.contextPath}/home/create/createticket/">  
+    <form:form method="POST" action="${pageContext.servletContext.contextPath}/home/create/ticket/p2/">  
 
         <div class="col-xs-12 col-sm-8 col-md-10">
 

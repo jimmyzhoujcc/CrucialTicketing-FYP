@@ -6,11 +6,8 @@
 package com.crucialticketing.daos.services;
 
 import com.crucialticketing.daos.UserQueueConChangeLogDao;
-import com.crucialticketing.util.ActiveFlag;
-import com.crucialticketing.entities.Queue;
 import com.crucialticketing.entities.Ticket;
 import com.crucialticketing.entities.User;
-import com.crucialticketing.entities.UserQueueCon;
 import com.crucialticketing.entities.UserQueueConChangeLog;
 import static com.crucialticketing.util.Timestamp.getTimestamp;
 import java.util.ArrayList;
@@ -105,7 +102,7 @@ public class UserQueueConChangeLogService extends JdbcDaoSupport implements User
                 changeLog.setTicket(retrievedTicketList.get((int) row.get("ticket_id")));
             } else {
                 Ticket ticket = ticketService.
-                        getTicketById((int) row.get("ticket_id"), false, false, false, false);
+                        getTicketById((int) row.get("ticket_id"), false, false, false, false, false);
                 changeLog.setTicket(ticket);
                 retrievedTicketList.put((int) row.get("ticket_id"), ticket);
             }

@@ -25,21 +25,21 @@ import javax.servlet.http.HttpSession;
  * @author Daniel Foley
  */
 public class SecurityController implements Filter {
-
+    
     private static final boolean debug = true;
 
     // The filter configuration object we are associated with.  If
     // this value is null, this filter instance is not currently
     // configured. 
     private FilterConfig filterConfig = null;
-
+    
     public SecurityController() {
     }
-
+    
     private void doBeforeProcessing(ServletRequest request, ServletResponse response)
             throws IOException, ServletException {
     }
-
+    
     private void doAfterProcessing(ServletRequest request, ServletResponse response)
             throws IOException, ServletException {
     }
@@ -57,34 +57,34 @@ public class SecurityController implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response,
             FilterChain chain)
             throws IOException, ServletException {
-
+        
         doBeforeProcessing(request, response);
-
+        
         Throwable problem = null;
         try {
             HttpServletRequest httpRequest = (HttpServletRequest) request;
-
+            
             String contextPath = httpRequest.getRequestURI();
             if (contextPath.contains("/home/") && (!contextPath.contains("/home/login/"))) {
                 HttpSession session = httpRequest.getSession(false);
-
+                
                 if (session == null) {
                     HttpServletResponse httpResponse = (HttpServletResponse) response;
-                    httpRequest.getSession().setAttribute("alert", "NULL SESSION Session has timed out, please re-login");
+                    httpRequest.getSession().setAttribute("alert", "Session has timed out, please re-login");
                     httpResponse.sendRedirect("/CrucialTicketing/home/login/login/");
                     return;
                 }
-
+                
                 User user = (User) session.getAttribute("user");
-
+                
                 if (user == null) {
                     HttpServletResponse httpResponse = (HttpServletResponse) response;
-                    httpRequest.getSession().setAttribute("alert", "NULL USER Session has timed out, please re-login");
+                    httpRequest.getSession().setAttribute("alert", "Session has timed out, please re-login");
                     httpResponse.sendRedirect("/CrucialTicketing/home/login/login/");
                     return;
                 }
-
-                boolean active = (boolean)session.getAttribute("active");
+                
+                boolean active = (boolean) session.getAttribute("active");
                 
                 if (!active) {
                     HttpServletResponse httpResponse = (HttpServletResponse) response;
@@ -94,14 +94,18 @@ public class SecurityController implements Filter {
                     return;
                 }
             }
-
+            
             chain.doFilter(request, response);
         } catch (IOException | ServletException t) {
-            problem = t;
+            //problem = t;
+            HttpServletResponse httpResponse = (HttpServletResponse) response;
+            HttpServletRequest httpRequest = (HttpServletRequest) request;
+            httpRequest.getSession().setAttribute("systemError", t.toString());
+            httpResponse.sendRedirect("/CrucialTicketing/error.jsp");
         }
-
+        
         doAfterProcessing(request, response);
-
+        
         if (problem != null) {
             if (problem instanceof ServletException) {
                 throw (ServletException) problem;
@@ -115,7 +119,8 @@ public class SecurityController implements Filter {
 
     /**
      * Return the filter configuration object for this filter.
-     * @return 
+     *
+     * @return
      */
     public FilterConfig getFilterConfig() {
         return (this.filterConfig);
@@ -139,6 +144,7 @@ public class SecurityController implements Filter {
 
     /**
      * Init method for this filter
+     *
      * @param filterConfig
      */
     @Override
@@ -164,16 +170,16 @@ public class SecurityController implements Filter {
         sb.append(")");
         return (sb.toString());
     }
-
+    
     private void sendProcessingError(Throwable t, ServletResponse response) {
         String stackTrace = getStackTrace(t);
-
+        
         if (stackTrace != null && !stackTrace.equals("")) {
             try {
                 response.setContentType("text/html");
                 try (PrintStream ps = new PrintStream(response.getOutputStream()); PrintWriter pw = new PrintWriter(ps)) {
                     pw.print("<html>\n<head>\n<title>Error</title>\n</head>\n<body>\n"); //NOI18N
-                    
+
                     // PENDING! Localize this for next official release
                     pw.print("<h1>The resource did not process correctly</h1>\n<pre>\n");
                     pw.print(stackTrace);
@@ -192,7 +198,7 @@ public class SecurityController implements Filter {
             }
         }
     }
-
+    
     public static String getStackTrace(Throwable t) {
         String stackTrace = null;
         try {
@@ -206,9 +212,9 @@ public class SecurityController implements Filter {
         }
         return stackTrace;
     }
-
+    
     public void log(String msg) {
         filterConfig.getServletContext().log(msg);
     }
-
+    
 }

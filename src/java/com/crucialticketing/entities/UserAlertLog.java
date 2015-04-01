@@ -5,6 +5,7 @@
  */
 package com.crucialticketing.entities;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -16,7 +17,9 @@ public class UserAlertLog {
     private int lastUpdated;
     private int unread;
     
-    public UserAlertLog() {}
+    public UserAlertLog() {
+        this.userAlertLog = new ArrayList<>();
+    }
 
     public UserAlertLog(List<UserAlert> userAlertLog, int lastUpdated) {
         this.userAlertLog = userAlertLog;
