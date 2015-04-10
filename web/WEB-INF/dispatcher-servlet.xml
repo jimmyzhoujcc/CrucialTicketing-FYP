@@ -44,151 +44,151 @@
           class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
     
     <!-- Beans for DAO -->
-    <bean id="applicationChangeLogService" class="com.crucialticketing.daos.services.ApplicationChangeLogService">
+    <bean id="applicationChangeLogService" class="com.crucialticketing.daoimpl.ApplicationChangeLogService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     
-    <bean id="applicationControlChangeLogService" class="com.crucialticketing.daos.services.ApplicationControlChangeLogService">
+    <bean id="applicationControlChangeLogService" class="com.crucialticketing.daoimpl.ApplicationControlChangeLogService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     
-    <bean id="applicationControlLockRequestService" class="com.crucialticketing.daos.services.ApplicationControlLockRequestService">
+    <bean id="applicationControlLockRequestService" class="com.crucialticketing.daoimpl.ApplicationControlLockRequestService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     
-    <bean id="applicationControlService" class="com.crucialticketing.daos.services.ApplicationControlService">
+    <bean id="applicationControlService" class="com.crucialticketing.daoimpl.ApplicationControlService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     
-    <bean id="applicationLockRequestService" class="com.crucialticketing.daos.services.ApplicationLockRequestService">
+    <bean id="applicationLockRequestService" class="com.crucialticketing.daoimpl.ApplicationLockRequestService">
         <property name="dataSource" ref="dataSource" />
     </bean>
 
-    <bean id="applicationService" class="com.crucialticketing.daos.services.ApplicationService">
+    <bean id="applicationService" class="com.crucialticketing.daoimpl.ApplicationService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     
-    <bean id="attachmentService" class="com.crucialticketing.daos.services.AttachmentService">
+    <bean id="attachmentService" class="com.crucialticketing.daoimpl.AttachmentService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     
-    <bean id="queueChangeLogService" class="com.crucialticketing.daos.services.QueueChangeLogService">
+    <bean id="queueChangeLogService" class="com.crucialticketing.daoimpl.QueueChangeLogService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     
-    <bean id="queueLockRequestService" class="com.crucialticketing.daos.services.QueueLockRequestService">
+    <bean id="queueLockRequestService" class="com.crucialticketing.daoimpl.QueueLockRequestService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     
-    <bean id="queueService" class="com.crucialticketing.daos.services.QueueService">
+    <bean id="queueService" class="com.crucialticketing.daoimpl.QueueService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     
-    <bean id="roleChangeLogService" class="com.crucialticketing.daos.services.RoleChangeLogService">
+    <bean id="roleChangeLogService" class="com.crucialticketing.daoimpl.RoleChangeLogService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     
-    <bean id="roleLockRequestService" class="com.crucialticketing.daos.services.RoleLockRequestService">
+    <bean id="roleLockRequestService" class="com.crucialticketing.daoimpl.RoleLockRequestService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     
-    <bean id="roleService" class="com.crucialticketing.daos.services.RoleService">
+    <bean id="roleService" class="com.crucialticketing.daoimpl.RoleService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     
-    <bean id="severityChangeLogService" class="com.crucialticketing.daos.services.SeverityChangeLogService">
+    <bean id="severityChangeLogService" class="com.crucialticketing.daoimpl.SeverityChangeLogService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     
-    <bean id="severityLockRequestService" class="com.crucialticketing.daos.services.SeverityLockRequestService">
+    <bean id="severityLockRequestService" class="com.crucialticketing.daoimpl.SeverityLockRequestService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     
-    <bean id="severityService" class="com.crucialticketing.daos.services.SeverityService">
+    <bean id="severityService" class="com.crucialticketing.daoimpl.SeverityService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     
-    <bean id="ticketChangeLogService" class="com.crucialticketing.daos.services.TicketChangeLogService">
+    <bean id="ticketChangeLogService" class="com.crucialticketing.daoimpl.TicketChangeLogService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     
-    <bean id="ticketLinkService" class="com.crucialticketing.daos.services.TicketLinkService">
+    <bean id="ticketLinkService" class="com.crucialticketing.daoimpl.TicketLinkService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     
-    <bean id="ticketLockRequestService" class="com.crucialticketing.daos.services.TicketLockRequestService">
+    <bean id="ticketLockRequestService" class="com.crucialticketing.daoimpl.TicketLockRequestService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     
-    <bean id="ticketLogService" class="com.crucialticketing.daos.services.TicketLogService">
+    <bean id="ticketLogService" class="com.crucialticketing.daoimpl.TicketLogService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     
-    <bean id="ticketService" class="com.crucialticketing.daos.services.TicketService">
+    <bean id="ticketService" class="com.crucialticketing.daoimpl.TicketService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     
-    <bean id="ticketTypeService" class="com.crucialticketing.daos.services.TicketTypeService">
+    <bean id="ticketTypeService" class="com.crucialticketing.daoimpl.TicketTypeService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     
-    <bean id="userAlertService" class="com.crucialticketing.daos.services.UserAlertService">
+    <bean id="userAlertService" class="com.crucialticketing.daoimpl.UserAlertService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     
-    <bean id="userChangeLogService" class="com.crucialticketing.daos.services.UserChangeLogService">
+    <bean id="userChangeLogService" class="com.crucialticketing.daoimpl.UserChangeLogService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     
-    <bean id="userLockRequestService" class="com.crucialticketing.daos.services.UserLockRequestService">
+    <bean id="userLockRequestService" class="com.crucialticketing.daoimpl.UserLockRequestService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     
-    <bean id="userQueueConChangeLogService" class="com.crucialticketing.daos.services.UserQueueConChangeLogService">
+    <bean id="userQueueConChangeLogService" class="com.crucialticketing.daoimpl.UserQueueConChangeLogService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     
-    <bean id="userQueueConService" class="com.crucialticketing.daos.services.UserQueueConService">
+    <bean id="userQueueConService" class="com.crucialticketing.daoimpl.UserQueueConService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     
-    <bean id="userRoleConChangeLogService" class="com.crucialticketing.daos.services.UserRoleConChangeLogService">
+    <bean id="userRoleConChangeLogService" class="com.crucialticketing.daoimpl.UserRoleConChangeLogService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     
-    <bean id="userRoleConService" class="com.crucialticketing.daos.services.UserRoleConService">
+    <bean id="userRoleConService" class="com.crucialticketing.daoimpl.UserRoleConService">
         <property name="dataSource" ref="dataSource" />
     </bean>
 
-    <bean id="userService" class="com.crucialticketing.daos.services.UserService">
+    <bean id="userService" class="com.crucialticketing.daoimpl.UserService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     
-    <bean id="workflowChangeLogService" class="com.crucialticketing.daos.services.WorkflowChangeLogService">
+    <bean id="workflowChangeLogService" class="com.crucialticketing.daoimpl.WorkflowChangeLogService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     
-    <bean id="workflowLockRequestService" class="com.crucialticketing.daos.services.WorkflowLockRequestService">
+    <bean id="workflowLockRequestService" class="com.crucialticketing.daoimpl.WorkflowLockRequestService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     
-    <bean id="workflowMapService" class="com.crucialticketing.daos.services.WorkflowMapService">
+    <bean id="workflowMapService" class="com.crucialticketing.daoimpl.WorkflowMapService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     
-    <bean id="workflowService" class="com.crucialticketing.daos.services.WorkflowService">
+    <bean id="workflowService" class="com.crucialticketing.daoimpl.WorkflowService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     
-    <bean id="workflowStatusChangeLogService" class="com.crucialticketing.daos.services.WorkflowStatusChangeLogService">
+    <bean id="workflowStatusChangeLogService" class="com.crucialticketing.daoimpl.WorkflowStatusChangeLogService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     
-    <bean id="workflowStatusLockRequestService" class="com.crucialticketing.daos.services.WorkflowStatusLockRequestService">
+    <bean id="workflowStatusLockRequestService" class="com.crucialticketing.daoimpl.WorkflowStatusLockRequestService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     
-    <bean id="workflowStatusService" class="com.crucialticketing.daos.services.WorkflowStatusService">
+    <bean id="workflowStatusService" class="com.crucialticketing.daoimpl.WorkflowStatusService">
         <property name="dataSource" ref="dataSource" />
     </bean>
     

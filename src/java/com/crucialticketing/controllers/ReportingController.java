@@ -5,7 +5,7 @@
  */
 package com.crucialticketing.controllers;
 
-import com.crucialticketing.daos.services.TicketService;
+import com.crucialticketing.daoimpl.TicketService;
 import com.crucialticketing.entities.Ticket;
 import com.crucialticketing.util.Timestamp;
 import com.crucialticketing.util.Validation;

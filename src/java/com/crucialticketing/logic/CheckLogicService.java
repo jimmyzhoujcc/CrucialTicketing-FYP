@@ -5,9 +5,9 @@
  */
 package com.crucialticketing.logic;
 
-import com.crucialticketing.daos.services.RoleService;
-import com.crucialticketing.daos.services.TicketService;
-import com.crucialticketing.daos.services.UserRoleConService;
+import com.crucialticketing.daoimpl.RoleService;
+import com.crucialticketing.daoimpl.TicketService;
+import com.crucialticketing.daoimpl.UserRoleConService;
 import com.crucialticketing.entities.User;
 import com.crucialticketing.util.Validation;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -5,12 +5,11 @@
  */
 package com.crucialticketing.controllers;
 
-import com.crucialticketing.daos.services.RoleService;
-import com.crucialticketing.entities.Secure;
+import com.crucialticketing.daoimpl.RoleService;
 import com.crucialticketing.entities.PasswordHash;
 import com.crucialticketing.entities.User;
-import com.crucialticketing.daos.services.UserRoleConService;
-import com.crucialticketing.daos.services.UserService;
+import com.crucialticketing.daoimpl.UserRoleConService;
+import com.crucialticketing.daoimpl.UserService;
 import com.crucialticketing.entities.Role;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;

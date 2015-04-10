@@ -6,7 +6,7 @@
 package com.crucialticketing.controllers;
 
 import com.crucialticketing.entities.Attachment;
-import com.crucialticketing.daos.services.AttachmentService;
+import com.crucialticketing.daoimpl.AttachmentService;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;

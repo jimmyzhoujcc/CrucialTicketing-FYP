@@ -27,7 +27,7 @@ public class Ticket {
     private TicketLog ticketLog;
     private List<Attachment> attachmentList;
     private List<TicketLink> ticketLinkList;
-    private ChangeLog changeLog;
+    private TicketChangeLog changeLog;
     
     public Ticket() {}
 
@@ -115,11 +115,11 @@ public class Ticket {
         this.ticketLinkList = ticketLinkList;
     }
 
-    public ChangeLog getChangeLog() {
+    public TicketChangeLog getChangeLog() {
         return changeLog;
     }
 
-    public void setChangeLog(ChangeLog changeLog) {
+    public void setChangeLog(TicketChangeLog changeLog) {
         this.changeLog = changeLog;
     }
 

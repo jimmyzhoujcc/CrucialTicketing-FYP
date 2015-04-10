@@ -5,8 +5,8 @@
  */
 package com.crucialticketing.logic;
 
-import com.crucialticketing.daos.services.UserRoleConService;
-import com.crucialticketing.daos.services.UserService;
+import com.crucialticketing.daoimpl.UserRoleConService;
+import com.crucialticketing.daoimpl.UserService;
 import com.crucialticketing.entities.PasswordHash;
 import com.crucialticketing.entities.Ticket;
 import com.crucialticketing.entities.User;

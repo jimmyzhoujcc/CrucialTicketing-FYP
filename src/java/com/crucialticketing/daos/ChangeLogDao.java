@@ -5,7 +5,7 @@
  */
 package com.crucialticketing.daos;
 
-import com.crucialticketing.entities.ChangeLog;
+import com.crucialticketing.entities.TicketChangeLog;
 import java.util.List;
 import java.util.Map;
 
@@ -16,7 +16,7 @@ import java.util.Map;
 public interface ChangeLogDao {
     public void addChangeLogEntry(int ticketId, int applicationControlId, int userId, int statusId);
     
-    public ChangeLog getChangeLogByTicketId(int ticketId, boolean populateAll);
+    public TicketChangeLog getChangeLogByTicketId(int ticketId, boolean populateAll);
 
-    public ChangeLog rowMapper(List<Map<String, Object>> resultSet, boolean populateAll);
+    public TicketChangeLog rowMapper(List<Map<String, Object>> resultSet, boolean populateAll);
 }

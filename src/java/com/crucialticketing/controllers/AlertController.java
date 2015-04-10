@@ -5,18 +5,18 @@
  */
 package com.crucialticketing.controllers;
 
-import com.crucialticketing.daos.services.ApplicationLockRequestService;
-import com.crucialticketing.daos.services.QueueLockRequestService;
-import com.crucialticketing.daos.services.RoleLockRequestService;
-import com.crucialticketing.daos.services.SeverityLockRequestService;
-import com.crucialticketing.daos.services.TicketLockRequestService;
+import com.crucialticketing.daoimpl.ApplicationLockRequestService;
+import com.crucialticketing.daoimpl.QueueLockRequestService;
+import com.crucialticketing.daoimpl.RoleLockRequestService;
+import com.crucialticketing.daoimpl.SeverityLockRequestService;
+import com.crucialticketing.daoimpl.TicketLockRequestService;
 import com.crucialticketing.entities.User;
 import com.crucialticketing.entities.UserAlert;
 import com.crucialticketing.entities.UserAlertLog;
-import com.crucialticketing.daos.services.UserAlertService;
-import com.crucialticketing.daos.services.UserLockRequestService;
-import com.crucialticketing.daos.services.WorkflowLockRequestService;
-import com.crucialticketing.daos.services.WorkflowStatusLockRequestService;
+import com.crucialticketing.daoimpl.UserAlertService;
+import com.crucialticketing.daoimpl.UserLockRequestService;
+import com.crucialticketing.daoimpl.WorkflowLockRequestService;
+import com.crucialticketing.daoimpl.WorkflowStatusLockRequestService;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.codehaus.jackson.map.ObjectMapper;

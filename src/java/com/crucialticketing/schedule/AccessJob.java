@@ -5,16 +5,16 @@
  */
 package com.crucialticketing.schedule;
 
-import com.crucialticketing.daos.services.ApplicationControlLockRequestService;
-import com.crucialticketing.daos.services.ApplicationLockRequestService;
-import com.crucialticketing.daos.services.QueueLockRequestService;
-import com.crucialticketing.daos.services.RoleLockRequestService;
-import com.crucialticketing.daos.services.SeverityLockRequestService;
+import com.crucialticketing.daoimpl.ApplicationControlLockRequestService;
+import com.crucialticketing.daoimpl.ApplicationLockRequestService;
+import com.crucialticketing.daoimpl.QueueLockRequestService;
+import com.crucialticketing.daoimpl.RoleLockRequestService;
+import com.crucialticketing.daoimpl.SeverityLockRequestService;
 import com.crucialticketing.entities.TicketLockRequest;
-import com.crucialticketing.daos.services.TicketLockRequestService;
-import com.crucialticketing.daos.services.UserLockRequestService;
-import com.crucialticketing.daos.services.WorkflowLockRequestService;
-import com.crucialticketing.daos.services.WorkflowStatusLockRequestService;
+import com.crucialticketing.daoimpl.TicketLockRequestService;
+import com.crucialticketing.daoimpl.UserLockRequestService;
+import com.crucialticketing.daoimpl.WorkflowLockRequestService;
+import com.crucialticketing.daoimpl.WorkflowStatusLockRequestService;
 import com.crucialticketing.entities.ApplicationControlLockRequest;
 import com.crucialticketing.entities.ApplicationLockRequest;
 import com.crucialticketing.entities.QueueLockRequest;

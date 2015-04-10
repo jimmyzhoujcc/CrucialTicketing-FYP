@@ -1,14 +1,14 @@
 package com.crucialticketing.controllers;
 
-import com.crucialticketing.daos.services.ApplicationService;
-import com.crucialticketing.daos.services.AttachmentService;
-import com.crucialticketing.daos.services.SeverityService;
-import com.crucialticketing.daos.services.TicketService;
-import com.crucialticketing.daos.services.TicketTypeService;
-import com.crucialticketing.daos.services.UserQueueConService;
-import com.crucialticketing.daos.services.UserService;
-import com.crucialticketing.daos.services.WorkflowService;
-import com.crucialticketing.daos.services.WorkflowStatusService;
+import com.crucialticketing.daoimpl.ApplicationService;
+import com.crucialticketing.daoimpl.AttachmentService;
+import com.crucialticketing.daoimpl.SeverityService;
+import com.crucialticketing.daoimpl.TicketService;
+import com.crucialticketing.daoimpl.TicketTypeService;
+import com.crucialticketing.daoimpl.UserQueueConService;
+import com.crucialticketing.daoimpl.UserService;
+import com.crucialticketing.daoimpl.WorkflowService;
+import com.crucialticketing.daoimpl.WorkflowStatusService;
 import com.crucialticketing.entities.Ticket;
 import com.crucialticketing.entities.UploadedFile;
 import com.crucialticketing.entities.UploadedFileLog;
