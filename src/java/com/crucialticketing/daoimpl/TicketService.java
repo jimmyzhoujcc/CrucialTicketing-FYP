@@ -44,7 +44,7 @@ public class TicketService extends JdbcDaoSupport implements TicketDao {
 
     @Autowired
     TicketChangeLogService changeLogService;
-    
+
     @Autowired
     TicketLinkService ticketLinkService;
 
@@ -94,8 +94,8 @@ public class TicketService extends JdbcDaoSupport implements TicketDao {
     }
 
     @Override
-    public Ticket getTicketById(int ticketId, boolean popTicketLog, 
-            boolean popAttachments, boolean popTicketLinks, 
+    public Ticket getTicketById(int ticketId, boolean popTicketLog,
+            boolean popAttachments, boolean popTicketLinks,
             boolean populateAllChangeLog, boolean popSLA) {
         String sql = "SELECT * FROM ticket WHERE ticket.ticket_id=?";
         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{ticketId});
@@ -184,14 +184,36 @@ public class TicketService extends JdbcDaoSupport implements TicketDao {
                 }
             }
         }
+        
+        for (Integer id : checkList) {
+            if(!searchList.contains(String.valueOf(id))) {
+                if(this.isTicketFinished(id)) {
+                    searchList.add(String.valueOf(id));
+                }
+            }
+        }
+
 
         return this.getTicketListByTicketIdList(searchList);
     }
 
+    private boolean isTicketFinished(int ticketId) {
+         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList("SELECT COUNT(ticket_change_log.ticket_change_log_id) AS result "
+                 + "FROM ticket_change_log JOIN workflow_status WHERE ticket_change_log.ticket_id="+ticketId+" AND "
+                 + "workflow_status.workflow_status_id=ticket_change_log.workflow_status_id AND workflow_status.workflow_status_type=2 "
+                 + "ORDER BY ticket_change_log.ticket_change_log_id DESC LIMIT 1");
+        int result = Integer.valueOf(rs.get(0).get("result").toString());
+        return result != 0;
+    }
+    
     private List<Ticket> getTicketListByTicketIdList(ArrayList<String> ticketIdList) {
-        String sql = "SELECT * FROM ticket WHERE ";
+        if ((ticketIdList == null) || (ticketIdList.isEmpty())) {
+            return new ArrayList<>();
+        }
 
-        sql = QueryGenerator.amendQuery(sql, ticketIdList, "ticket_id", false);
+        String sql = "SELECT * FROM ticket WHERE 1=1 ";
+
+        sql = QueryGenerator.amendQuery(sql, ticketIdList, "ticket_id", true);
 
         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql);
 

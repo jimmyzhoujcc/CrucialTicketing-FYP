@@ -44,7 +44,7 @@ public class UserQueueConService extends JdbcDaoSupport implements UserQueueConD
 
     @Override
     public int insertUserQueueCon(final UserQueueCon userQueueCon, final boolean newUserFlag, Ticket ticket, User requestor) {
-        final String sql = "INSERT INTO user_queue_con (user_id, queue_id, new_user_flag, active_flag) VALUES "
+        final String sql = "INSERT INTO user_queue_con (user_id, queue_id, new_queue_flag, active_flag) VALUES "
                 + "(?, ?, ?, ?)";
 
         KeyHolder holder = new GeneratedKeyHolder();
@@ -57,7 +57,7 @@ public class UserQueueConService extends JdbcDaoSupport implements UserQueueConD
                 PreparedStatement ps = (PreparedStatement) connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
                 ps.setInt(1, userQueueCon.getUser().getUserId());
                 ps.setInt(2, userQueueCon.getQueue().getQueueId());
-                ps.setInt(3, (newUserFlag) ? 1 : 0);
+                ps.setInt(3, 0);
                 ps.setInt(4, ActiveFlag.INCOMPLETE.getActiveFlag());
                 return ps;
             }
@@ -86,6 +86,13 @@ public class UserQueueConService extends JdbcDaoSupport implements UserQueueConD
                 + "WHERE user_id=? AND queue_id=?";
         return this.queryForExistCheck(sql, new Object[]{userId, queueId});
     }
+    
+    @Override
+    public boolean doesUserQueueConExistOnlineOrOffline(int userId, int queueId) {
+        String sql = "SELECT COUNT(user_queue_con_id) AS result FROM user_queue_con "
+                + "WHERE user_id=? AND queue_id=? AND active_flag>=?";
+        return this.queryForExistCheck(sql, new Object[]{userId, queueId, ActiveFlag.OFFLINE});
+    }
 
     @Override
     public boolean doesUserQueueConExistInOnline(int userId, int queueId) {
@@ -107,33 +114,33 @@ public class UserQueueConService extends JdbcDaoSupport implements UserQueueConD
     }
 
     @Override
-    public List<UserQueueCon> getIncompleteUserQueueConList(boolean newUserFlag) {
-        String sql = "SELECT * FROM user_queue_con WHERE active_flag=? AND new_user_flag=?";
-        return this.queryForArray(sql, new Object[]{-2, (newUserFlag) ? 1 : 0});
+    public List<UserQueueCon> getIncompleteUserQueueConList(boolean newQueueFlag) {
+        String sql = "SELECT * FROM user_queue_con WHERE active_flag=? AND new_queue_flag=?";
+        return this.queryForArray(sql, new Object[]{-2, (newQueueFlag) ? 1 : 0});
     }
 
     @Override
-    public List<UserQueueCon> getUnprocessedUserQueueConList(boolean newUserFlag) {
-        String sql = "SELECT * FROM user_queue_con WHERE active_flag=? AND new_user_flag=?";
-        return this.queryForArray(sql, new Object[]{-1, (newUserFlag) ? 1 : 0});
+    public List<UserQueueCon> getUnprocessedUserQueueConList(boolean newQueueFlag) {
+        String sql = "SELECT * FROM user_queue_con WHERE active_flag=? AND new_queue_flag=?";
+        return this.queryForArray(sql, new Object[]{-1, (newQueueFlag) ? 1 : 0});
     }
 
     @Override
-    public List<UserQueueCon> getUnprocessedUserQueueConListByQueueId(Queue queue, boolean newUserFlag) {
-        String sql = "SELECT * FROM user_queue_con WHERE queue_id=? AND active_flag=? AND new_user_flag=?";
-        return this.queryForArray(sql, new Object[]{queue.getQueueId(), -1, (newUserFlag) ? 1 : 0});
+    public List<UserQueueCon> getUnprocessedUserQueueConListByQueueId(Queue queue, boolean newQueueFlag) {
+        String sql = "SELECT * FROM user_queue_con WHERE queue_id=? AND active_flag=? AND new_queue_flag=?";
+        return this.queryForArray(sql, new Object[]{queue.getQueueId(), -1, (newQueueFlag) ? 1 : 0});
     }
 
     @Override
-    public List<UserQueueCon> getOnlineUserQueueConList(boolean newUserFlag) {
-        String sql = "SELECT * FROM user_queue_con WHERE active_flag=? AND new_user_flag=?";
-        return this.queryForArray(sql, new Object[]{1, (newUserFlag) ? 1 : 0});
+    public List<UserQueueCon> getOnlineUserQueueConList(boolean newQueueFlag) {
+        String sql = "SELECT * FROM user_queue_con WHERE active_flag=? AND new_queue_flag=?";
+        return this.queryForArray(sql, new Object[]{1, (newQueueFlag) ? 1 : 0});
     }
 
     @Override
-    public List<UserQueueCon> getOfflineUserQueueConList(boolean newUserFlag) {
-        String sql = "SELECT * FROM user_queue_con WHERE active_flag=? AND new_user_flag=?";
-        return this.queryForArray(sql, new Object[]{0, (newUserFlag) ? 1 : 0});
+    public List<UserQueueCon> getOfflineUserQueueConList(boolean newQueueFlag) {
+        String sql = "SELECT * FROM user_queue_con WHERE active_flag=? AND new_queue_flag=?";
+        return this.queryForArray(sql, new Object[]{0, (newQueueFlag) ? 1 : 0});
     }
 
     @Override
@@ -167,9 +174,9 @@ public class UserQueueConService extends JdbcDaoSupport implements UserQueueConD
     }
     
     @Override
-    public void removeUserQueueConByQueueId(int queueId) {
-        String sql = "DELETE FROM user_queue_con WHERE queue_id=?";
-        this.queryUpdate(sql, new Object[]{queueId});    
+    public void removeUserQueueCon(int userQueueConId) {
+        String sql = "DELETE FROM user_queue_con WHERE user_queue_con_id=?";
+        this.queryUpdate(sql, new Object[]{userQueueConId});    
     }
 
     private UserQueueCon queryForSingle(String sql, Object[] objectList) {

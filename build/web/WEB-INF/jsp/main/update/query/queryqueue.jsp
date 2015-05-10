@@ -5,45 +5,66 @@
     <h3>Query Queue</h3>
 
     <form action="<%=request.getContextPath()%>/home/update/queue/" method="POST">
-        Queue ID: <input type="text" name="queueId" />
-        <br class="clearfix" />
-        Queue Name: <input type="text" name="queueName" />
-        <br class="clearfix" />
-        <br class="clearfix" />
-        <input type="submit" />
+        <div class="query_container">
+            <div class="query_heading">
+                Queue ID:
+            </div>
+            <div class="query_box">
+                <input type="text" name="queueId" />
+            </div>
+        </div>
+
+        <div class="query_container">
+            <div class="query_heading">
+                Queue Name:
+            </div>
+            <div class="query_box">
+                <input type="text" name="queueName" />
+            </div>
+        </div>
+
+        <div class="query_container">
+            <div class="query_heading">
+                <input type="submit" />
+            </div>
+        </div>
     </form>
-        
+
     <br class="clearfix" />
     <hr />
     <br class="clearfix" />
 
-    <c:if test="${fn:length(queueList) gt 0}">
+    <table class="table table-hover">
+        <tr>
+            <td>ID</td>
+            <td>Queue Name</td>
+            <td>Select</td>
+        </tr>
 
-        <table class="table table-hover">
-            <tr>
-                <td>ID</td>
-                <td>Queue Name</td>
-                <td>Select</td>
-            </tr>
+        <tr>
+            <c:if test="${fn:length(queueList) gt 0}">
+                <c:forEach var="queue" items="${queueList}">
 
-            <c:forEach var="queue" items="${queueList}">
-                <tr>
                     <td>${queue.queueId}</td>
                     <td>${queue.queueName}</td>
                     <td><input type="button" onClick="javascript:updateQueueInput(${queue.queueId})" value="Select" /></td>
-                </tr>
-            </c:forEach>
-        </table>
 
-        <script>
-            function updateQueueInput(queueId) {
-                document.getElementById('queueHiddenInput').value = queueId;
-                $("#queryQueue").submit();
-            }
-            </script>
-        <form id="queryQueue" action="<%=request.getContextPath()%>/home/update/queue/update/" method="POST">
-            <input id="queueHiddenInput" type="hidden" name="queueId" />
-        </form>
-    </c:if>
+                </c:forEach>
+            </c:if>
+            <c:if test="${fn:length(queueList) == 0}">
+                <td colspan="3">No records to display</td>
+            </c:if>
+        </tr>
+    </table>
+
+    <script>
+        function updateQueueInput(queueId) {
+            document.getElementById('queueHiddenInput').value = queueId;
+            $("#queryQueue").submit();
+        }
+    </script>
+    <form id="queryQueue" action="<%=request.getContextPath()%>/home/update/queue/update/" method="POST">
+        <input id="queueHiddenInput" type="hidden" name="queueId" />
+    </form>
 </div>
 

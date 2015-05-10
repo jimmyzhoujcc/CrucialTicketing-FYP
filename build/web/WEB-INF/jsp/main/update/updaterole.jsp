@@ -7,6 +7,12 @@
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 <%@taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
 
+<script>
+    function goToUrl(inputUrl) {
+        window.location.replace(inputUrl)
+    }
+</script>
+
 <!-- Auto edit functionality -->
 <script src="<%=request.getContextPath()%>/js/auto/autoedit.js"></script>
 <script>
@@ -29,47 +35,137 @@
     </c:otherwise>
 </c:choose>
 
-<div class="create-form-button-container">
+<div class="row">
     <form:form action="${pageContext.request.contextPath}${formLink}" id="${formName}" method="POST" commandName="role">
 
-        <c:choose>
-            <c:when test="${edit}">
-                <input type="submit" value="Save" />
-                <input type="hidden" value="${role.roleId}" name="roleId" />
-                <br class="clearfix" />
-                Ticket ID: <input type="text" name="ticketId" /> (for request)
-            </c:when>
-            <c:otherwise>
-                <input type="submit" value="Edit" />
-                <input type="hidden" value="${role.roleId}" name="roleId" />
-            </c:otherwise>
-        </c:choose>
+        <div id="subticketnav" class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title">User Control</h3>
+            </div>
+            <div class="panel-body">
+                <c:choose>
+                    <c:when test="${edit}">
+                        <input type="submit" value="Save" class="btn btn-success" />
+                        <input type="button" onClick="javascript:goToUrl('${pageContext.request.contextPath}/home/update/role/cancel/?roleId=${role.roleId}')"  value="Cancel (Exit)" class="btn btn-danger" />
+                    </c:when>
+                    <c:otherwise>
+                        <input type="submit" value="Edit" class="btn btn-warning" />
+                        <input type="button" value="Refresh" class="btn btn-success"  onClick="javascript:goToUrl('${pageContext.request.contextPath}/home/update/role/update/?roleId=${role.roleId}')" />
+                    </c:otherwise>
+                </c:choose>
 
-        <br class="clearfix" />
-        <br class="clearfix" />
+            </div>
+        </div>
 
-        Role ID: ${role.roleId}
+        <div class="col-xs-12 col-sm-8 col-md-10">
+            <h3><span class="label label-default">Role Record</span> ${role.roleName}</h3>
 
-        <br class="clearfix" />
+            <br class="clearfix" />
 
-        Role Name: ${role.roleName}
-        
-        <br class="clearfix" />
+            <ol class="breadcrumb">
+                <li>
+                    Snapshot as of the role as of 
+                    <c:set var="now" value="<%=new java.util.Date()%>" />
+                <fmt:formatDate type="both" dateStyle="long" timeStyle="long" value="${now}" />
+                </li>
+            </ol>
 
-        Role Description: ${role.roleDescription}
+            <div class="create-form-button-container form-override">
+                <div class="panel panel-primary">
+                    <a name="basic"></a>
+                    <div class="panel-heading">
+                        <h3 class="panel-title">User information</h3>
+                    </div>
+                    <div class="panel-body">
 
-        <br class="clearfix" />
-        <br class="clearfix" />
-        Status:
-        <c:choose>
-            <c:when test="${edit}">
-                Online: <input type="radio" value="${activeFlagOnline}" name="activeFlag" <c:if test="${role.activeFlag.activeFlag == activeFlagOnline}">checked</c:if> /> 
-                Offline: <input type="radio" value="${activeFlagOffline}" name="activeFlag" <c:if test="${role.activeFlag.activeFlag == activeFlagOffline}">checked</c:if> />  
-            </c:when>
-            <c:otherwise>
-                ${role.activeFlag}
-            </c:otherwise>
-        </c:choose>
+                        <input type="hidden" value="${role.roleId}" name="roleId" />
 
+                        <c:if test="${edit}">
+                            <div class="ticketinfo_container">
+                                <div class="ticketinfo_heading">
+                                    Ticket ID:
+                                </div>
+                                <div class="ticketinfo_data">
+                                    <input type="text" name="ticketId" /> (for request)
+                                </div>
+                            </div>
+
+                            <br class="clearfix" />
+                            <br class="clearfix" />
+                        </c:if>
+
+                        <div class="ticketinfo_container">
+                            <div class="ticketinfo_heading">
+                                Role ID:
+                            </div>
+                            <div class="ticketinfo_data">
+                                ${role.roleId}
+                            </div>
+                        </div>
+
+                        <div class="ticketinfo_container">
+                            <div class="ticketinfo_heading">
+                                Role Name:
+                            </div>
+                            <div class="ticketinfo_data">
+                                ${role.roleName}
+                            </div>
+                        </div>
+
+                        <div class="ticketinfo_container">
+                            <div class="ticketinfo_heading">
+                                Role Description:
+                            </div>
+                            <div class="ticketinfo_data">
+                                ${role.roleDescription}
+                            </div>
+                        </div>
+
+                        <div class="ticketinfo_container">
+                            <div class="ticketinfo_heading">
+                                Status:
+                            </div>
+                            <div class="ticketinfo_data">
+                                <c:choose>
+                                    <c:when test="${edit}">
+                                        Online: <input type="radio" value="${activeFlagOnline}" name="activeFlag" <c:if test="${role.activeFlag.activeFlag == activeFlagOnline}">checked</c:if> /> 
+                                        Offline: <input type="radio" value="${activeFlagOffline}" name="activeFlag" <c:if test="${role.activeFlag.activeFlag == activeFlagOffline}">checked</c:if> />  
+                                    </c:when>
+                                    <c:otherwise>
+                                        ${role.activeFlag}
+                                    </c:otherwise>
+                                </c:choose>
+                            </div>
+                        </div> 
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ticketnav col-xs-4 col-md-2">
+
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title">User Control</h3>
+                </div>
+                <div class="panel-body">
+                    <c:choose>
+                        <c:when test="${edit}">
+                            <input type="submit" value="Save" class="btn btn-success" />
+                            <br class="clearfix" />
+                            <br class="clearfix" />
+                            <input type="button" onClick="javascript:goToUrl('${pageContext.request.contextPath}/home/update/role/cancel/?roleId=${role.roleId}')"  value="Cancel (Exit)" class="btn btn-danger" />
+                        </c:when>
+                        <c:otherwise>
+                            <input type="submit" value="Edit" class="btn btn-warning" />
+                            <br class="clearfix" />
+                            <br class="clearfix" />
+                            <input type="button" value="Refresh" class="btn btn-success"  onClick="javascript:goToUrl('${pageContext.request.contextPath}/home/update/role/update/?roleId=${role.roleId}')" />
+                        </c:otherwise>
+                    </c:choose>
+
+                </div>
+            </div>
+        </div>
     </form:form>
 </div>

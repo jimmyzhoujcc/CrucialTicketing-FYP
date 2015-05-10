@@ -226,17 +226,19 @@ public class UpdateController {
         ArrayList<String> ticketIdList = new ArrayList<>();
         ArrayList<String> emptyList = new ArrayList<>();
 
+        List<Ticket> ticketList = new ArrayList<>();
+
         if (Validation.isStringSet(ticketId, 10)) {
             ticketIdList.add(ticketId);
-        }
 
-        List<Ticket> ticketList = ticketService.getListByCriteria(ticketIdList, emptyList,
-                emptyList, emptyList,
-                emptyList, emptyList,
-                emptyList, emptyList,
-                emptyList, emptyList,
-                "", "",
-                String.valueOf(Timestamp.convTimestamp(lastUpdatedFrom)), String.valueOf(Timestamp.convTimestamp(lastUpdatedTo)));
+            ticketList = ticketService.getListByCriteria(ticketIdList, emptyList,
+                    emptyList, emptyList,
+                    emptyList, emptyList,
+                    emptyList, emptyList,
+                    emptyList, emptyList,
+                    "", "",
+                    String.valueOf(Timestamp.convTimestamp(lastUpdatedFrom)), String.valueOf(Timestamp.convTimestamp(lastUpdatedTo)));
+        }
 
         // Success
         map.put("ticketList", ticketList);
@@ -386,7 +388,7 @@ public class UpdateController {
                     + newVersion.getApplicationControl().getSeverity().getSeverityLevel() + ": "
                     + newVersion.getApplicationControl().getSeverity().getSeverityName());
 
-            ticketLogService.addTicketLog(newVersion.getTicketId(), 0, "Ticket status reset to "
+            ticketLogService.addTicketLog(newVersion.getTicketId(), 1, "Ticket status reset to "
                     + newVersion.getCurrentWorkflowStep().getWorkflowStatus().getWorkflowStatusName());
 
             changeLogEntryRequired = true;
@@ -406,13 +408,13 @@ public class UpdateController {
                     Validation.inputIsInvalid(map, "Workflow Status");
                     return this.viewTicket(request, ticketIdStr, map);
                 } else {
-                    ticketLogService.addTicketLog(newVersion.getTicketId(), user.getUserId(), "Ticket status has been changed to "
-                            + newVersion.getApplicationControl()
+                    newVersion.setCurrentWorkflowStep(newVersion.getApplicationControl()
                             .getWorkflow()
                             .getWorkflowMap()
-                            .getWorkflowStageByStatus(Validation.toInteger(workflowStatus))
-                            .getWorkflowStatus()
-                            .getWorkflowStatusName());
+                            .getWorkflowStageByStatus(Validation.toInteger(workflowStatus)));
+
+                    ticketLogService.addTicketLog(newVersion.getTicketId(), user.getUserId(), "Ticket status has been changed to "
+                            + newVersion.getCurrentWorkflowStep().getWorkflowStatus().getWorkflowStatusName());
 
                     changeLogEntryRequired = true;
                 }
@@ -427,7 +429,7 @@ public class UpdateController {
         }
 
         // Checks if the log entry is valid - buffer for <br />
-        if (Validation.isStringSet(logEntry, (1000-200))) {
+        if (Validation.isStringSet(logEntry, (1000 - 200))) {
             if ((logEntry.isEmpty()) || ((logEntry.replace(" ", "")).length() == 0)) {
                 Validation.inputIsInvalid(map, "Ticket Log Entry");
             }
@@ -452,21 +454,23 @@ public class UpdateController {
         }
 
         // Adds any links
-        for (String link : linkedTicketList) {
-            int ticketLinkId = Validation.toInteger(link);
+        if (linkedTicketList != null) {
+            for (String link : linkedTicketList) {
+                int ticketLinkId = Validation.toInteger(link);
 
-            if (ticketLinkId == 0) {
-                Validation.inputIsInvalid(map, "Ticket Link");
-                return this.viewTicket(request, ticketIdStr, map);
-            }
+                if (ticketLinkId == 0) {
+                    Validation.inputIsInvalid(map, "Ticket Link");
+                    return this.viewTicket(request, ticketIdStr, map);
+                }
 
-            if (!ticketService.doesTicketExist(ticketLinkId)) {
-                Validation.inputIsInvalid(map, "Ticket Link");
-                return this.viewTicket(request, ticketIdStr, map);
-            }
+                if (!ticketService.doesTicketExist(ticketLinkId)) {
+                    Validation.inputIsInvalid(map, "Ticket Link");
+                    return this.viewTicket(request, ticketIdStr, map);
+                }
 
-            if (!ticketLinkService.doesTicketLinkExist(newVersion.getTicketId(), ticketLinkId)) {
-                ticketLinkService.insertTicketLink(new TicketLink(new Ticket(newVersion.getTicketId()), new Ticket(ticketLinkId)));
+                if (!ticketLinkService.doesTicketLinkExist(newVersion.getTicketId(), ticketLinkId)) {
+                    ticketLinkService.insertTicketLink(new TicketLink(new Ticket(newVersion.getTicketId()), new Ticket(ticketLinkId)));
+                }
             }
         }
 
@@ -481,6 +485,27 @@ public class UpdateController {
 
         ticketLockRequestService.closeRequest(newVersion.getTicketId(), user.getUserId());
         return this.viewTicket(request, ticketIdStr, map);
+    }
+
+    @RequestMapping(value = "/ticket/cancel/", method = RequestMethod.GET)
+    public String cancelTicketEdit(HttpServletRequest request,
+            @RequestParam(value = "ticketId", required = false) String ticketId,
+            ModelMap map) {
+        User user = (User) request.getSession().getAttribute("user");
+
+        if (!checkService.doesRoleCheckPass("MAINT_TICKET_UPDATE", user, map)) {
+            Validation.userDoesntHaveRole(map);
+            return this.viewTicket(request, ticketId, map);
+        }
+
+        if (!ticketService.doesTicketExist(Validation.toInteger(ticketId))) {
+            map.addAttribute("page", "main/update/query/queryticket.jsp");
+            Validation.inputIsInvalid(map, "query");
+            return "mainview";
+        }
+
+        ticketLockRequestService.closeRequest(Integer.valueOf(ticketId), user.getUserId());
+        return this.viewTicket(request, ticketId, map);
     }
 
     // User
@@ -542,7 +567,7 @@ public class UpdateController {
         return "mainview";
     }
 
-    @RequestMapping(value = "/user/update/", method = RequestMethod.POST)
+    @RequestMapping(value = "/user/update/", method = {RequestMethod.POST, RequestMethod.GET})
     public String viewUser(HttpServletRequest request,
             @RequestParam(value = "userId", required = false) String userIdStr,
             ModelMap map) {
@@ -620,6 +645,8 @@ public class UpdateController {
             @RequestParam(value = "ticketId", required = false) String ticketId,
             ModelMap map) {
 
+        userForChange.getSecure().setTextPassword(password);
+
         this.setRoot("menu/update.jsp", map);
 
         User user = (User) request.getSession().getAttribute("user");
@@ -647,6 +674,22 @@ public class UpdateController {
 
         return this.viewUser(request, String.valueOf(userForChange.getUserId()), map);
 
+    }
+
+    @RequestMapping(value = "/user/cancel/", method = RequestMethod.GET)
+    public String cancelUserEdit(HttpServletRequest request,
+            @RequestParam(value = "userId", required = false) String userId,
+            ModelMap map) {
+        User user = (User) request.getSession().getAttribute("user");
+
+        if (!checkService.doesRoleCheckPass("MAINT_USER_UPDATE", user, map)) {
+            Validation.userDoesntHaveRole(map);
+            return this.viewUser(request, userId, map);
+        }
+
+        userLockRequestService.closeRequest(Integer.valueOf(userId), user.getUserId());
+
+        return this.viewUser(request, String.valueOf(userId), map);
     }
 
     @RequestMapping(value = "/role/", method = RequestMethod.POST)
@@ -792,6 +835,22 @@ public class UpdateController {
             }
         } catch (NumberFormatException e) {
             Validation.pageError(map);
+        }
+
+        roleLockRequestService.closeRequest(Integer.valueOf(roleId), user.getUserId());
+
+        return this.viewRole(request, roleId, map);
+    }
+
+    @RequestMapping(value = "/role/cancel/", method = RequestMethod.GET)
+    public String cancelRoleEdit(HttpServletRequest request,
+            @RequestParam(value = "roleId", required = false) String roleId,
+            ModelMap map) {
+        User user = (User) request.getSession().getAttribute("user");
+
+        if (!checkService.doesRoleCheckPass("MAINT_ROLE_UPDATE", user, map)) {
+            Validation.userDoesntHaveRole(map);
+            return this.viewRole(request, roleId, map);
         }
 
         roleLockRequestService.closeRequest(Integer.valueOf(roleId), user.getUserId());
@@ -981,6 +1040,22 @@ public class UpdateController {
         queueLockRequestService.closeRequest(newVersion.getQueueId(), user.getUserId());
 
         return this.viewQueue(request, String.valueOf(newVersion.getQueueId()), map);
+    }
+
+    @RequestMapping(value = "/queue/cancel/", method = RequestMethod.GET)
+    public String cancelQueueEdit(HttpServletRequest request,
+            @RequestParam(value = "queueId", required = false) String queueId,
+            ModelMap map) {
+        User user = (User) request.getSession().getAttribute("user");
+
+        if (!checkService.doesRoleCheckPass("MAINT_QUEUE_UPDATE", user, map)) {
+            Validation.userDoesntHaveRole(map);
+            return this.viewQueue(request, String.valueOf(Integer.valueOf(queueId)), map);
+        }
+
+        queueLockRequestService.closeRequest(Integer.valueOf(queueId), user.getUserId());
+
+        return this.viewQueue(request, queueId, map);
     }
 
     @RequestMapping(value = "/application/", method = RequestMethod.POST)

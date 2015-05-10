@@ -121,13 +121,15 @@
 
                 }
 
-                workflowList = document.getElementById('confirmedWorkflowList');
-                addNewHiddenWorkflowStep(indexArray[workflowFromId], size, workflowToId, roleId);
-                workflowList.options[workflowList.options.length] = new Option(
-                        $("#workflowFromSelection option:selected").text()
-                        + " --> "
-                        + $("#workflowToSelection option:selected").text()
-                        + " (" + $("#roleSelection option:selected").text() + ")");
+                if (!found) {
+                    workflowList = document.getElementById('confirmedWorkflowList');
+                    addNewHiddenWorkflowStep(indexArray[workflowFromId], size, workflowToId, roleId);
+                    workflowList.options[workflowList.options.length] = new Option(
+                            $("#workflowFromSelection option:selected").text()
+                            + " --> "
+                            + $("#workflowToSelection option:selected").text()
+                            + " (" + $("#roleSelection option:selected").text() + ")");
+                }
             });
 
             $('#workflowClear').click(function () {

@@ -12,6 +12,7 @@ import com.crucialticketing.entities.Ticket;
 import com.crucialticketing.entities.User;
 import com.crucialticketing.entities.UserRoleCon;
 import com.crucialticketing.util.ActiveFlag;
+import com.crucialticketing.util.Timestamp;
 import static com.crucialticketing.util.Timestamp.convTimestamp;
 import static com.crucialticketing.util.Timestamp.getTimestamp;
 import com.crucialticketing.util.Validation;
@@ -94,62 +95,33 @@ public class UserLogicService {
 
             // Updates any role connections
             for (UserRoleCon userRoleCon : newVersion.getUserRoleConList()) {
-                boolean found = false;
-                boolean statusChange = false;
-                boolean timeChange = false;
                 int userRoleConId = 0;
 
-                for (int i = 0; (i < oldVersion.getUserRoleConList().size()) && (!found); i++) {
+                for (int i = 0; i < oldVersion.getUserRoleConList().size(); i++) {
 
                     if (oldVersion.getUserRoleConList().get(i).getRole().getRoleId() == userRoleCon.getRole().getRoleId()) {
-                        found = true;
+
                         userRoleConId = oldVersion.getUserRoleConList().get(i).getUserRoleConId();
 
-                        if (oldVersion.getUserRoleConList().get(i).getActiveFlag().getActiveFlag()
-                                != userRoleCon.getActiveFlag().getActiveFlag()) {
-
-                            if (!((userDeactivated) && (userRoleCon.getActiveFlag().getActiveFlag() == ActiveFlag.OFFLINE.getActiveFlag()))) {
-                                statusChange = true;
+                        // User deactivated
+                        if (userDeactivated) {
+                            userRoleConService.updateValidity(userRoleConId, oldVersion.getUserRoleConList().get(i).getValidFrom(), Timestamp.getTimestamp());
+                            userRoleConService.updateToOffline(userRoleConId, new Ticket(Integer.valueOf(ticketId)), requestor);
+                        } else {
+                            if (userRoleCon.getActiveFlag().getActiveFlag()
+                                    != oldVersion.getUserRoleConList().get(i).getActiveFlag().getActiveFlag()) {
+                                if (userRoleCon.getActiveFlag().getActiveFlag() == ActiveFlag.ONLINE.getActiveFlag()) {
+                                    userRoleConService.updateToOnline(userRoleConId, new Ticket(Integer.valueOf(ticketId)), requestor);
+                                    userRoleCon.setValidTo(Timestamp.convTimestamp(userRoleCon.getValidToStr()));
+                                } else {
+                                    userRoleConService.updateToOffline(userRoleConId, new Ticket(Integer.valueOf(ticketId)), requestor);
+                                    userRoleCon.setValidTo(Timestamp.getTimestamp());
+                                }
+                                
+                                if(oldVersion.getUserRoleConList().get(i).getValidTo() != userRoleCon.getValidTo()) {
+                                    userRoleConService.updateValidity(userRoleConId, oldVersion.getUserRoleConList().get(i).getValidFrom(), userRoleCon.getValidTo());
+                                }
                             }
-                        } else if (!convTimestamp(oldVersion.getUserRoleConList().get(i).getValidTo()).equals(userRoleCon.getValidToStr())) {
-                            timeChange = true;
-                        }
-                    }
-                }
-
-                if (((statusChange) || (timeChange) || (userDeactivated)) && (found)) {
-                    int timestamp = getTimestamp();
-
-                    String validToStr = userRoleCon.getValidToStr();
-
-                    int dateFrom = timestamp;
-                    int dateTo = convTimestamp(validToStr);
-
-                    // If user is being deactivated, the user role con status flag is overriden
-                    if (userDeactivated) {
-                        if (userRoleCon.getActiveFlag().getActiveFlag() != ActiveFlag.OFFLINE.getActiveFlag()) {
-                            userRoleCon.setActiveFlag(ActiveFlag.OFFLINE);
-                            statusChange = true;
-                        }
-                    }
-
-                    // Overrides requested To date if active flag is set to offline for role or user
-                    if (userRoleCon.getActiveFlag().getActiveFlag() == ActiveFlag.OFFLINE.getActiveFlag()) {
-                        dateTo = timestamp;
-                        timeChange = true;
-                    }
-
-                    if (timeChange) {
-                        userRoleConService.updateValidity(userRoleConId, dateFrom, dateTo);
-                    }
-
-                    if (statusChange) {
-                        if (userRoleCon.getActiveFlag().getActiveFlag() == ActiveFlag.ONLINE.getActiveFlag()) {
-                            userRoleConService.updateToOnline(userRoleConId,
-                                    new Ticket(Integer.valueOf(ticketId)), requestor);
-                        } else if (userRoleCon.getActiveFlag().getActiveFlag() == ActiveFlag.OFFLINE.getActiveFlag()) {
-                            userRoleConService.updateToOffline(userRoleConId,
-                                    new Ticket(Integer.valueOf(ticketId)), requestor);
                         }
                     }
                 }

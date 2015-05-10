@@ -62,7 +62,8 @@
 
                     <jsp:setProperty name="dateValue" property="time" value="${ticket.changeLog.changeLog[fn:length(ticket.changeLog.changeLog) - 1].stamp*1000}"/>
                     <td><fmt:formatDate pattern="dd-MM-yyyy" value="${dateValue}" /></td>
-                    <td><input type="button" onClick="javascript:getTicket(${ticket.ticketId})" value="Select" /></td>
+                    
+                    <td><a href="<%=request.getContextPath()%>/home/update/ticket/update/?ticketId=${ticket.ticketId}">View</a></td>
                 </tr>
             </c:forEach>
         </c:when>

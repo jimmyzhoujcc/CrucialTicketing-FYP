@@ -28,6 +28,8 @@ public interface UserQueueConDao {
 
     public boolean doesUserQueueConExist(int userId, int queueId);
 
+    public boolean doesUserQueueConExistOnlineOrOffline(int userId, int queueId);
+    
     public boolean doesUserQueueConExistInOnline(int userId, int queueId);
 
     public List<UserQueueCon> getIncompleteUserQueueConList(boolean newUserFlag);
@@ -46,7 +48,7 @@ public interface UserQueueConDao {
 
     public void updateToOffline(int userQueueConId, Ticket ticket, User requestor);
 
-    public void removeUserQueueConByQueueId(int queueId);
+    public void removeUserQueueCon(int userQueueConId);
     
     public List<UserQueueCon> rowMapper(List<Map<String, Object>> resultSet);
 }

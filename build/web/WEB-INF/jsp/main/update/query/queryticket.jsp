@@ -8,9 +8,15 @@
 
 <div class="create-form-button-container">
     <form method="POST" action="<%=request.getContextPath()%>/home/update/ticket/">
-        Select by
-        <br />
-        Ticket ID: <input type="text" name="ticketId" />
+
+        <div class="query_container">
+            <div class="query_heading">
+                Ticket ID:
+            </div>
+            <div class="query_box">
+                <input type="text" name="ticketId" />
+            </div>
+        </div>
 
         <script>
             $(function () {
@@ -21,56 +27,67 @@
             });
         </script>    
 
-        <br class="clearfix" />
+        <div class="query_container">
+            <div class="query_heading">
+                Last Updated From: 
+            </div>
+            <div class="query_box">
+                <input type="text" name="lastUpdatedFrom" id="datepicker_from">
+            </div>
+        </div>
 
-        Last Updated From: 
+        <div class="query_container">
+            <div class="query_heading">
+                Last Updated To:
+            </div>
+            <div class="query_box">
+                <input type="text" name="lastUpdatedTo" id="datepicker_to">
+            </div>
+        </div>
 
-        <input type="text" name="lastUpdatedFrom" id="datepicker_from">
-
-        <br class="clearfix" />
-
-        Last Updated To:
-
-        <input type="text" name="lastUpdatedTo" id="datepicker_to">
-
-        <br class="clearfix" />
-
-        <input type="submit" />
+        <div class="query_container">
+            <div class="query_heading">
+                <input type="submit" />
+            </div>
+        </div>
     </form>
 
     <br class="clearfix" />
     <hr />
     <br class="clearfix" />
 
-    <c:if test="${fn:length(ticketList) gt 0}">
+    <table class="table table-hover">
+        <tr>
+            <td>ID</td>
+            <td>Short Description</td>
+            <td>Workflow Status</td>
+            <td>Select</td>
+        </tr>
 
-        <table class="table table-hover">
-            <tr>
-                <td>ID</td>
-                <td>Short Description</td>
-                <td>Workflow Status</td>
-                <td>Select</td>
-            </tr>
+        <tr>
+            <c:if test="${fn:length(ticketList) gt 0}">
 
-            <c:forEach var="ticket" items="${ticketList}">
-                <tr>
+                <c:forEach var="ticket" items="${ticketList}">
                     <td>${ticket.ticketId}</td>
                     <td>${ticket.shortDescription}</td>
                     <td>${ticket.currentWorkflowStep.workflowStatus.workflowStatusName}</td>
                     <td><input type="button" onClick="javascript:updateHiddenIdentifier(${ticket.ticketId})" value="Select" /></td>
-                </tr>
-            </c:forEach>
-        </table>
+                    </c:forEach>
+                </c:if>
 
-        <script>
-            function updateHiddenIdentifier(id) {
-                document.getElementById('hiddenIdentifier').value = id;
-                $("#queryForSingle").submit();
-            }
-        </script>
+            <c:if test="${fn:length(ticketList) == 0}">
+                <td colspan="4">No records to display</td>
+            </c:if>
+    </table>
 
-        <form id="queryForSingle" action="<%=request.getContextPath()%>/home/update/ticket/update/" method="POST">
-            <input id="hiddenIdentifier" type="hidden" name="ticketId" />
-        </form>
-    </c:if>
+    <script>
+        function updateHiddenIdentifier(id) {
+            document.getElementById('hiddenIdentifier').value = id;
+            $("#queryForSingle").submit();
+        }
+    </script>
+
+    <form id="queryForSingle" action="<%=request.getContextPath()%>/home/update/ticket/update/" method="POST">
+        <input id="hiddenIdentifier" type="hidden" name="ticketId" />
+    </form>
 </div>

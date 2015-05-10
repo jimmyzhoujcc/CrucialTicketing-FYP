@@ -5,88 +5,123 @@
     <h3>Query Configuration</h3>
 
     <form action="<%=request.getContextPath()%>/home/update/configuration/" method="POST">
-        Configuration ID: <input type="text" name="applicationControlId" />
 
-        <br class="clearfix" />
+        <div class="query_container">
+            <div class="query_heading">
+                Configuration ID:
+            </div>
+            <div class="query_box">
+                <input type="text" name="applicationControlId" />
+            </div>
+        </div>
 
-        Ticket Type: 
-        <select name="ticketType">
-            <option value="0">Select</option>
-            <c:forEach var="ticketType" items="${ticketTypeList}">
-                <option value="${ticketType.ticketTypeId}">${ticketType.ticketTypeName}</option>
-            </c:forEach>
-        </select>
+        <div class="query_container">
+            <div class="query_heading">
+                Ticket Type: 
+            </div>
+            <div class="query_box">
+                <select name="ticketType">
+                    <option value="0">Select</option>
+                    <c:forEach var="ticketType" items="${ticketTypeList}">
+                        <option value="${ticketType.ticketTypeId}">${ticketType.ticketTypeName}</option>
+                    </c:forEach>
+                </select>
+            </div>
+        </div>
 
-        <br class="clearfix" />
+        <div class="query_container">
+            <div class="query_heading">
+                Application: 
+            </div>
+            <div class="query_box">
+                <select name="application">
+                    <option value="0">Select</option>
+                    <c:forEach var="application" items="${applicationList}">
+                        <option value="${application.applicationId}">${application.applicationName}</option>
+                    </c:forEach>
+                </select>
+            </div>
+        </div>
 
-        Application: 
-        <select name="application">
-            <option value="0">Select</option>
-            <c:forEach var="application" items="${applicationList}">
-                <option value="${application.applicationId}">${application.applicationName}</option>
-            </c:forEach>
-        </select>
+        <div class="query_container">
+            <div class="query_heading">
+                Severity: 
+            </div>
+            <div class="query_box">
+                <select name="severity">
+                    <option value="0">Select</option>
+                    <c:forEach var="severity" items="${severityList}">
+                        <option value="${severity.severityId}">${severity.severityName}</option>
+                    </c:forEach>
+                </select>
+            </div>
+        </div>
 
-        <br class="clearfix" />
+        <div class="query_container">
+            <div class="query_heading">
+                Workflow: 
+            </div>
+            <div class="query_box">
+                <select name="workflow">
+                    <option value="0">Select</option>
+                    <c:forEach var="workflow" items="${workflowList}">
+                        <option value="${workflow.workflowId}">${workflow.workflowName}</option>
+                    </c:forEach>
+                </select>
+            </div>
+        </div>
 
-        Severity: 
-        <select name="severity">
-            <option value="0">Select</option>
-            <c:forEach var="severity" items="${severityList}">
-                <option value="${severity.severityId}">${severity.severityName}</option>
-            </c:forEach>
-        </select>
+        <div class="query_container">
+            <div class="query_heading">
+                Role: 
+            </div>
+            <div class="query_box">
+                <select name="role">
+                    <option value="0">Select</option>
+                    <c:forEach var="role" items="${roleList}">
+                        <option value="${role.roleId}">${role.roleName}</option>
+                    </c:forEach>
+                </select>
+            </div>
+        </div>
 
-        <br class="clearfix" />
+        <div class="query_container">
+            <div class="query_heading">
+                SLA Clock: 
+            </div>
+            <div class="query_box">
+                <input type="text" name="slaClock" />
+            </div>
+        </div>
 
-        Workflow:  
-        <select name="workflow">
-            <option value="0">Select</option>
-            <c:forEach var="workflow" items="${workflowList}">
-                <option value="${workflow.workflowId}">${workflow.workflowName}</option>
-            </c:forEach>
-        </select>
-
-        <br class="clearfix" />
-
-        Role:  
-        <select name="role">
-            <option value="0">Select</option>
-            <c:forEach var="role" items="${roleList}">
-                <option value="${role.roleId}">${role.roleName}</option>
-            </c:forEach>
-        </select>
-
-        <br class="clearfix" />
-
-        SLA Clock: <input type="text" name="slaClock" />
-
-        <br class="clearfix" />
-
-        <input type="submit" />
+        <div class="query_container">
+            <div class="query_heading">
+                <input type="submit" />
+            </div>
+        </div>
     </form>
 
     <br class="clearfix" />
     <hr />
     <br class="clearfix" />
 
-    <c:if test="${fn:length(applicationControlList) gt 0}">
+    <table class="table table-hover">
+        <tr>
+            <td>ID</td>
+            <td>Ticket Type</td>
+            <td>Application</td>
+            <td>Severity</td>
+            <td>Workflow</td>
+            <td>Role</td>
+            <td>SLA Clock</td>
+            <td>Status Flag</td>
+            <td>Select</td>
+        </tr>
 
-        <table class="table table-hover">
-            <tr>
-                <td>ID</td>
-                <td>Ticket Type</td>
-                <td>Application</td>
-                <td>Severity</td>
-                <td>Workflow</td>
-                <td>Role</td>
-                <td>SLA Clock</td>
-                <td>Status Flag</td>
-                <td>Select</td>
-            </tr>
+        <tr>
+            <c:if test="${fn:length(applicationControlList) gt 0}">
+                <c:forEach var="applicationControl" items="${applicationControlList}">
 
-            <c:forEach var="applicationControl" items="${applicationControlList}">
-                <tr>
                     <td>${applicationControl.applicationControlId}</td>
                     <td>${applicationControl.ticketType.ticketTypeName}</td>
                     <td>${applicationControl.application.applicationName}</td>
@@ -96,19 +131,23 @@
                     <td>${applicationControl.slaClock}</td>
                     <td>${applicationControl.activeFlag}</td>
                     <td><input type="button" onClick="javascript:updateConfigurationInput(${applicationControl.applicationControlId})" value="Select" /></td>
-                </tr>
-            </c:forEach>
-        </table>
+                    </c:forEach>
+                </c:if>
 
-        <script>
-            function updateConfigurationInput(applicationControlId) {
-                document.getElementById('configurationHiddenInput').value = applicationControlId;
-                $("#queryConfiguration").submit();
-            }
-        </script>
-        <form id="queryConfiguration" action="<%=request.getContextPath()%>/home/update/configuration/update/" method="POST">
-            <input id="configurationHiddenInput" type="hidden" name="applicationControlId" />
-        </form>
-    </c:if>
+            <c:if test="${fn:length(applicationControlList) == 0}">
+                <td colspan="9">No records to display</td>
+            </c:if>
+        </tr>
+    </table>
+
+    <script>
+        function updateConfigurationInput(applicationControlId) {
+            document.getElementById('configurationHiddenInput').value = applicationControlId;
+            $("#queryConfiguration").submit();
+        }
+    </script>
+    <form id="queryConfiguration" action="<%=request.getContextPath()%>/home/update/configuration/update/" method="POST">
+        <input id="configurationHiddenInput" type="hidden" name="applicationControlId" />
+    </form>
 </div>
 

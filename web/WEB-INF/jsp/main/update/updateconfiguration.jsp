@@ -7,6 +7,12 @@
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 <%@taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
 
+<script>
+    function goToUrl(inputUrl) {
+        window.location.replace(inputUrl)
+    }
+</script>
+
 <!-- Auto edit functionality -->
 <script src="<%=request.getContextPath()%>/js/auto/autoedit.js"></script>
 <script>

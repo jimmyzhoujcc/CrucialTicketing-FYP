@@ -39,7 +39,7 @@ public class QueueService extends JdbcDaoSupport implements QueueDao {
  
     @Override
     public int insertQueue(final Queue queue, Ticket ticket, User requestor) {
-        final String sql = "INSERT INTO queue (queue_name, active_flag) VALUES (?, ?)";
+        final String sql = "INSERT INTO queue (queue_name, protected, active_flag) VALUES (?, ?, ?)";
 
         KeyHolder holder = new GeneratedKeyHolder();
 
@@ -50,7 +50,8 @@ public class QueueService extends JdbcDaoSupport implements QueueDao {
                     throws SQLException {
                 PreparedStatement ps = (PreparedStatement) connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
                 ps.setString(1, queue.getQueueName());
-                ps.setInt(2, ActiveFlag.INCOMPLETE.getActiveFlag());
+                ps.setInt(2, 0);
+                ps.setInt(3, ActiveFlag.INCOMPLETE.getActiveFlag());
                 return ps;
             }
         }, holder);

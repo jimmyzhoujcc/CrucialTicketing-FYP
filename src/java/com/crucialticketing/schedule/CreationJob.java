@@ -17,7 +17,9 @@ import com.crucialticketing.daoimpl.SeverityChangeLogService;
 import com.crucialticketing.daoimpl.SeverityService;
 import com.crucialticketing.daoimpl.UserAlertService;
 import com.crucialticketing.daoimpl.UserChangeLogService;
+import com.crucialticketing.daoimpl.UserQueueConChangeLogService;
 import com.crucialticketing.daoimpl.UserQueueConService;
+import com.crucialticketing.daoimpl.UserRoleConChangeLogService;
 import com.crucialticketing.daoimpl.UserRoleConService;
 import com.crucialticketing.daoimpl.UserService;
 import com.crucialticketing.daoimpl.WorkflowChangeLogService;
@@ -38,7 +40,9 @@ import com.crucialticketing.entities.SeverityChangeLog;
 import com.crucialticketing.entities.User;
 import com.crucialticketing.entities.UserChangeLog;
 import com.crucialticketing.entities.UserQueueCon;
+import com.crucialticketing.entities.UserQueueConChangeLog;
 import com.crucialticketing.entities.UserRoleCon;
+import com.crucialticketing.entities.UserRoleConChangeLog;
 import com.crucialticketing.entities.Workflow;
 import com.crucialticketing.entities.WorkflowChangeLog;
 import com.crucialticketing.entities.WorkflowStatus;
@@ -82,7 +86,14 @@ public class CreationJob {
     UserRoleConService userRoleConService;
 
     @Autowired
+    UserRoleConChangeLogService userRoleConChangeLogService;
+
+    //
+    @Autowired
     UserQueueConService userQueueConService;
+
+    @Autowired
+    UserQueueConChangeLogService userQueueConChangeLogService;
 
     //
     @Autowired
@@ -124,7 +135,6 @@ public class CreationJob {
     UserAlertService userAlertService;
 
     //
-    
     public void executeJobList() {
         this.createUser();
         this.createRole();
@@ -134,6 +144,8 @@ public class CreationJob {
         this.createTicketConfiguration();
         this.createWorkflowStatus();
         this.createWorkflow();
+        this.createUserRoleConnection();
+        this.createUserQueueConnection();
     }
 
     private void createUser() {
@@ -492,7 +504,7 @@ public class CreationJob {
 
         for (Workflow workflow : workflowList) {
             found = false;
-            
+
             for (int i = 0; (i < processedList.size()) && (!found); i++) {
 
                 if (workflow.getWorkflowName().equals(processedList.get(i))) {
@@ -523,6 +535,86 @@ public class CreationJob {
                 workflowService.removeWorkflow(workflow.getWorkflowId());
                 userAlertService.insertUserAlert(changeLog.get(0).getRequestor().getUserId(),
                         "A workflow was setup with the same name before your request could be completed");
+            }
+        }
+    }
+
+    private void createUserRoleConnection() {
+        ArrayList<String> processedList = new ArrayList<>();
+        boolean found;
+
+        List<UserRoleCon> userRoleConList = userRoleConService.getUnprocessedUserRoleConList(false);
+
+        for (UserRoleCon userRoleCon : userRoleConList) {
+            found = false;
+
+            for (int i = 0; (i < processedList.size()) && (!found); i++) {
+                if (processedList.get(i).equals(userRoleCon.getUser().getUserId() + "-" + userRoleCon.getRole().getRoleId())) {
+                    found = true;
+                }
+            }
+
+            List<UserRoleConChangeLog> changeLog = userRoleConChangeLogService.getChangeLogByUserRoleConId(userRoleCon.getUserRoleConId());
+
+            if (!found) {
+                if (userRoleConService.doesUserRoleConExistInOnlineOrOffline(userRoleCon.getUser().getUserId(), userRoleCon.getRole().getRoleId())) {
+                    found = true;
+                } else {
+                    userRoleConService.updateToOnline(userRoleCon.getUserRoleConId(),
+                            changeLog.get(0).getTicket(),
+                            changeLog.get(0).getRequestor());
+
+                    userAlertService.insertUserAlert(changeLog.get(0).getRequestor().getUserId(),
+                            "A user role connection has been setup with the following information: "
+                            + "Username (" + userRoleCon.getUser().getUsername() + "), Role Name (" + userRoleCon.getRole().getRoleName() + ")");
+                }
+            }
+
+            if (found) {
+                processedList.add(userRoleCon.getUser().getUserId() + "-" + userRoleCon.getRole().getRoleId());
+                userRoleConService.removeUserRoleCon(userRoleCon.getUserRoleConId());
+                userAlertService.insertUserAlert(changeLog.get(0).getRequestor().getUserId(),
+                        "A user role connection was setup with the same details before your request could be completed");
+            }
+        }
+    }
+    
+    private void createUserQueueConnection() {
+        ArrayList<String> processedList = new ArrayList<>();
+        boolean found;
+
+        List<UserQueueCon> userQueueConList = userQueueConService.getUnprocessedUserQueueConList(false);
+
+        for (UserQueueCon userQueueCon : userQueueConList) {
+            found = false;
+
+            for (int i = 0; (i < processedList.size()) && (!found); i++) {
+                if (processedList.get(i).equals(userQueueCon.getUser().getUserId() + "-" + userQueueCon.getQueue().getQueueName())) {
+                    found = true;
+                }
+            }
+
+            List<UserQueueConChangeLog> changeLog = userQueueConChangeLogService.getChangeLogByUserQueueConId(userQueueCon.getUserQueueConId());
+
+            if (!found) {
+                if (userQueueConService.doesUserQueueConExistOnlineOrOffline(userQueueCon.getUser().getUserId(), userQueueCon.getQueue().getQueueId())) {
+                    found = true;
+                } else {
+                    userQueueConService.updateToOnline(userQueueCon.getUserQueueConId(),
+                            changeLog.get(0).getTicket(),
+                            changeLog.get(0).getRequestor());
+
+                    userAlertService.insertUserAlert(changeLog.get(0).getRequestor().getUserId(),
+                            "A user queue connection has been setup with the following information: "
+                            + "Username (" + userQueueCon.getUser().getUsername() + "), Queue Name (" + userQueueCon.getQueue().getQueueName()+ ")");
+                }
+            }
+
+            if (found) {
+                processedList.add(userQueueCon.getUser().getUserId() + "-" + userQueueCon.getQueue().getQueueName());
+                userQueueConService.removeUserQueueCon(userQueueCon.getUserQueueConId());
+                userAlertService.insertUserAlert(changeLog.get(0).getRequestor().getUserId(),
+                        "A user queue connection was setup with the same details before your request could be completed");
             }
         }
     }

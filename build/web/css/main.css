@@ -56,9 +56,24 @@ body {
     max-width: 48px;
 }
 
+@media screen and (max-width: 2000px)  {
+    .ticketnav {
+        display:block;
+        position:fixed;
+        right:0
+    }
+    #subticketnav {
+        display:none;
+    }
+}
+
 @media screen and (max-width: 800px)  {
     .ticketnav {
         display:none;
+    }
+    #subticketnav {
+        display:block;
+        width:100%;
     }
 }
 
@@ -123,4 +138,45 @@ table.gridtable td {
 
 .create-form-button-container {
     width: 50%;
+}
+
+.query_container {
+    width:100%;
+}
+
+.query_heading {
+    float:left;
+    width:50%;
+    margin-top:10px;
+}
+
+.query_box {
+    float:left;
+    width:50%;
+    margin-top:10px;
+}
+
+.ticketinfo_container {
+    width:100%;
+    float:left;
+    clear:both;
+    
+}
+
+.ticketinfo_heading {
+    float:left;
+    width:18%;
+    font-weight:bold;
+    font-style:italic;
+    margin-top:10px;
+}
+
+.ticketinfo_data {
+    float:left;
+    width:82%;
+    margin-top:10px;
+}
+
+.form-override {
+    width:100%;
 }

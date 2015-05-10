@@ -12,6 +12,7 @@ import com.crucialticketing.util.ActiveFlag;
 import com.crucialticketing.entities.Role;
 import com.crucialticketing.entities.Ticket;
 import com.crucialticketing.entities.UserRoleConChangeLog;
+import com.crucialticketing.util.Timestamp;
 import static com.crucialticketing.util.Timestamp.getTimestamp;
 import com.mysql.jdbc.PreparedStatement;
 import java.sql.Connection;
@@ -121,7 +122,7 @@ public class UserRoleConService extends JdbcDaoSupport implements UserRoleConDao
     @Override
     public boolean doesUserRoleConExistInOnline(int userId, int roleId) {
         String sql = "SELECT COUNT(user_role_con_id) AS result FROM user_role_con "
-                + "WHERE user_id=? AND role_id=? AND active_flag=?";
+                + "WHERE user_id=? AND role_id=? AND active_flag=? AND valid_to>=" + Timestamp.getTimestamp();
         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(
                 sql, new Object[]{userId, roleId, ActiveFlag.ONLINE.getActiveFlag()});
         int result = Integer.valueOf(rs.get(0).get("result").toString());

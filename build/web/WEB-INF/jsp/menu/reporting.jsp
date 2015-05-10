@@ -9,9 +9,9 @@
     <h3>Reporting</h3>
 
     <form method="POST" action="<%=request.getContextPath()%>/home/reporting/execute/">
-        <input type="submit" />
+        
         <ul class="nav nav-pills">
-            <li role="presentation" class="active"><a href="#">Query</a></li>
+            <li role="presentation" class="active"><input type="submit" class="btn btn-primary" /></li>
         </ul>
 
         <br class="clearfix" />

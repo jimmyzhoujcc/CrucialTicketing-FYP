@@ -37,9 +37,9 @@ public class ApplicationService extends JdbcDaoSupport implements ApplicationDao
     @Override
     public int insertApplication(final Application application, Ticket ticket, User requestor) {
         final String sql = "INSERT INTO application "
-                + "(application_name, active_flag) "
+                + "(application_name, protected, active_flag) "
                 + "VALUES "
-                + "(?, ?)";
+                + "(?, ?, ?)";
 
         KeyHolder holder = new GeneratedKeyHolder();
 
@@ -50,7 +50,8 @@ public class ApplicationService extends JdbcDaoSupport implements ApplicationDao
                     throws SQLException {
                 PreparedStatement ps = (PreparedStatement) connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
                 ps.setString(1, application.getApplicationName());
-                ps.setInt(2, ActiveFlag.INCOMPLETE.getActiveFlag());
+                ps.setInt(2, 0);
+                ps.setInt(3, ActiveFlag.INCOMPLETE.getActiveFlag());
                 return ps;
             }
         }, holder);

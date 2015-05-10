@@ -9,6 +9,11 @@
 <%@taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
 <jsp:useBean id="dateValue" class="java.util.Date"/>
 
+<script>
+    function goToUrl(inputUrl) {
+        window.location.replace(inputUrl)
+    }
+</script>
 
 <c:choose>
     <c:when test="${newTicket}">
@@ -22,9 +27,9 @@
         <!-- Auto edit functionality -->
         <script src="<%=request.getContextPath()%>/js/auto/autoedit.js"></script>
         <script>
-            var id = ${ticket.ticketId};
-            var item = "ticket";
-            var checkIdIsOpenInterval = setInterval(checkItemIsOpen, timeForNotificationInterval);
+    var id = ${ticket.ticketId};
+    var item = "ticket";
+    var checkIdIsOpenInterval = setInterval(checkItemIsOpen, timeForNotificationInterval);
         </script>
     </c:when>
     <c:when test="${edit}">
@@ -36,6 +41,72 @@
 
 <div class="row">
     <form:form action="${pageContext.request.contextPath}${formLink}" id="${formName}" method="POST" modelAttribute="uploadedfilelog" enctype="multipart/form-data"> 
+
+        <div id="subticketnav" class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title">Ticket Control</h3>
+            </div>
+            <div class="panel-body">
+
+                <c:choose>
+                    <c:when test="${view}">
+                        <input type="submit" value="Edit" class="btn btn-warning" />
+                        <br class="clearfix" />
+                        <br class="clearfix" />
+                        <input type="button" value="Refresh Ticket" class="btn btn-success"  onclick="location.reload();" />
+                    </c:when>
+                    <c:when test="${newTicket || edit}">
+
+                        <div class="btn-group">
+
+                            <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                Change ticket status<span class="caret"></span>
+                            </button>
+
+                            <c:set var="totalNextNodes" value="${fn:length(ticket.currentWorkflowStep.nextWorkflowStep)}"/>
+
+                            <script type="text/javascript">
+                                function changeStatus(inputStatus) {
+                                    var elem = document.getElementById("workflowStatus");
+                                    elem.value = inputStatus;
+                                }
+                            </script>
+
+                            <ul class="dropdown-menu" role="menu">
+                                <c:forEach var="nextNode" items="${ticket.currentWorkflowStep.nextWorkflowStep}">
+                                    <li>
+                                        <a href="javascript:changeStatus('${nextNode.workflowStatus.workflowStatusId}');">${nextNode.workflowStatus.workflowStatusName}</a>
+                                    </li>
+                                </c:forEach>
+                                <c:if test="${totalNextNodes == 0}">
+                                    <li><a href="#">No further actions</a></li>
+                                    </c:if>
+                            </ul>
+
+                            <input type="hidden" value="" id="workflowStatus" name="workflowStatus" />
+
+
+                        </div>
+
+                        <br class="clearfix" />
+                        <br class="clearfix" />
+
+                        <input type="submit" value="Save Ticket" class="btn btn-success" />
+
+                        <br class="clearfix" />
+                        <br class="clearfix" />
+
+                        <input type="button" id="cancelEdit" value="Cancel (Exit)" class="btn btn-danger" />
+                        <script>
+                            $('#cancelEdit').on('click', function () {
+                                window.history.back();
+                            });
+                        </script>
+                    </c:when>
+                </c:choose>
+
+            </div>
+        </div>
 
         <div class="col-xs-12 col-sm-8 col-md-10">
 
@@ -67,64 +138,110 @@
                     <h3 class="panel-title">Basic information</h3>
                 </div>
                 <div class="panel-body">
-                    <c:choose>
-                        <c:when test="${newTicket}">
-                            Ticket ID: Will be issued upon creation
-                        </c:when>
-                        <c:otherwise>
-                            Ticket ID: ${ticket.ticketId}
-                            <input type="hidden" value="${ticket.ticketId}" name="ticketId" />
-                        </c:otherwise>
-                    </c:choose>
+                    <div class="ticketinfo_container">
+                        <div class="ticketinfo_heading">
+                            Ticket ID: 
+                        </div>
+                        <div class="ticketinfo_data">
+                            <c:choose>
+                                <c:when test="${newTicket}">
+                                    Will be issued upon creation
+                                </c:when>
+                                <c:otherwise>
+                                    ${ticket.ticketId}
+                                    <input type="hidden" value="${ticket.ticketId}" name="ticketId" />
+                                </c:otherwise>
+                            </c:choose>
+                        </div>
+                    </div>
 
-                    <br class="clearfix" />
-                    <br class="clearfix" />
+                    <div class="ticketinfo_container">
+                        <div class="ticketinfo_heading">
+                            Ticket Description: 
+                        </div>
+                        <div class="ticketinfo_data">
+                            <c:choose>
+                                <c:when test="${view}">
+                                    ${ticket.shortDescription}
+                                </c:when>
+                                <c:when test="${newTicket || edit}">
+                                    <input type="input" value="${ticket.shortDescription}" name="shortDescription" />
+                                </c:when>
+                            </c:choose>
+                        </div>
+                    </div>
 
-                    Ticket Description: 
-                    <c:choose>
-                        <c:when test="${view}">
-                            ${ticket.shortDescription}
-                        </c:when>
-                        <c:when test="${newTicket || edit}">
-                            <input type="input" value="${ticket.shortDescription}" name="shortDescription" />
-                        </c:when>
-                    </c:choose>
+                    <div class="ticketinfo_container">
+                        <div class="ticketinfo_heading">
+                            Severity: 
+                        </div>
+                        <div class="ticketinfo_data">
+                            <c:choose>
+                                <c:when test="${newTicket || view}">
+                                    ${ticket.applicationControl.severity.severityLevel}: ${ticket.applicationControl.severity.severityName} 
+                                </c:when>
+                                <c:when test="${edit}">
+                                    <select name="severity">
+                                        <c:forEach var="severity" items="${severityList}">
+                                            <option 
+                                                <c:if test="${ticket.applicationControl.severity.severityId == severity.severityId}">
+                                                    selected
+                                                </c:if>
+                                                value="${severity.severityId}">${severity.severityLevel}: ${severity.severityName}</option>
+                                        </c:forEach>
+                                    </select>
 
-                    <br class="clearfix" /><br class="clearfix" />
+                                    <span class="severity-note"><small>Note: Changing severity overrides any changes made to the ticket's status</small></span>
+                                </c:when>
+                            </c:choose>
+                        </div>
+                    </div>
 
-                    Severity: 
-                    <c:choose>
-                        <c:when test="${newTicket || view}">
-                            ${ticket.applicationControl.severity.severityLevel}: ${ticket.applicationControl.severity.severityName} 
-                        </c:when>
-                        <c:when test="${edit}">
-                            <select name="severity">
-                                <c:forEach var="severity" items="${severityList}">
-                                    <option 
-                                        <c:if test="${ticket.applicationControl.severity.severityId == severity.severityId}">
-                                            selected
-                                        </c:if>
-                                        value="${severity.severityId}">${severity.severityLevel}: ${severity.severityName}</option>
-                                </c:forEach>
-                            </select>
+                    <div class="ticketinfo_container">
+                        <div class="ticketinfo_heading">
+                            Ticket Type: 
+                        </div>
+                        <div class="ticketinfo_data">
+                            ${ticket.applicationControl.ticketType.ticketTypeName}
+                        </div>
+                    </div>
 
-                            <span class="severity-note"><small>Note: Changing severity overrides any changes made to the ticket's status</small></span>
-                        </c:when>
-                    </c:choose>
+                    <div class="ticketinfo_container">
+                        <div class="ticketinfo_heading">
+                            Application:
+                        </div>
+                        <div class="ticketinfo_data">
+                            ${ticket.applicationControl.application.applicationName}
+                        </div>
+                    </div>
 
-                    <br class="clearfix" /><br class="clearfix" />
+                    <div class="ticketinfo_container">
+                        <div class="ticketinfo_heading">
+                            Workflow:
+                        </div>
+                        <div class="ticketinfo_data">
+                            ${ticket.applicationControl.workflow.workflowName}
+                        </div>
+                    </div>
 
-                    Ticket Type: ${ticket.applicationControl.ticketType.ticketTypeName}
-                    <br class="clearfix" />
-                    Application: ${ticket.applicationControl.application.applicationName}
-                    <br class="clearfix" />
-                    Workflow: ${ticket.applicationControl.workflow.workflowName}
-                    <br class="clearfix" /><br class="clearfix" />
-                    Current status: ${ticket.currentWorkflowStep.workflowStatus.workflowStatusName}
-                    <br class="clearfix" /><br class="clearfix" />
-                    Current Queue: ${ticket.currentWorkflowStep.queue.queueName}
-                    <br class="clearfix" />
-                    
+                    <div class="ticketinfo_container">
+                        <div class="ticketinfo_heading">
+                            Current status:
+                        </div>
+                        <div class="ticketinfo_data">
+                            ${ticket.currentWorkflowStep.workflowStatus.workflowStatusName}
+                        </div>
+                    </div>
+
+                    <div class="ticketinfo_container">
+                        <div class="ticketinfo_heading">
+                            Current Queue:
+                        </div>
+                        <div class="ticketinfo_data">
+                            ${ticket.currentWorkflowStep.queue.queueName}
+                        </div>
+                    </div>
+
                     <c:if test="${newTicket}">
                         <input type="hidden" name="applicationControlId" value="${ticket.applicationControl.applicationControlId}" />
                         <input type="hidden" name="ticketTypeId" value="${ticket.applicationControl.ticketType.ticketTypeId}" />
@@ -141,50 +258,64 @@
                     <h3 class="panel-title">User information</h3>
                 </div>
                 <div class="panel-body">
-                    Created By: 
-                    <c:choose>
-                        <c:when test="${newTicket}">
-                            ${user.firstName} ${user.lastName}
-                        </c:when>
-                        <c:otherwise>
-                            ${ticket.changeLog.changeLog[0].user.firstName} 
-                            ${ticket.changeLog.changeLog[0].user.lastName}
-                        </c:otherwise>
-                    </c:choose>
+                    <div class="ticketinfo_container">
+                        <div class="ticketinfo_heading">
+                            Created By: 
+                        </div>
+                        <div class="ticketinfo_data">
+                            <c:choose>
+                                <c:when test="${newTicket}">
+                                    ${user.firstName} ${user.lastName}
+                                </c:when>
+                                <c:otherwise>
+                                    ${ticket.changeLog.changeLog[0].user.firstName} 
+                                    ${ticket.changeLog.changeLog[0].user.lastName}
+                                </c:otherwise>
+                            </c:choose>
+                        </div>
+                    </div>
 
-                    <br class="clearfix" />
+                    <div class="ticketinfo_container">
+                        <div class="ticketinfo_heading">
+                            Reported By:
+                        </div>
+                        <div class="ticketinfo_data">
+                            <c:choose>
+                                <c:when test="${newTicket}">
+                                    <select name="reportedByUserId">
+                                        <c:forEach var="reportedByUser" items="${userList}">
+                                            <option 
+                                                <c:if test="${user.userId == reportedByUser.userId}">
+                                                    selected
+                                                </c:if>
+                                                value="${reportedByUser.userId}">${reportedByUser.firstName} ${reportedByUser.lastName}</option>
+                                        </c:forEach>
+                                    </select>
+                                </c:when>
+                                <c:otherwise>
+                                    ${ticket.reportedBy.firstName} 
+                                    ${ticket.reportedBy.lastName}
+                                </c:otherwise>
+                            </c:choose>
+                        </div>
+                    </div>
 
-                    Reported By: 
-                    <c:choose>
-                        <c:when test="${newTicket}">
-                            <select name="reportedByUserId">
-                                <c:forEach var="reportedByUser" items="${userList}">
-                                    <option 
-                                        <c:if test="${user.userId == reportedByUser.userId}">
-                                            selected
-                                        </c:if>
-                                        value="${reportedByUser.userId}">${reportedByUser.firstName} ${reportedByUser.lastName}</option>
-                                </c:forEach>
-                            </select>
-                        </c:when>
-                        <c:otherwise>
-                            ${ticket.reportedBy.firstName} 
-                            ${ticket.reportedBy.lastName}
-                        </c:otherwise>
-                    </c:choose>
-
-                    <br class="clearfix" />
-
-                    Last Processing By: 
-                    <c:choose>
-                        <c:when test="${newTicket}">
-                            ${user.firstName} ${user.lastName}
-                        </c:when>
-                        <c:otherwise>
-                            ${ticket.changeLog.changeLog[fn:length(ticket.changeLog.changeLog)-1].user.firstName} 
-                            ${ticket.changeLog.changeLog[fn:length(ticket.changeLog.changeLog)-1].user.lastName}
-                        </c:otherwise>
-                    </c:choose>
+                    <div class="ticketinfo_container">
+                        <div class="ticketinfo_heading">
+                            Last Processing By: 
+                        </div>
+                        <div class="ticketinfo_data">
+                            <c:choose>
+                                <c:when test="${newTicket}">
+                                    ${user.firstName} ${user.lastName}
+                                </c:when>
+                                <c:otherwise>
+                                    ${ticket.changeLog.changeLog[fn:length(ticket.changeLog.changeLog)-1].user.firstName} 
+                                    ${ticket.changeLog.changeLog[fn:length(ticket.changeLog.changeLog)-1].user.lastName}
+                                </c:otherwise>
+                            </c:choose>
+                        </div>
+                    </div>
 
                 </div>
             </div>
@@ -213,7 +344,14 @@
                             </div>
                         </div>
 
-                        SLA: ${slanote}
+                        <div class="ticketinfo_container">
+                            <div class="ticketinfo_heading">
+                                SLA:
+                            </div>
+                            <div class="ticketinfo_data">
+                                ${slanote}
+                            </div>
+                        </div>
                     </div>
 
                 </div>
@@ -499,7 +637,7 @@
 
         </div>
 
-        <div class="ticketnav col-xs-4 col-md-2" style="position:fixed; right:0">
+        <div class="ticketnav col-xs-4 col-md-2">
             <div class="panel panel-primary">
                 <div class="panel-heading">
                     <h3 class="panel-title">Quick Navigation</h3>
@@ -507,7 +645,7 @@
                 <div class="panel-body">
                     <a href="#basic">Basic information</a>
                     <br class="clearfix" />
-                    <a href="#sla">SLA Information</a>
+                    <a href="#user">User/SLA Information</a>
                     <br class="clearfix" />
                     <a href="#ticketlog">Ticket Log</a>
                     <br class="clearfix" />
@@ -530,7 +668,7 @@
                             <input type="submit" value="Edit" class="btn btn-warning" />
                             <br class="clearfix" />
                             <br class="clearfix" />
-                            <input type="button" value="Refresh Ticket" class="btn btn-success"  onclick="location.reload();" />
+                            <input type="button" value="Refresh Ticket" class="btn btn-success"  onClick="javascript:goToUrl('${pageContext.request.contextPath}/home/update/ticket/update/?ticketId=${ticket.ticketId}')" />
                         </c:when>
                         <c:when test="${newTicket || edit}">
 
@@ -560,7 +698,7 @@
                                         </c:if>
                                 </ul>
 
-                                <input type="hidden" value="" id="workflowStatus" name="workflowStatusId" />
+                                <input type="hidden" value="" id="workflowStatus" name="workflowStatus" />
 
 
                             </div>
@@ -573,12 +711,8 @@
                             <br class="clearfix" />
                             <br class="clearfix" />
 
-                            <input type="button" id="cancelEdit" value="Cancel (Exit)" class="btn btn-danger" />
-                            <script>
-                                $('#cancelEdit').on('click', function () {
-                                    window.history.back();
-                                });
-                            </script>
+                            <input type="button" onClick="javascript:goToUrl('${pageContext.request.contextPath}/home/update/ticket/cancel/?ticketId=${ticket.ticketId}')"  value="Cancel (Exit)" class="btn btn-danger" />
+
                         </c:when>
                     </c:choose>
 

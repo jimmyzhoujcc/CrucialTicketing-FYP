@@ -18,7 +18,7 @@ public interface UserQueueConChangeLogDao {
     
     public List<UserQueueConChangeLog> getChangeLogByUserId(int userId);
     
-    public List<UserQueueConChangeLog> getChangeLogByQueueId(int roleId);
+    public List<UserQueueConChangeLog> getChangeLogByUserQueueConId(int userQueueConId);
     
     public List<UserQueueConChangeLog> getChangeLogByTicketId(int ticketId);
     

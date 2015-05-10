@@ -62,10 +62,10 @@ public class UserQueueConChangeLogService extends JdbcDaoSupport implements User
     }
 
     @Override
-    public List<UserQueueConChangeLog> getChangeLogByQueueId(int queueId) {
-        String sql = "SELECT * FROM user_queue_con_change_log WHERE queue_id=?";
+    public List<UserQueueConChangeLog> getChangeLogByUserQueueConId(int userQueueConId) {
+        String sql = "SELECT * FROM user_queue_con_change_log WHERE user_queue_con_id=?";
         List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(
-                sql, new Object[]{queueId});
+                sql, new Object[]{userQueueConId});
         if (rs.isEmpty()) {
             return new ArrayList<>();
         }
