@@ -737,7 +737,7 @@ public class UpdateController {
         return "mainview";
     }
 
-    @RequestMapping(value = "/role/update/", method = RequestMethod.POST)
+    @RequestMapping(value = "/role/update/", method = {RequestMethod.POST, RequestMethod.GET})
     public String viewRole(HttpServletRequest request,
             @RequestParam(value = "roleId", required = false) String roleIdentifier,
             ModelMap map) {
@@ -894,7 +894,7 @@ public class UpdateController {
         return "mainview";
     }
 
-    @RequestMapping(value = "/queue/update/", method = RequestMethod.POST)
+    @RequestMapping(value = "/queue/update/", method = {RequestMethod.POST, RequestMethod.GET})
     public String viewQueue(HttpServletRequest request,
             @RequestParam(value = "queueId", required = false) String queueIdentifier,
             ModelMap map) {
@@ -1094,7 +1094,7 @@ public class UpdateController {
         return "mainview";
     }
 
-    @RequestMapping(value = "/application/update/", method = RequestMethod.POST)
+    @RequestMapping(value = "/application/update/", method = {RequestMethod.POST, RequestMethod.GET})
     public String viewApplication(HttpServletRequest request,
             @RequestParam(value = "applicationId", required = false) String applicationIdentifier,
             ModelMap map) {
@@ -1195,6 +1195,23 @@ public class UpdateController {
         return this.viewApplication(request, applicationId, map);
     }
 
+    @RequestMapping(value = "/application/cancel/", method = RequestMethod.GET)
+    public String cancelApplicationEdit(HttpServletRequest request,
+            @RequestParam(value = "applicationId", required = false) String applicationId,
+            ModelMap map) {
+
+        User user = (User) request.getSession().getAttribute("user");
+
+        if (!checkService.doesRoleCheckPass("MAINT_APPLICATION_UPDATE", user, map)) {
+            Validation.userDoesntHaveRole(map);
+            return this.viewApplication(request, applicationId, map);
+        }
+
+        applicationLockRequestService.closeRequest(Integer.valueOf(applicationId), user.getUserId());
+
+        return this.viewApplication(request, applicationId, map);
+    }
+
     @RequestMapping(value = "/severity/", method = RequestMethod.POST)
     public String querySeverity(HttpServletRequest request,
             @RequestParam(value = "severityId", required = false) String severityId,
@@ -1238,7 +1255,7 @@ public class UpdateController {
         return "mainview";
     }
 
-    @RequestMapping(value = "/severity/update/", method = RequestMethod.POST)
+    @RequestMapping(value = "/severity/update/", method = {RequestMethod.POST, RequestMethod.GET})
     public String viewSeverity(HttpServletRequest request,
             @RequestParam(value = "severityId", required = false) String severityIdentifier,
             ModelMap map) {
@@ -1333,6 +1350,23 @@ public class UpdateController {
         return this.viewSeverity(request, String.valueOf(newVersion.getSeverityId()), map);
     }
 
+    @RequestMapping(value = "/severity/cancel/", method = RequestMethod.GET)
+    public String cancelSeverityEdit(HttpServletRequest request,
+            @RequestParam(value = "severityId", required = false) String severityId,
+            ModelMap map) {
+
+        User user = (User) request.getSession().getAttribute("user");
+
+        if (!checkService.doesRoleCheckPass("MAINT_SEVERITY_UPDATE", user, map)) {
+            Validation.userDoesntHaveRole(map);
+            return this.viewSeverity(request, severityId, map);
+        }
+
+        severityLockRequestService.closeRequest(Integer.valueOf(severityId), user.getUserId());
+
+        return this.viewSeverity(request, severityId, map);
+    }
+
     @RequestMapping(value = "/configuration/", method = RequestMethod.POST)
     public String queryApplicationControl(HttpServletRequest request,
             @RequestParam(value = "applicationControlId", required = false) String applicationControlId,
@@ -1403,7 +1437,7 @@ public class UpdateController {
         return this.configuration(request, map);
     }
 
-    @RequestMapping(value = "/configuration/update/", method = RequestMethod.POST)
+    @RequestMapping(value = "/configuration/update/", method = {RequestMethod.POST, RequestMethod.GET})
     public String viewApplicationControl(HttpServletRequest request,
             @RequestParam(value = "applicationControlId", required = false) String applicationControlIdentifier,
             ModelMap map) {
@@ -1500,6 +1534,23 @@ public class UpdateController {
         return this.viewApplicationControl(request, applicationControlId, map);
     }
 
+    @RequestMapping(value = "/configuration/cancel/", method = RequestMethod.GET)
+    public String cancelApplicationControlEdit(HttpServletRequest request,
+            @RequestParam(value = "applicationControlId", required = false) String applicationControlId,
+            ModelMap map) {
+
+        User user = (User) request.getSession().getAttribute("user");
+
+        if (!checkService.doesRoleCheckPass("MAINT_CONFIGURATION_UPDATE", user, map)) {
+            Validation.userDoesntHaveRole(map);
+            return this.viewApplicationControl(request, applicationControlId, map);
+        }
+
+        applicationControlLockRequestService.closeRequest(Integer.valueOf(applicationControlId), user.getUserId());
+
+        return this.viewApplicationControl(request, applicationControlId, map);
+    }
+
     @RequestMapping(value = "/workflow/", method = RequestMethod.POST)
     public String queryWorkflow(HttpServletRequest request,
             @RequestParam(value = "workflowId", required = false) String workflowId,
@@ -1536,7 +1587,7 @@ public class UpdateController {
         return "mainview";
     }
 
-    @RequestMapping(value = "/workflow/update/", method = RequestMethod.POST)
+    @RequestMapping(value = "/workflow/update/", method = {RequestMethod.POST, RequestMethod.GET})
     public String viewWorkflow(HttpServletRequest request,
             @RequestParam(value = "workflowId", required = false) String workflowIdentifier,
             ModelMap map) {
@@ -1639,6 +1690,23 @@ public class UpdateController {
         return this.viewWorkflow(request, workflowId, map);
     }
 
+    @RequestMapping(value = "/workflow/cancel/", method = RequestMethod.GET)
+    public String cancelWorkflowEdit(HttpServletRequest request,
+            @RequestParam(value = "workflowId", required = false) String workflowId,
+            ModelMap map) {
+
+        User user = (User) request.getSession().getAttribute("user");
+
+        if (!checkService.doesRoleCheckPass("MAINT_WORKFLOW_UPDATE", user, map)) {
+            Validation.userDoesntHaveRole(map);
+            return this.viewWorkflow(request, workflowId, map);
+        }
+
+        workflowLockRequestService.closeRequest(Integer.valueOf(workflowId), user.getUserId());
+
+        return this.viewWorkflow(request, workflowId, map);
+    }
+
     @RequestMapping(value = "/workflowstatus/", method = RequestMethod.POST)
     public String queryWorkflowStatus(HttpServletRequest request,
             @RequestParam(value = "workflowStatusId", required = false) String workflowStatusId,
@@ -1675,7 +1743,7 @@ public class UpdateController {
         return "mainview";
     }
 
-    @RequestMapping(value = "/workflowstatus/update/", method = RequestMethod.POST)
+    @RequestMapping(value = "/workflowstatus/update/", method = {RequestMethod.POST, RequestMethod.GET})
     public String viewWorkflowStatus(HttpServletRequest request,
             @RequestParam(value = "workflowStatusId", required = false) String workflowStatusIdentifier,
             ModelMap map) {
@@ -1767,6 +1835,23 @@ public class UpdateController {
             }
         } catch (NumberFormatException e) {
             Validation.pageError(map);
+        }
+
+        workflowStatusLockRequestService.closeRequest(Integer.valueOf(workflowStatusId), user.getUserId());
+
+        return this.viewWorkflowStatus(request, workflowStatusId, map);
+    }
+
+    @RequestMapping(value = "/workflowstatus/cancel/", method = RequestMethod.GET)
+    public String cancelWorkflowStatusEdit(HttpServletRequest request,
+            @RequestParam(value = "workflowStatusId", required = false) String workflowStatusId,
+            ModelMap map) {
+
+        User user = (User) request.getSession().getAttribute("user");
+
+        if (!checkService.doesRoleCheckPass("MAINT_WORKFLOWSTATUS_UPDATE", user, map)) {
+            Validation.userDoesntHaveRole(map);
+            return this.viewWorkflowStatus(request, workflowStatusId, map);
         }
 
         workflowStatusLockRequestService.closeRequest(Integer.valueOf(workflowStatusId), user.getUserId());

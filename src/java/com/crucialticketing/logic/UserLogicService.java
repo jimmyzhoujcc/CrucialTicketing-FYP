@@ -117,10 +117,12 @@ public class UserLogicService {
                                     userRoleConService.updateToOffline(userRoleConId, new Ticket(Integer.valueOf(ticketId)), requestor);
                                     userRoleCon.setValidTo(Timestamp.getTimestamp());
                                 }
-                                
-                                if(oldVersion.getUserRoleConList().get(i).getValidTo() != userRoleCon.getValidTo()) {
-                                    userRoleConService.updateValidity(userRoleConId, oldVersion.getUserRoleConList().get(i).getValidFrom(), userRoleCon.getValidTo());
-                                }
+                            } else {
+                                userRoleCon.setValidTo(Timestamp.convTimestamp(userRoleCon.getValidToStr()));
+                            }
+
+                            if (oldVersion.getUserRoleConList().get(i).getValidTo() != userRoleCon.getValidTo()) {
+                                userRoleConService.updateValidity(userRoleConId, oldVersion.getUserRoleConList().get(i).getValidFrom(), userRoleCon.getValidTo());
                             }
                         }
                     }
