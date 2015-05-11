@@ -239,6 +239,7 @@ public class RoleService extends JdbcDaoSupport implements RoleDao {
 
             role.setRoleId((int) row.get("role_id"));
             role.setRoleName((String) row.get("role_name"));
+            role.setRoleDescription((String) row.get("role_description"));
             role.setProtectedFlag((int)row.get("protected") != 0);
             role.setActiveFlag(ActiveFlag.values()[((int)row.get("active_flag"))+2]);
             roleList.add(role);

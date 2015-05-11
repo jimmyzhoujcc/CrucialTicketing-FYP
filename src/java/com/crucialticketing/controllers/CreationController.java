@@ -209,7 +209,7 @@ public class CreationController {
             @RequestParam(value = "ticketTypeId", required = false) String ticketTypeId,
             @RequestParam(value = "applicationId", required = false) String applicationId,
             @RequestParam(value = "severityId", required = false) String severityId,
-            @RequestParam(value = "workflowStatusId", required = false) String workflowStatusId,
+            @RequestParam(value = "workflowStatus", required = false) String workflowStatusId,
             @RequestParam(value = "reportedByUserId", required = false) String reportedByUserId,
             @RequestParam(value = "logentry", required = false) String logEntry,
             @RequestParam(value = "linkedTicketList", required = false) String[] linkedTicketList,

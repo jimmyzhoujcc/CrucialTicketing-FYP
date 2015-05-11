@@ -223,6 +223,8 @@ public class QueueService extends JdbcDaoSupport implements QueueDao {
             queue.setProtectedFlag((int)row.get("protected") != 0);
             queue.setActiveFlag(ActiveFlag.values()[((int)row.get("active_flag"))+2]);
 
+            queue.setUserQueueConList(userQueueConService.getUserListByQueueId(queue.getQueueId()));
+            
             queueList.add(queue);
         }
         return queueList;

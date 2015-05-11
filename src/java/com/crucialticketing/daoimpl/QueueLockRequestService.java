@@ -54,6 +54,15 @@ public class QueueLockRequestService extends JdbcDaoSupport implements QueueLock
         int result = Integer.valueOf(rs.get(0).get("result").toString());
         return result != 0;
     }
+    
+    @Override
+    public boolean checkIfOpen(int queueId) {
+        String sql = "SELECT COUNT(queue_lock_request_id) AS result FROM queue_lock_request "
+                + "WHERE queue_id=? AND request_pass_time+" + buffer + " > " + getTimestamp();
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{queueId});
+        int result = Integer.valueOf(rs.get(0).get("result").toString());
+        return result != 0;
+    }
 
     @Override
     public boolean checkIfOutstanding(int queueId, int requestorUserId) {
@@ -71,7 +80,7 @@ public class QueueLockRequestService extends JdbcDaoSupport implements QueueLock
 
     @Override
     public void denyAccess(int queueLockRequestId, Queue queue, int requestorUserId) {
-        this.getJdbcTemplate().update("UPDATE queue_lock_request SET request_pass_time=? WHERE queue_lock_request_id=?", new Object[]{-1, queueLockRequestId});
+        this.closeRequest(queue.getQueueId(), requestorUserId);
         userAlertService.insertUserAlert(requestorUserId, "Access denied to access queue (" + queue.getQueueName() + ")");
     }
 

@@ -54,6 +54,15 @@ public class TicketLockRequestService extends JdbcDaoSupport implements TicketLo
         int result = Integer.valueOf(rs.get(0).get("result").toString());
         return result != 0;
     }
+    
+    @Override
+    public boolean checkIfOpen(int ticketId) {
+        String sql = "SELECT COUNT(ticket_lock_request_id) AS result FROM ticket_lock_request "
+                + "WHERE ticket_id=? AND request_pass_time+" + buffer + " > " + getTimestamp();
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{ticketId});
+        int result = Integer.valueOf(rs.get(0).get("result").toString());
+        return result != 0;
+    }
 
     @Override
     public boolean checkIfOutstanding(int ticketId, int requestorUserId) {
@@ -71,7 +80,7 @@ public class TicketLockRequestService extends JdbcDaoSupport implements TicketLo
 
     @Override
     public void denyAccess(int lockRequestId, Ticket ticket, int requestorUserId) {
-        this.getJdbcTemplate().update("UPDATE ticket_lock_request SET request_pass_time=? WHERE ticket_lock_request_id=?", new Object[]{-1, lockRequestId});
+        this.closeRequest(ticket.getTicketId(), requestorUserId);
         userAlertService.insertUserAlert(requestorUserId, "Access denied to access ticket (" + ticket.getTicketId() + ")");
     }
 

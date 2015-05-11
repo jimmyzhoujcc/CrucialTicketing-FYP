@@ -96,8 +96,16 @@ public class AccessJob {
                         lockRequest.getTicket(),
                         lockRequest.getRequestor().getUserId());
             } else {
-                processedList.add(lockRequest.getTicket().getTicketId());
-                ticketLockRequestService.grantAccess(lockRequest.getLockRequestId());
+                if (ticketLockRequestService.checkIfOpen(lockRequest.getTicket().getTicketId())) {
+                    ticketLockRequestService.denyAccess(lockRequest.getLockRequestId(),
+                            lockRequest.getTicket(),
+                            lockRequest.getRequestor().getUserId());
+
+                    processedList.add(lockRequest.getTicket().getTicketId());
+                } else {
+                    processedList.add(lockRequest.getTicket().getTicketId());
+                    ticketLockRequestService.grantAccess(lockRequest.getLockRequestId());
+                }
             }
         }
     }
@@ -121,8 +129,16 @@ public class AccessJob {
                         lockRequest.getUser(),
                         lockRequest.getRequestor().getUserId());
             } else {
-                processedList.add(lockRequest.getUser().getUserId());
-                userLockRequestService.grantAccess(lockRequest.getLockRequestId());
+                if (userLockRequestService.checkIfOpen(lockRequest.getUser().getUserId())) {
+                    userLockRequestService.denyAccess(lockRequest.getLockRequestId(),
+                            lockRequest.getUser(),
+                            lockRequest.getRequestor().getUserId());
+
+                    processedList.add(lockRequest.getUser().getUserId());
+                } else {
+                    processedList.add(lockRequest.getUser().getUserId());
+                    userLockRequestService.grantAccess(lockRequest.getLockRequestId());
+                }
             }
         }
     }
@@ -146,8 +162,16 @@ public class AccessJob {
                         lockRequest.getRole(),
                         lockRequest.getRequestor().getUserId());
             } else {
-                processedList.add(lockRequest.getRole().getRoleId());
-                roleLockRequestService.grantAccess(lockRequest.getLockRequestId());
+                if (roleLockRequestService.checkIfOpen(lockRequest.getRole().getRoleId())) {
+                    roleLockRequestService.denyAccess(lockRequest.getLockRequestId(),
+                            lockRequest.getRole(),
+                            lockRequest.getRequestor().getUserId());
+
+                    processedList.add(lockRequest.getRole().getRoleId());
+                } else {
+                    processedList.add(lockRequest.getRole().getRoleId());
+                    roleLockRequestService.grantAccess(lockRequest.getLockRequestId());
+                }
             }
         }
     }
@@ -171,8 +195,16 @@ public class AccessJob {
                         lockRequest.getQueue(),
                         lockRequest.getRequestor().getUserId());
             } else {
-                processedList.add(lockRequest.getQueue().getQueueId());
-                queueLockRequestService.grantAccess(lockRequest.getLockRequestId());
+                if (queueLockRequestService.checkIfOpen(lockRequest.getQueue().getQueueId())) {
+                    queueLockRequestService.denyAccess(lockRequest.getLockRequestId(),
+                            lockRequest.getQueue(),
+                            lockRequest.getRequestor().getUserId());
+
+                    processedList.add(lockRequest.getQueue().getQueueId());
+                } else {
+                    processedList.add(lockRequest.getQueue().getQueueId());
+                    queueLockRequestService.grantAccess(lockRequest.getLockRequestId());
+                }
             }
         }
     }
@@ -196,8 +228,16 @@ public class AccessJob {
                         lockRequest.getApplication(),
                         lockRequest.getRequestor().getUserId());
             } else {
-                processedList.add(lockRequest.getApplication().getApplicationId());
-                applicationLockRequestService.grantAccess(lockRequest.getLockRequestId());
+                if (applicationLockRequestService.checkIfOpen(lockRequest.getApplication().getApplicationId())) {
+                    applicationLockRequestService.denyAccess(lockRequest.getLockRequestId(),
+                            lockRequest.getApplication(),
+                            lockRequest.getRequestor().getUserId());
+
+                    processedList.add(lockRequest.getApplication().getApplicationId());
+                } else {
+                    processedList.add(lockRequest.getApplication().getApplicationId());
+                    applicationLockRequestService.grantAccess(lockRequest.getLockRequestId());
+                }
             }
         }
     }
@@ -221,8 +261,16 @@ public class AccessJob {
                         lockRequest.getSeverity(),
                         lockRequest.getRequestor().getUserId());
             } else {
-                processedList.add(lockRequest.getSeverity().getSeverityId());
-                severityLockRequestService.grantAccess(lockRequest.getLockRequestId());
+                if (severityLockRequestService.checkIfOpen(lockRequest.getSeverity().getSeverityId())) {
+                    severityLockRequestService.denyAccess(lockRequest.getLockRequestId(),
+                            lockRequest.getSeverity(),
+                            lockRequest.getRequestor().getUserId());
+
+                    processedList.add(lockRequest.getSeverity().getSeverityId());
+                } else {
+                    processedList.add(lockRequest.getSeverity().getSeverityId());
+                    severityLockRequestService.grantAccess(lockRequest.getLockRequestId());
+                }
             }
         }
     }
@@ -246,8 +294,16 @@ public class AccessJob {
                         lockRequest.getApplicationControl(),
                         lockRequest.getRequestor().getUserId());
             } else {
-                processedList.add(lockRequest.getApplicationControl().getApplicationControlId());
-                applicationControlLockRequestService.grantAccess(lockRequest.getLockRequestId());
+                if (applicationControlLockRequestService.checkIfOpen(lockRequest.getApplicationControl().getApplicationControlId())) {
+                    applicationControlLockRequestService.denyAccess(lockRequest.getLockRequestId(),
+                            lockRequest.getApplicationControl(),
+                            lockRequest.getRequestor().getUserId());
+
+                    processedList.add(lockRequest.getApplicationControl().getApplicationControlId());
+                } else {
+                    processedList.add(lockRequest.getApplicationControl().getApplicationControlId());
+                    applicationControlLockRequestService.grantAccess(lockRequest.getLockRequestId());
+                }
             }
         }
     }
@@ -271,8 +327,16 @@ public class AccessJob {
                         lockRequest.getWorkflowStatus(),
                         lockRequest.getRequestor().getUserId());
             } else {
-                processedList.add(lockRequest.getWorkflowStatus().getWorkflowStatusId());
-                workflowStatusLockRequestService.grantAccess(lockRequest.getLockRequestId());
+                if (workflowStatusLockRequestService.checkIfOpen(lockRequest.getWorkflowStatus().getWorkflowStatusId())) {
+                    workflowStatusLockRequestService.denyAccess(lockRequest.getLockRequestId(),
+                            lockRequest.getWorkflowStatus(),
+                            lockRequest.getRequestor().getUserId());
+
+                    processedList.add(lockRequest.getWorkflowStatus().getWorkflowStatusId());
+                } else {
+                    processedList.add(lockRequest.getWorkflowStatus().getWorkflowStatusId());
+                    workflowStatusLockRequestService.grantAccess(lockRequest.getLockRequestId());
+                }
             }
         }
     }
@@ -296,8 +360,16 @@ public class AccessJob {
                         lockRequest.getWorkflow(),
                         lockRequest.getRequestor().getUserId());
             } else {
-                processedList.add(lockRequest.getWorkflow().getWorkflowId());
-                workflowLockRequestService.grantAccess(lockRequest.getLockRequestId());
+                if (workflowLockRequestService.checkIfOpen(lockRequest.getWorkflow().getWorkflowId())) {
+                    workflowLockRequestService.denyAccess(lockRequest.getLockRequestId(),
+                            lockRequest.getWorkflow(),
+                            lockRequest.getRequestor().getUserId());
+
+                    processedList.add(lockRequest.getWorkflow().getWorkflowId());
+                } else {
+                    processedList.add(lockRequest.getWorkflow().getWorkflowId());
+                    workflowLockRequestService.grantAccess(lockRequest.getLockRequestId());
+                }
             }
         }
     }

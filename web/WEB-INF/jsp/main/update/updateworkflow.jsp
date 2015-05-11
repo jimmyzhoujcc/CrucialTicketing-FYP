@@ -150,9 +150,10 @@
                             </tr>
 
                             <c:forEach var="workflowStep" items="${workflow.workflowMap.workflow}">
-                                <tr>
-                                    <c:choose>
-                                        <c:when test="${fn:length(workflowStep.nextWorkflowStep) gt 0}">
+
+                                <c:choose>
+                                    <c:when test="${fn:length(workflowStep.nextWorkflowStep) gt 0}">
+                                        <tr>
                                             <c:forEach var="nextWorkflowStep" items="${workflowStep.nextWorkflowStep}">
                                                 <td>${workflowStep.workflowStatus.workflowStatusName}</td>
 
@@ -166,18 +167,20 @@
                                                         <c:otherwise>No</c:otherwise>
                                                     </c:choose>
                                                 </td>
-                                            </c:forEach>
-                                        </c:when>
-                                        <c:otherwise>
+                                            </tr>
+                                        </c:forEach>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <tr>
                                             <td>${workflowStep.workflowStatus.workflowStatusName}</td>
                                             <td>none</td>
                                             <td>none</td>
                                             <td>none</td>
                                             <td>none</td>
-                                        </c:otherwise>
-                                    </c:choose>
+                                        </tr>
+                                    </c:otherwise>
+                                </c:choose>
 
-                                </tr>
                             </c:forEach>
                         </table>
                     </div>

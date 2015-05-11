@@ -54,6 +54,15 @@ public class RoleLockRequestService extends JdbcDaoSupport implements RoleLockRe
         int result = Integer.valueOf(rs.get(0).get("result").toString());
         return result != 0;
     }
+    
+    @Override
+    public boolean checkIfOpen(int roleId) {
+        String sql = "SELECT COUNT(role_lock_request_id) AS result FROM role_lock_request "
+                + "WHERE role_id=? AND request_pass_time+" + buffer + " > " + getTimestamp();
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{roleId});
+        int result = Integer.valueOf(rs.get(0).get("result").toString());
+        return result != 0;
+    }
 
     @Override
     public boolean checkIfOutstanding(int roleId, int requestorUserId) {
@@ -71,7 +80,7 @@ public class RoleLockRequestService extends JdbcDaoSupport implements RoleLockRe
 
     @Override
     public void denyAccess(int roleLockRequestId, Role role, int requestorUserId) {
-        this.getJdbcTemplate().update("UPDATE role_lock_request SET request_pass_time=? WHERE role_lock_request_id=?", new Object[]{-1, roleLockRequestId});
+        this.closeRequest(role.getRoleId(), requestorUserId);
         userAlertService.insertUserAlert(requestorUserId, "Access denied to access role (" + role.getRoleName() + ")");
     }
 

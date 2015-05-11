@@ -217,9 +217,9 @@
                         <br class="clearfix" />
 
                         <div class="ticketinfo_heading">
-                                Role List
-                            </div>
-                        
+                            Role List
+                        </div>
+
                         <br class="clearfix" />
                         <table class="table table-hover">
                             <tr>

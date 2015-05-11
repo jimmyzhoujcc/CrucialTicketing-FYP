@@ -52,6 +52,15 @@ public class UserLockRequestService extends JdbcDaoSupport implements UserLockRe
     }
     
     @Override
+    public boolean checkIfOpen(int userId) {
+        String sql = "SELECT COUNT(user_lock_request_id) AS result FROM user_lock_request "
+                + "WHERE user_id=? AND request_pass_time+" + buffer + " > " + getTimestamp();
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{userId});
+        int result = Integer.valueOf(rs.get(0).get("result").toString());
+        return result != 0;
+    }
+    
+    @Override
     public boolean checkIfOutstanding(int userId, int requestorUserId) {
         String sql = "SELECT COUNT(user_lock_request_id) AS result FROM user_lock_request "
                 + "WHERE user_id=? AND  requestor_user_id=? AND request_pass_time=?";
@@ -67,8 +76,8 @@ public class UserLockRequestService extends JdbcDaoSupport implements UserLockRe
 
     @Override
     public void denyAccess(int lockRequestId, User user, int requestorUserId) {
-        this.getJdbcTemplate().update("UPDATE user_lock_request SET request_pass_time=? WHERE user_lock_request_id=?", new Object[]{-1, lockRequestId});
-         userAlertService.insertUserAlert(requestorUserId, "Access denied to access user (" + user.getUsername() + ")");
+        this.closeRequest(user.getUserId(), requestorUserId);
+        userAlertService.insertUserAlert(requestorUserId, "Access denied to access user (" + user.getUsername() + ")");
     }
 
     @Override
@@ -107,10 +116,10 @@ public class UserLockRequestService extends JdbcDaoSupport implements UserLockRe
             
             // User
             if (userList.containsKey((int) row.get("requestor_user_id"))) {
-                userLockRequest.setUser(userList.get((int) row.get("requestor_user_id")));
+                userLockRequest.setRequestor(userList.get((int) row.get("requestor_user_id")));
             } else {
                 User user = userService.getUserById((int) row.get("requestor_user_id"), false);
-                userLockRequest.setUser(user);
+                userLockRequest.setRequestor(user);
                 userList.put((int) row.get("requestor_user_id"), user);
             }
 

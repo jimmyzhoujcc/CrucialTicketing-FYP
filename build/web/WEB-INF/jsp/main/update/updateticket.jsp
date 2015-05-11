@@ -65,13 +65,6 @@
 
                             <c:set var="totalNextNodes" value="${fn:length(ticket.currentWorkflowStep.nextWorkflowStep)}"/>
 
-                            <script type="text/javascript">
-                                function changeStatus(inputStatus) {
-                                    var elem = document.getElementById("workflowStatus");
-                                    elem.value = inputStatus;
-                                }
-                            </script>
-
                             <ul class="dropdown-menu" role="menu">
                                 <c:forEach var="nextNode" items="${ticket.currentWorkflowStep.nextWorkflowStep}">
                                     <li>
@@ -82,8 +75,6 @@
                                     <li><a href="#">No further actions</a></li>
                                     </c:if>
                             </ul>
-
-                            <input type="hidden" value="" id="workflowStatus" name="workflowStatus" />
 
 
                         </div>
@@ -429,7 +420,7 @@
                             <input id="addFile" type="button" value="Add File" />
 
                             <script>
-                                var counter = 1;
+                                var attachmentCount = 1;
                                 var limit = 10;
 
                                 $('#addFile').on('click', function () {
@@ -437,17 +428,17 @@
                                         alert("You have reached the limit of files");
                                     } else {
                                         content = "";
-                                        content += "<h4 class=\"media-heading\">File " + (counter + 1) + "</h4>";
-                                        content += "<input name=\"files[" + counter + "].file\" type=\"file\" />";
+                                        content += "<h4 class=\"media-heading\">File " + (attachmentCount + 1) + "</h4>";
+                                        content += "<input name=\"files[" + attachmentCount + "].file\" type=\"file\" />";
                                         content += "<br class=\"clearfix\" />";
-                                        content += "Name: <input name=\"files[" + counter + "].name\" type=\"input\" />";
-                                        content += "Description: <input name=\"files[" + counter + "].description\" type=\"input\" />";
+                                        content += "Name: <input name=\"files[" + attachmentCount + "].name\" type=\"input\" />";
+                                        content += "Description: <input name=\"files[" + attachmentCount + "].description\" type=\"input\" />";
 
                                         newDiv = document.createElement('div');
                                         $(newDiv).addClass("file-media media")
                                                 .html(content)
                                                 .appendTo($("#file-table")); //main div
-                                        counter++;
+                                        attachmentCount++;
                                     }
                                 });
                             </script>

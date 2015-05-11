@@ -20,6 +20,8 @@ public interface RoleLockRequestDao {
 
     public boolean checkIfOpen(int roleId, int requestorUserId);
 
+    public boolean checkIfOpen(int roleId);
+    
     public boolean checkIfOutstanding(int roleId, int requestorUserId);
 
     public void grantAccess(int lockRequestId);

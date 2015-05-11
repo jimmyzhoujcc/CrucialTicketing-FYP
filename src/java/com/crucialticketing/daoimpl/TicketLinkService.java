@@ -11,6 +11,7 @@ import com.crucialticketing.entities.TicketLink;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 
 /**
@@ -19,6 +20,9 @@ import org.springframework.jdbc.core.support.JdbcDaoSupport;
  */
 public class TicketLinkService extends JdbcDaoSupport implements TicketLinkDao {
 
+    @Autowired
+    TicketService ticketService;
+    
     @Override
     public void insertTicketLink(TicketLink ticketLink) {
         String sql = "INSERT INTO ticket_link (from_ticket_id, to_ticket_id) VALUES (?, ?)";
@@ -56,7 +60,7 @@ public class TicketLinkService extends JdbcDaoSupport implements TicketLinkDao {
 
             ticketLink.setTicketLinkId((int) row.get("ticket_link_id"));
             ticketLink.setFromTicket(new Ticket((int) row.get("from_ticket_id")));
-            ticketLink.setToTicket(new Ticket((int) row.get("to_ticket_id")));
+            ticketLink.setToTicket(ticketService.getTicketById((int) row.get("to_ticket_id"), false, false, false, false, false));
 
             ticketLinkList.add(ticketLink);
         }

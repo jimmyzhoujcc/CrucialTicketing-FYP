@@ -20,6 +20,8 @@ public interface ApplicationControlLockRequestDao {
 
     public boolean checkIfOpen(int applicationControlId, int requestorUserId);
 
+    public boolean checkIfOpen(int applicationControlId);
+    
     public boolean checkIfOutstanding(int applicationControlId, int requestorUserId);
 
     public void grantAccess(int lockRequestId);

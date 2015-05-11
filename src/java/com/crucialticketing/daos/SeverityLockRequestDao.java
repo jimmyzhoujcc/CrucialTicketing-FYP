@@ -21,6 +21,8 @@ public interface SeverityLockRequestDao {
 
     public boolean checkIfOpen(int severityId, int requestorUserId);
 
+    public boolean checkIfOpen(int severityId);
+    
     public boolean checkIfOutstanding(int severityId, int requestorUserId);
 
     public void grantAccess(int lockRequestId);

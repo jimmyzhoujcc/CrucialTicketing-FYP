@@ -663,7 +663,7 @@ public class UpdateController {
             return this.viewUser(request, String.valueOf(userForChange.getUserId()), map);
         }
 
-        if (!ticketService.doesTicketExist(Integer.valueOf(ticketId))) {
+        if (!ticketService.doesTicketExist(Validation.toInteger(ticketId))) {
             Validation.inputIsInvalid(map, "Ticket");
             return this.viewUser(request, String.valueOf(userForChange.getUserId()), map);
         }
@@ -1817,7 +1817,7 @@ public class UpdateController {
             return this.viewWorkflowStatus(request, workflowStatusId, map);
         }
 
-        if (!ticketService.doesTicketExist(Integer.valueOf(ticketId))) {
+        if (!ticketService.doesTicketExist(Validation.toInteger(ticketId))) {
             return this.viewWorkflowStatus(request, workflowStatusId, map);
         }
 

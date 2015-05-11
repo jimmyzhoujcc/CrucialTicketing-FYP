@@ -56,6 +56,15 @@ public class ApplicationLockRequestService extends JdbcDaoSupport implements App
     }
 
     @Override
+    public boolean checkIfOpen(int applicationId) {
+        String sql = "SELECT COUNT(application_lock_request_id) AS result FROM application_lock_request "
+                + "WHERE application_id=? AND request_pass_time+" + buffer + " > " + getTimestamp();
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{applicationId});
+        int result = Integer.valueOf(rs.get(0).get("result").toString());
+        return result != 0;
+    }
+    
+    @Override
     public boolean checkIfOutstanding(int applicationId, int requestorUserId) {
         String sql = "SELECT COUNT(application_lock_request_id) AS result FROM application_lock_request "
                 + "WHERE application_id=? AND  requestor_user_id=? AND request_pass_time=?";
@@ -71,7 +80,7 @@ public class ApplicationLockRequestService extends JdbcDaoSupport implements App
 
     @Override
     public void denyAccess(int applicationLockRequestId, Application application, int requestorUserId) {
-        this.getJdbcTemplate().update("UPDATE application_lock_request SET request_pass_time=? WHERE application_lock_request_id=?", new Object[]{-1, applicationLockRequestId});
+        this.closeRequest(application.getApplicationId(), requestorUserId);
         userAlertService.insertUserAlert(requestorUserId, "Access denied to access application (" + application.getApplicationName() + ")");
     }
 

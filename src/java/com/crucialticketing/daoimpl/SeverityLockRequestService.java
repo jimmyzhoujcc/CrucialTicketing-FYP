@@ -56,6 +56,15 @@ public class SeverityLockRequestService extends JdbcDaoSupport implements Severi
     }
 
     @Override
+    public boolean checkIfOpen(int severityId) {
+        String sql = "SELECT COUNT(severity_lock_request_id) AS result FROM severity_lock_request "
+                + "WHERE severity_id=? AND request_pass_time+" + buffer + " > " + getTimestamp();
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{severityId});
+        int result = Integer.valueOf(rs.get(0).get("result").toString());
+        return result != 0;
+    }
+    
+    @Override
     public boolean checkIfOutstanding(int severityId, int requestorUserId) {
         String sql = "SELECT COUNT(severity_lock_request_id) AS result FROM severity_lock_request "
                 + "WHERE severity_id=? AND  requestor_user_id=? AND request_pass_time=?";
@@ -71,7 +80,7 @@ public class SeverityLockRequestService extends JdbcDaoSupport implements Severi
 
     @Override
     public void denyAccess(int lockRequestId, Severity severity, int requestorUserId) {
-        this.getJdbcTemplate().update("UPDATE severity_lock_request SET request_pass_time=? WHERE severity_lock_request_id=?", new Object[]{-1, lockRequestId});
+        this.closeRequest(severity.getSeverityId(), requestorUserId);
         userAlertService.insertUserAlert(requestorUserId, "Access denied to access role (" + severity.getSeverityLevel() + ":" + severity.getSeverityName() + ")");
     }
 

@@ -169,7 +169,7 @@
                                             </td>
                                     </c:when>
                                     <c:otherwise>
-                                        <td>${role.activeFlag}</td>
+                                        <td>${userQueueCon.activeFlag}</td>
                                     </c:otherwise>
                                 </c:choose>
 

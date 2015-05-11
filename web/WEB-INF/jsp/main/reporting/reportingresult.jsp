@@ -8,7 +8,7 @@
     <br class="clearfix" />
 
     <ul class="nav nav-pills">
-        <li role="presentation" class="active"><a href="#">Back</a></li>
+        <li role="presentation" class="active"><a href="${pageContext.request.contextPath}/home/main/reporting/">Back</a></li>
         <li role="presentation" class="active"><a href="#" id="exportToExcel">Export to Excel</a></li>
     </ul>
 

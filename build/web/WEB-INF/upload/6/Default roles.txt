@@ -1,0 +1,56 @@
+INSERT INTO `role` (`role_id`, `role_name`, `role_description`, `protected`, `active_flag`) VALUES
+(1, 'END_USER', 'Default role to access the system', 1, 1),
+
+(2, 'MAINT_TICKET_CREATION', 'Role required to create tickets', 1, 1),
+
+(3, 'MAINT_USER_CREATION', 'Role required to create user requests', 1, 1),
+
+(4, 'MAINT_ROLE_CREATION', 'Role required to create role requests', 1, 1),
+
+(5, 'MAINT_QUEUE_CREATION', 'Role required to create queue requests', 1, 1),
+
+(6, 'MAINT_APPLICATION_CREATION', 'Role required to create application requests', 1, 1),
+
+(7, 'MAINT_SEVERITY_CREATION', 'Role required to create severity requests', 1, 1),
+
+(8, 'MAINT_CONFIGURATION_CREATION', 'Role required to create configuration requests', 1, 1),
+
+(9, 'MAINT_WORKFLOW_CREATION', 'Role required to create workflow requests', 1, 1),
+
+(10, 'MAINT_WORKFLOWSTATUS_CREATION', 'Role required to create workflow status requests', 1, 1),
+
+(11, 'MAINT_TICKET_VIEW', 'Role required to view existing tickets', 1, 1),
+
+(12, 'MAINT_USER_VIEW', 'Role required to view existing users', 1, 1),
+
+(13, 'MAINT_ROLE_VIEW', 'Role required to view existing roles', 1, 1),
+
+(14, 'MAINT_QUEUE_VIEW', 'Role required to view existing queues', 1, 1),
+
+(15, 'MAINT_APPLICATION_VIEW', 'Role required to view existing applications', 1, 1),
+
+(16, 'MAINT_SEVERITY_VIEW', 'Role required to view existing severities', 1, 1),
+
+(17, 'MAINT_CONFIGURATION_VIEW', 'Role required to view existing configurations', 1, 1),
+
+(18, 'MAINT_WORKFLOW_VIEW', 'Role required to view existing workflows', 1, 1),
+
+(19, 'MAINT_WORKFLOWSTATUS_VIEW', 'Role required to view existing workflow statuses', 1, 1),
+(20, 'MAINT_TICKET_UPDATE', 'Role required to update tickets', 1, 1),
+
+(21, 'MAINT_USER_UPDATE', 'Role required to update users', 1, 1),
+
+(22, 'MAINT_ROLE_UPDATE', 'Role required to update roles', 1, 1),
+
+(23, 'MAINT_QUEUE_UPDATE', 'Role required to update queues', 1, 1),
+
+(24, 'MAINT_APPLICATION_UPDATE', 'Role required to update applications', 1, 1),
+
+(25, 'MAINT_SEVERITY_UPDATE', 'Role required to update severities', 1, 1),
+
+(26, 'MAINT_CONFIGURATION_UPDATE', 'Role required to update configurations', 1, 1),
+
+(27, 'MAINT_WORKFLOW_UPDATE', 'Role required to update workflows', 1, 1),
+
+(28, 'MAINT_WORKFLOWSTATUS_UPDATE', 'Role required to update workflow statuses', 1, 1), 
+(29, 'MAINT_REPORTING', 'Role required to execute reports', 1, 1)

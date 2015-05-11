@@ -20,6 +20,8 @@ public interface TicketLockRequestDao {
 
     public boolean checkIfOpen(int ticketId, int requestorUserId);
 
+    public boolean checkIfOpen(int ticketId);
+    
     public boolean checkIfOutstanding(int ticketId, int requestorUserId);
 
     public void grantAccess(int lockRequestId);

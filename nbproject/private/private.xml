@@ -21,10 +21,8 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/dan-project/src/java/com/crucialticketing/controllers/UpdateController.java</file>
-            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/dan-project/web/WEB-INF/jsp/main/update/updateuser.jsp</file>
-            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/dan-project/web/WEB-INF/jsp/main/update/updateseverity.jsp</file>
-            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/dan-project/web/WEB-INF/jsp/main/update/updateworkflowstatus.jsp</file>
-            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/dan-project/src/java/com/crucialticketing/logic/UserLogicService.java</file>
+            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/dan-project/src/java/com/crucialticketing/controllers/CreationController.java</file>
+            <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/dan-project/web/WEB-INF/jsp/main/update/updateticket.jsp</file>
             <file>file:/C:/Users/DanFoley/Documents/NetBeansProjects/dan-project/web/WEB-INF/jsp/main/update/updateworkflow.jsp</file>
         </group>
     </open-files>

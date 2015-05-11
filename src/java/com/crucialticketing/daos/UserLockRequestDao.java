@@ -20,6 +20,8 @@ public interface UserLockRequestDao {
 
     public boolean checkIfOpen(int userId, int requestorUserId);
 
+    public boolean checkIfOpen(int userId);
+    
     public boolean checkIfOutstanding(int userId, int requestorUserId);
 
     public void grantAccess(int lockRequestId);

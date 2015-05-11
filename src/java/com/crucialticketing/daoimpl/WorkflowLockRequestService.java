@@ -54,6 +54,15 @@ public class WorkflowLockRequestService extends JdbcDaoSupport implements Workfl
         int result = Integer.valueOf(rs.get(0).get("result").toString());
         return result != 0;
     }
+    
+    @Override
+    public boolean checkIfOpen(int workflowId) {
+        String sql = "SELECT COUNT(workflow_lock_request_id) AS result FROM workflow_lock_request "
+                + "WHERE workflow_id=? AND request_pass_time+" + buffer + " > " + getTimestamp();
+        List<Map<String, Object>> rs = this.getJdbcTemplate().queryForList(sql, new Object[]{workflowId});
+        int result = Integer.valueOf(rs.get(0).get("result").toString());
+        return result != 0;
+    }
 
     @Override
     public boolean checkIfOutstanding(int workflowId, int requestorUserId) {
@@ -71,7 +80,7 @@ public class WorkflowLockRequestService extends JdbcDaoSupport implements Workfl
 
     @Override
     public void denyAccess(int workflowLockRequestId, Workflow workflow, int requestorUserId) {
-        this.getJdbcTemplate().update("UPDATE workflow_lock_request SET request_pass_time=? WHERE workflow_lock_request_id=?", new Object[]{-1, workflowLockRequestId});
+        this.closeRequest(workflow.getWorkflowId(), requestorUserId);
         userAlertService.insertUserAlert(requestorUserId, "Access denied to access workflow (" + workflow.getWorkflowName() + ")");
     }
 

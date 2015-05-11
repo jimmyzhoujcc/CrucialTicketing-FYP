@@ -209,7 +209,6 @@ public class UserQueueConService extends JdbcDaoSupport implements UserQueueConD
     public List<UserQueueCon> rowMapper(List<Map<String, Object>> resultSet) {
         List<UserQueueCon> userQueueConList = new ArrayList<>();
         Map<Integer, User> userList = new HashMap<>();
-        Map<Integer, Queue> queueList = new HashMap<>();
 
         for (Map row : resultSet) {
             UserQueueCon userQueueCon = new UserQueueCon();
@@ -222,14 +221,6 @@ public class UserQueueConService extends JdbcDaoSupport implements UserQueueConD
                 User user = userService.getUserById((int) row.get("user_id"), false);
                 userQueueCon.setUser(user);
                 userList.put((int) row.get("user_id"), user);
-            }
-
-            if (queueList.containsKey((int) row.get("queue_id"))) {
-                userQueueCon.setQueue(queueList.get((int) row.get("queue_id")));
-            } else {
-                Queue queue = queueService.getQueueById((int) row.get("queue_id"));
-                userQueueCon.setQueue(queue);
-                queueList.put((int) row.get("queue_id"), queue);
             }
 
             userQueueCon.setActiveFlag(ActiveFlag.values()[((int)row.get("active_flag"))+2]);

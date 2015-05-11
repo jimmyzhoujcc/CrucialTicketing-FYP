@@ -20,6 +20,8 @@ public interface WorkflowStatusLockRequestDao {
 
     public boolean checkIfOpen(int workflowStatusId, int requestorUserId);
 
+    public boolean checkIfOpen(int workflowStatusId);
+    
     public boolean checkIfOutstanding(int workflowStatusId, int requestorUserId);
 
     public void grantAccess(int lockRequestId);

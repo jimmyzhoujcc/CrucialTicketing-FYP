@@ -20,6 +20,8 @@ public interface QueueLockRequestDao {
 
     public boolean checkIfOpen(int queueId, int requestorUserId);
 
+    public boolean checkIfOpen(int queueId);
+    
     public boolean checkIfOutstanding(int queueId, int requestorUserId);
 
     public void grantAccess(int lockRequestId);
